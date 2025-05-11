@@ -37,6 +37,7 @@
   "scripts": {
     "build": "npm run z:node-eval -- \"import { build } from './scripts/functions/build.mjs'; build();\"",
     "check-all": "npm run z:node-eval -- \"import { checkAll } from './scripts/cmd/check-all.mjs'; checkAll();\"",
+    "check:ext": "npm run z:node-eval -- \"import { checkExt } from './scripts/functions/check-ext.mjs'; checkExt();\"",
     "cspell": "cspell \"**\" --gitignore --gitignore-root ./ --no-progress",
     "doc": "npm run z:node-eval -- \"import { genDocs } from './scripts/functions/gen-docs.mjs'; genDocs();\"",
     "fmt": "prettier --write .",

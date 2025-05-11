@@ -4,40 +4,65 @@
 
 # Documentation
 
-## Functions
+## Modules
 
-### expectType()
-
-> **expectType**\<`A`, `B`\>(`_relation`): `void`
-
-Defined in: [expect-type.mts:12](https://github.com/noshiro-pf/ts-verified/blob/main/src/expect-type.mts#L12)
-
-- `expectType<A, B>("=")` passes if `A` is equal to `B`.
-- `expectType<A, B>("~=")` passes if `A` extends `B` and `B` extends `A`.
-- `expectType<A, B>("<=")` passes if `A` extends `B`.
-- `expectType<A, B>(">=")` passes if `B` extends `A`.
-- `expectType<A, B>("!<=")` passes if `A` doesn't extend `B`.
-- `expectType<A, B>("!>=")` passes if `B` doesn't extend `A`.
-- `expectType<A, B>("!=")` passes if `A` is not equal to `B`.
-
-#### Type Parameters
-
-##### A
-
-`A`
-
-##### B
-
-`B`
-
-#### Parameters
-
-##### \_relation
-
-`TypeEq`\<`A`, `B`\> _extends_ `true` ? `"<="` \| `"="` \| `">="` \| `"~="` : `"!="` \| `TypeExtends`\<`A`, `B`\> _extends_ `true` ? `"<="` \| `TypeExtends`\<`B`, `A`\> _extends_ `true` ? `">="` \| `"~="` : `"!>="` : `"!<="` \| `TypeExtends`\<`B`, `A`\> _extends_ `true` ? `">="` : `"!>="`
-
-`"=" | "~=" | "<=" | ">=" | "!<=" | "!>=" | "!="`
-
-#### Returns
-
-`void`
+- [array](array.md)
+- [array/array-utils](array/array-utils.md)
+- [array/array-utils-conversion.test](array/array-utils-conversion.test.md)
+- [array/array-utils-create.test](array/array-utils-create.test.md)
+- [array/array-utils-mutation.test](array/array-utils-mutation.test.md)
+- [array/array-utils-reducing-value.test](array/array-utils-reducing-value.test.md)
+- [array/array-utils-set-op.test](array/array-utils-set-op.test.md)
+- [array/array-utils-slice.test](array/array-utils-slice.test.md)
+- [array/array-utils-slice2.test](array/array-utils-slice2.test.md)
+- [array/array-utils-zip.test](array/array-utils-zip.test.md)
+- [array/array-utils.test](array/array-utils.test.md)
+- [array/array.test](array/array.test.md)
+- [array/tuple-utils](array/tuple-utils.md)
+- [array/tuple-utils.test](array/tuple-utils.test.md)
+- [collections](collections.md)
+- [collections/imap](collections/imap.md)
+- [collections/imap-mapped](collections/imap-mapped.md)
+- [collections/imap-mapped.test](collections/imap-mapped.test.md)
+- [collections/imap.test](collections/imap.test.md)
+- [collections/iset](collections/iset.md)
+- [collections/iset-mapped](collections/iset-mapped.md)
+- [collections/iset-mapped.test](collections/iset-mapped.test.md)
+- [collections/iset.test](collections/iset.test.md)
+- [collections/queue](collections/queue.md)
+- [expect-type](expect-type.md)
+- [functional](functional.md)
+- [functional/match](functional/match.md)
+- [functional/match.test](functional/match.test.md)
+- [functional/maybe](functional/maybe/README.md)
+- [functional/pipe](functional/pipe.md)
+- [functional/result](functional/result/README.md)
+- [guard](guard.md)
+- [guard/is-non-empty-string](guard/is-non-empty-string.md)
+- [guard/is-non-null-object](guard/is-non-null-object.md)
+- [guard/is-primitive](guard/is-primitive.md)
+- [guard/is-record](guard/is-record.md)
+- [guard/is-record.test](guard/is-record.test.md)
+- [guard/is-type](guard/is-type.md)
+- [guard/key-is-in](guard/key-is-in.md)
+- [guard/key-is-in.test](guard/key-is-in.test.md)
+- [iterator](iterator.md)
+- [iterator/range](iterator/range.md)
+- [iterator/range.test](iterator/range.test.md)
+- [json](json.md)
+- [json/json](json/json.md)
+- [num](num.md)
+- [num/num](num/num.md)
+- [num/num.test](num/num.test.md)
+- [others](others.md)
+- [others/cast-mutable](others/cast-mutable.md)
+- [others/cast-readonly](others/cast-readonly.md)
+- [others/if-then](others/if-then.md)
+- [others/map-optional](others/map-optional.md)
+- [others/memoize-function](others/memoize-function.md)
+- [others/tuple](others/tuple.md)
+- [others/tuple.test](others/tuple.test.md)
+- [others/unknown-to-string](others/unknown-to-string.md)
+- [others/unknown-to-string.test](others/unknown-to-string.test.md)
+- [record](record.md)
+- [record/object](record/object.md)

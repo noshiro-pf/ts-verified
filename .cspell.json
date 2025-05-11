@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "bivariant",
+    "contravariance",
+    "foldl",
+    "foldr",
+    "iset",
+    "LEQC",
+    "NAND",
+    "noshiro",
+    "testw",
+    "tscw",
+    "unshifted",
+    "XNOR"
+  ],
+  "flagWords": [],
+  "ignorePaths": ["eslint.config.js", "./package-lock.json"]
+}

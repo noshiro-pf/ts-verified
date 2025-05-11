@@ -1,0 +1,4 @@
+{
+  "extends": ["./tsconfig/tsconfig.test.json", "./tsconfig/tsconfig.vite.json"],
+  "include": ["../src"]
+}

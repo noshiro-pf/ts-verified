@@ -204,7 +204,7 @@ Defined in: [functional/maybe.mts:43](https://github.com/noshiro-pf/ts-verified/
 
 ### some()
 
-> **some**\<`S`\>(`value`): `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S`; \}\>
+> **some**\<`S`\>(`value`): [`Some`](#some)\<`S`\>
 
 Defined in: [functional/maybe.mts:28](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/maybe.mts#L28)
 
@@ -222,7 +222,7 @@ Defined in: [functional/maybe.mts:28](https://github.com/noshiro-pf/ts-verified/
 
 #### Returns
 
-`Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S`; \}\>
+[`Some`](#some)\<`S`\>
 
 ---
 

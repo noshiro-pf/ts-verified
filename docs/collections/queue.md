@@ -24,7 +24,7 @@ Defined in: [collections/queue.mts:1](https://github.com/noshiro-pf/ts-verified/
 
 ### createQueue()
 
-> **createQueue**\<`T`\>(): `Readonly`\<\{ `dequeue`: () => `undefined` \| `T`; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
+> **createQueue**\<`T`\>(): [`Queue`](#queue)\<`T`\>
 
 Defined in: [collections/queue.mts:29](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L29)
 
@@ -36,4 +36,4 @@ Defined in: [collections/queue.mts:29](https://github.com/noshiro-pf/ts-verified
 
 #### Returns
 
-`Readonly`\<\{ `dequeue`: () => `undefined` \| `T`; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
+[`Queue`](#queue)\<`T`\>

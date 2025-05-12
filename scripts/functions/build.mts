@@ -13,20 +13,20 @@ export const build = async (): Promise<void> => {
   await genIndex();
 
   await $('tsc --noEmit');
-  echo('Type checking done.');
+  echo('Type checking done.\n');
 
   await $(
     `rollup --config ${path.resolve(projectRootPath, './configs/rollup.config.ts')} --configPlugin typescript --configImportAttributesKey with`,
   );
-  echo('Building done.');
+  echo('Building done.\n');
 
   await $(
     `cp ${path.resolve(projectRootPath, './src/globals.d.mts')} ${path.resolve(projectRootPath, './dist')}`,
   );
-  echo('Copied src/globals.d.mts to dist/globals.d.mts');
+  echo('Copied src/globals.d.mts to dist/globals.d.mts.\n');
 
   await $(
     `echo '{ "include": ["."] }' > ${path.resolve(projectRootPath, './dist/tsconfig.json')}`,
   );
-  echo('Generated dist/tsconfig.json.');
+  echo('Generated dist/tsconfig.json.\n');
 };

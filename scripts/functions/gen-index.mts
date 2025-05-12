@@ -14,10 +14,10 @@ const INDEX_FILE_NAME_MJS = `index${EXPORT_EXTENSION}`;
 export const genIndex = async (): Promise<void> => {
   await checkExt();
 
-  console.log(`Starting index file generation in: ${TARGET_BASE_DIR}`);
+  echo(`Starting index file generation in: ${TARGET_BASE_DIR}\n`);
 
   await generateIndexFileForDir(TARGET_BASE_DIR);
-  console.log('Index file generation complete.');
+  echo('Index file generation complete.\n');
 
   await $('npm run fmt');
 };
@@ -75,5 +75,5 @@ const generateIndexFileForDir = async (dirPath: string): Promise<void> => {
 
   const indexPath = path.join(dirPath, INDEX_FILE_NAME_MTS);
   await fs.writeFile(indexPath, indexContent);
-  console.log(`Generated: ${path.relative(process.cwd(), indexPath)}`);
+  echo(`Generated: ${path.relative(process.cwd(), indexPath)}`);
 };

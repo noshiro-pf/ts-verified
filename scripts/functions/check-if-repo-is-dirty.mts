@@ -7,11 +7,11 @@ export const checkIfRepoIsDirty = async (): Promise<void> => {
   const res = await $('git status --porcelain');
 
   if (res.type === 'ok' && res.stdout === '') {
-    console.log('Repo is clean');
+    echo('Repo is clean\n');
     return;
   }
 
-  console.log('Repo is dirty');
+  echo('Repo is dirty\n');
 
   // Show files not tracked by git and unstaged changes
   await $('git add -N .');

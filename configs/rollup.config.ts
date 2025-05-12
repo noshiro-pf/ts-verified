@@ -30,6 +30,7 @@ export default {
     }),
     pluginTypescript.default({
       tsconfig: path.resolve(configDir, './tsconfig.build.json'),
+      module: 'NodeNext',
     }),
     rollupPluginReplace.default({
       "import 'vitest'": 'undefined',

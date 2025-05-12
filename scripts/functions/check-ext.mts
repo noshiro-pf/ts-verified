@@ -1,7 +1,6 @@
 import '../node-global.mjs';
 
 /**
- *
  * @param {string} dir
  * @param {string} expectedExtensions
  */

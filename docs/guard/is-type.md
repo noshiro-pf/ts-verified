@@ -10,45 +10,62 @@
 
 ### isBigint()
 
-> **isBigint**(`a`): `a is bigint`
+> **isBigint**(`u`): `u is bigint`
 
-Defined in: [guard/is-type.mts:16](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L16)
+Defined in: [src/guard/is-type.mts:61](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L61)
+
+Checks if a value is a bigint.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is bigint`
+`u is bigint`
+
+`true` if `u` is a bigint, `false` otherwise.
 
 ---
 
 ### isBoolean()
 
-> **isBoolean**(`a`): `a is boolean`
+> **isBoolean**(`u`): `u is boolean`
 
-Defined in: [guard/is-type.mts:6](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L6)
+Defined in: [src/guard/is-type.mts:25](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L25)
+
+Checks if a value is a boolean.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is boolean`
+`u is boolean`
+
+`true` if `u` is a boolean, `false` otherwise.
 
 ---
 
 ### isNonNullish()
 
-> **isNonNullish**\<`T`\>(`a`): `a is NonNullable<T>`
+> **isNonNullish**\<`T`\>(`u`): `u is NonNullable<T>`
 
-Defined in: [guard/is-type.mts:37](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L37)
+Defined in: [src/guard/is-type.mts:141](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L141)
+
+Checks if a value is not `null` or `undefined`.
+Acts as a type guard, narrowing `u` to its non-nullable type.
 
 #### Type Parameters
 
@@ -56,23 +73,32 @@ Defined in: [guard/is-type.mts:37](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is NonNullable<T>`
+`u is NonNullable<T>`
+
+`true` if `u` is not `null` and not `undefined`, `false` otherwise.
 
 ---
 
 ### isNotBigint()
 
-> **isNotBigint**\<`T`\>(`a`): `a is RelaxedExclude<T, bigint>`
+> **isNotBigint**\<`T`\>(`u`): `u is RelaxedExclude<T, bigint>`
 
-Defined in: [guard/is-type.mts:18](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L18)
+Defined in: [src/guard/is-type.mts:70](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L70)
+
+Checks if a value is not a bigint.
+Acts as a type guard, excluding `bigint` from the type of `u`.
 
 #### Type Parameters
 
@@ -80,23 +106,32 @@ Defined in: [guard/is-type.mts:18](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, bigint>`
+`u is RelaxedExclude<T, bigint>`
+
+`true` if `u` is not a bigint, `false` otherwise.
 
 ---
 
 ### isNotBoolean()
 
-> **isNotBoolean**\<`T`\>(`a`): `a is RelaxedExclude<T, boolean>`
+> **isNotBoolean**\<`T`\>(`u`): `u is RelaxedExclude<T, boolean>`
 
-Defined in: [guard/is-type.mts:8](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L8)
+Defined in: [src/guard/is-type.mts:34](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L34)
+
+Checks if a value is not a boolean.
+Acts as a type guard, excluding `boolean` from the type of `u`.
 
 #### Type Parameters
 
@@ -104,23 +139,32 @@ Defined in: [guard/is-type.mts:8](https://github.com/noshiro-pf/ts-verified/blob
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, boolean>`
+`u is RelaxedExclude<T, boolean>`
+
+`true` if `u` is not a boolean, `false` otherwise.
 
 ---
 
 ### isNotNull()
 
-> **isNotNull**\<`T`\>(`a`): `a is T`
+> **isNotNull**\<`T`\>(`u`): `u is T`
 
-Defined in: [guard/is-type.mts:33](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L33)
+Defined in: [src/guard/is-type.mts:124](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L124)
+
+Checks if a value is not `null`.
+Acts as a type guard, excluding `null` from the type of `u`.
 
 #### Type Parameters
 
@@ -128,23 +172,32 @@ Defined in: [guard/is-type.mts:33](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value (which could be `null`).
+
 #### Parameters
 
-##### a
+##### u
+
+The value to check.
 
 `null` | `T`
 
 #### Returns
 
-`a is T`
+`u is T`
+
+`true` if `u` is not `null`, `false` otherwise.
 
 ---
 
 ### isNotNumber()
 
-> **isNotNumber**\<`T`\>(`a`): `a is RelaxedExclude<T, number>`
+> **isNotNumber**\<`T`\>(`u`): `u is RelaxedExclude<T, number>`
 
-Defined in: [guard/is-type.mts:13](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L13)
+Defined in: [src/guard/is-type.mts:52](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L52)
+
+Checks if a value is not a number.
+Acts as a type guard, excluding `number` from the type of `u`.
 
 #### Type Parameters
 
@@ -152,23 +205,32 @@ Defined in: [guard/is-type.mts:13](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, number>`
+`u is RelaxedExclude<T, number>`
+
+`true` if `u` is not a number, `false` otherwise.
 
 ---
 
 ### isNotString()
 
-> **isNotString**\<`T`\>(`a`): `a is RelaxedExclude<T, string>`
+> **isNotString**\<`T`\>(`u`): `u is RelaxedExclude<T, string>`
 
-Defined in: [guard/is-type.mts:23](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L23)
+Defined in: [src/guard/is-type.mts:88](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L88)
+
+Checks if a value is not a string.
+Acts as a type guard, excluding `string` from the type of `u`.
 
 #### Type Parameters
 
@@ -176,23 +238,32 @@ Defined in: [guard/is-type.mts:23](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, string>`
+`u is RelaxedExclude<T, string>`
+
+`true` if `u` is not a string, `false` otherwise.
 
 ---
 
 ### isNotSymbol()
 
-> **isNotSymbol**\<`T`\>(`a`): `a is RelaxedExclude<T, symbol>`
+> **isNotSymbol**\<`T`\>(`u`): `u is RelaxedExclude<T, symbol>`
 
-Defined in: [guard/is-type.mts:28](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L28)
+Defined in: [src/guard/is-type.mts:106](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L106)
+
+Checks if a value is not a symbol.
+Acts as a type guard, excluding `symbol` from the type of `u`.
 
 #### Type Parameters
 
@@ -200,23 +271,32 @@ Defined in: [guard/is-type.mts:28](https://github.com/noshiro-pf/ts-verified/blo
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, symbol>`
+`u is RelaxedExclude<T, symbol>`
+
+`true` if `u` is not a symbol, `false` otherwise.
 
 ---
 
 ### isNotUndefined()
 
-> **isNotUndefined**\<`T`\>(`a`): `a is RelaxedExclude<T, undefined>`
+> **isNotUndefined**\<`T`\>(`u`): `u is RelaxedExclude<T, undefined>`
 
-Defined in: [guard/is-type.mts:3](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L3)
+Defined in: [src/guard/is-type.mts:16](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L16)
+
+Checks if a value is not `undefined`.
+Acts as a type guard, excluding `undefined` from the type of `u`.
 
 #### Type Parameters
 
@@ -224,120 +304,168 @@ Defined in: [guard/is-type.mts:3](https://github.com/noshiro-pf/ts-verified/blob
 
 `T`
 
+The type of the input value.
+
 #### Parameters
 
-##### a
+##### u
 
 `T`
 
+The value to check.
+
 #### Returns
 
-`a is RelaxedExclude<T, undefined>`
+`u is RelaxedExclude<T, undefined>`
+
+`true` if `u` is not `undefined`, `false` otherwise.
 
 ---
 
 ### isNull()
 
-> **isNull**(`a`): `a is null`
+> **isNull**(`u`): `u is null`
 
-Defined in: [guard/is-type.mts:31](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L31)
+Defined in: [src/guard/is-type.mts:115](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L115)
+
+Checks if a value is `null`.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is null`
+`u is null`
+
+`true` if `u` is `null`, `false` otherwise.
 
 ---
 
 ### isNullish()
 
-> **isNullish**(`a`): a is undefined \| null
+> **isNullish**(`u`): u is undefined \| null
 
-Defined in: [guard/is-type.mts:35](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L35)
+Defined in: [src/guard/is-type.mts:132](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L132)
+
+Checks if a value is `null` or `undefined`.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-a is undefined \| null
+u is undefined \| null
+
+`true` if `u` is `null` or `undefined`, `false` otherwise.
 
 ---
 
 ### isNumber()
 
-> **isNumber**(`a`): `a is number`
+> **isNumber**(`u`): `u is number`
 
-Defined in: [guard/is-type.mts:11](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L11)
+Defined in: [src/guard/is-type.mts:43](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L43)
+
+Checks if a value is a number.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is number`
+`u is number`
+
+`true` if `u` is a number, `false` otherwise.
 
 ---
 
 ### isString()
 
-> **isString**(`a`): `a is string`
+> **isString**(`u`): `u is string`
 
-Defined in: [guard/is-type.mts:21](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L21)
+Defined in: [src/guard/is-type.mts:79](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L79)
+
+Checks if a value is a string.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is string`
+`u is string`
+
+`true` if `u` is a string, `false` otherwise.
 
 ---
 
 ### isSymbol()
 
-> **isSymbol**(`a`): `a is symbol`
+> **isSymbol**(`u`): `u is symbol`
 
-Defined in: [guard/is-type.mts:26](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L26)
+Defined in: [src/guard/is-type.mts:97](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L97)
+
+Checks if a value is a symbol.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is symbol`
+`u is symbol`
+
+`true` if `u` is a symbol, `false` otherwise.
 
 ---
 
 ### isUndefined()
 
-> **isUndefined**(`a`): `a is undefined`
+> **isUndefined**(`u`): `u is undefined`
 
-Defined in: [guard/is-type.mts:1](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L1)
+Defined in: [src/guard/is-type.mts:7](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-type.mts#L7)
+
+Checks if a value is `undefined`.
+Acts as a type guard.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`a is undefined`
+`u is undefined`
+
+`true` if `u` is `undefined`, `false` otherwise.

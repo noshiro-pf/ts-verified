@@ -38,15 +38,9 @@ Re-exports [ifThen](others/if-then.md#ifthen)
 
 ---
 
-### mapOptional
+### mapNullable
 
-Re-exports [mapOptional](others/map-optional.md#mapoptional)
-
----
-
-### mapOptionalC
-
-Re-exports [mapOptionalC](others/map-optional.md#mapoptionalc)
+Re-exports [mapNullable](others/map-nullable.md#mapnullable)
 
 ---
 

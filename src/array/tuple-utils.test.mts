@@ -1,7 +1,7 @@
 import { expectType } from '../expect-type.mjs';
 import { Tpl } from './tuple-utils.mjs';
 
-describe('Tuple.map', () => {
+describe('Tpl.map', () => {
   const mapped = Tpl.map([1, 2, 3], (x, i): number => x * x * i);
 
   expectType<typeof mapped, ArrayOfLength<3, number>>('=');
@@ -21,8 +21,8 @@ describe('Tpl.set', () => {
   });
 });
 
-describe('Tpl.update', () => {
-  const result = Tpl.update([1, 2, 3], 1, (x) => x + 2);
+describe('Tpl.toUpdated', () => {
+  const result = Tpl.toUpdated([1, 2, 3], 1, (x) => x + 2);
 
   expectType<typeof result, readonly [number, number, number]>('=');
 
@@ -31,9 +31,9 @@ describe('Tpl.update', () => {
   });
 });
 
-describe('Tpl.reverse', () => {
+describe('Tpl.toReversed', () => {
   {
-    const result = Tpl.reversed([1, 2, 3]);
+    const result = Tpl.toReversed([1, 2, 3]);
 
     expectType<typeof result, readonly [3, 2, 1]>('=');
 
@@ -43,10 +43,10 @@ describe('Tpl.reverse', () => {
   }
 });
 
-describe('Tpl.sorted', () => {
+describe('Tpl.toSorted', () => {
   {
-    // as const 無しでも動くこと
-    const result = Tpl.sorted([2, 1, 3]);
+    // Works even without 'as const'
+    const result = Tpl.toSorted([2, 1, 3]);
 
     expectType<typeof result, ArrayOfLength<3, 1 | 2 | 3>>('=');
 
@@ -55,8 +55,8 @@ describe('Tpl.sorted', () => {
     });
   }
   {
-    // as const 無しでも動くこと
-    const result = Tpl.sorted([2, 1, 3], (a, b) => a - b);
+    // Works even without 'as const'
+    const result = Tpl.toSorted([2, 1, 3], (a, b) => a - b);
 
     expectType<typeof result, ArrayOfLength<3, 1 | 2 | 3>>('=');
 
@@ -76,9 +76,9 @@ describe('Tpl.sorted', () => {
   }
 });
 
-describe('Tpl.sortedBy', () => {
+describe('Tpl.toSortedBy', () => {
   {
-    const sorted = Tpl.sortedBy([{ v: 2 }, { v: 1 }, { v: 3 }], (x) => x.v);
+    const sorted = Tpl.toSortedBy([{ v: 2 }, { v: 1 }, { v: 3 }], (x) => x.v);
 
     expectType<
       typeof sorted,
@@ -93,7 +93,7 @@ describe('Tpl.sortedBy', () => {
     });
   }
   {
-    const sorted = Tpl.sortedBy(
+    const sorted = Tpl.toSortedBy(
       [{ v: 2 }, { v: 1 }, { v: 3 }],
       (x) => x.v,
       (a, b) => a - b,

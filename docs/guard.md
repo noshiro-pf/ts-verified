@@ -8,6 +8,12 @@
 
 ## References
 
+### hasKey
+
+Re-exports [hasKey](guard/has-key.md#haskey)
+
+---
+
 ### isBigint
 
 Re-exports [isBigint](guard/is-type.md#isbigint)

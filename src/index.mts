@@ -5,6 +5,6 @@ export * from './functional/index.mjs';
 export * from './guard/index.mjs';
 export * from './iterator/index.mjs';
 export * from './json/index.mjs';
-export * from './num/index.mjs';
+export * from './number/index.mjs';
+export * from './object/index.mjs';
 export * from './others/index.mjs';
-export * from './record/index.mjs';

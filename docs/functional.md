@@ -8,15 +8,9 @@
 
 ## References
 
-### match
+### Optional
 
-Re-exports [match](functional/match.md#match)
-
----
-
-### Maybe
-
-Re-exports [Maybe](functional/maybe/README.md#maybe)
+Re-exports [Optional](functional/optional/README.md#optional)
 
 ---
 
@@ -29,9 +23,3 @@ Re-exports [pipe](functional/pipe.md#pipe)
 ### Result
 
 Re-exports [Result](functional/result/README.md#result)
-
----
-
-### strictMatch
-
-Re-exports [strictMatch](functional/match.md#strictmatch)

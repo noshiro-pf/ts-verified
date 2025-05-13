@@ -11,6 +11,7 @@ import { unknownToString } from '../others/unknown-to-string.mjs';
  * @param reviver A function that transforms the results. This function is
  *   called for each member of the object. If a member contains nested objects,
  *   the nested objects are transformed before the parent object is.
+ * @returns A `Result` containing the parsed `JsonValue` on success, or an error message string on failure.
  */
 const parse = (
   text: string,
@@ -35,7 +36,8 @@ const parse = (
  * @param value A JavaScript value, usually an object or array, to be converted.
  * @param replacer A function that transforms the results.
  * @param space Adds indentation, white space, and line break characters to the
- *   return-value JSON text to make it easier to read.
+ *   return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
+ * @returns A `Result` containing the JSON string on success, or an error message string on failure.
  */
 const stringify = (
   value: unknown,
@@ -50,13 +52,15 @@ const stringify = (
 };
 
 /**
- * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+ * Converts a JavaScript value to a JavaScript Object Notation (JSON) string,
+ * including only the specified properties.
  *
  * @param value A JavaScript value, usually an object or array, to be converted.
- * @param replacer An array of strings and numbers that acts as an approved list
+ * @param propertiesToBeSelected An array of strings and numbers that acts as an approved list
  *   for selecting the object properties that will be stringified.
  * @param space Adds indentation, white space, and line break characters to the
- *   return-value JSON text to make it easier to read.
+ *   return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
+ * @returns A `Result` containing the JSON string on success, or an error message string on failure.
  */
 const stringifySelected = (
   value: unknown,
@@ -72,17 +76,32 @@ const stringifySelected = (
   }
 };
 
+/**
+ * Converts a JavaScript record to a JSON string with keys sorted alphabetically at all levels.
+ *
+ * @param value An `UnknownRecord` to be converted.
+ * @param space Adds indentation, white space, and line break characters to the
+ *   return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
+ * @returns A `Result` containing the JSON string with sorted keys on success, or an error message string on failure.
+ */
 const stringifySortedKey = (
   value: UnknownRecord,
   space?: UintRange<1, 11> | string,
 ): Result<string, string> => {
   const allKeys = pipe(keysDeep(value))
-    .chain((keys) => Arr.uniq(keys))
-    .chain((ks) => ks.toSorted()).value;
+    .map((keys) => Arr.uniq(keys))
+    .map((ks) => ks.toSorted()).value;
 
   return stringifySelected(value, allKeys, space);
 };
 
+/**
+ * @internal
+ * Recursively collects all keys from a nested record.
+ *
+ * @param obj The record to extract keys from.
+ * @param mut_keys A mutable array to store the collected keys. This array will be modified by the function.
+ */
 const keysDeepImpl = (
   obj: UnknownRecord,
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
@@ -104,15 +123,41 @@ const keysDeepImpl = (
   }
 };
 
+/**
+ * @internal
+ * Returns a flat array of all unique keys from a potentially nested record.
+ *
+ * @param obj The record to extract keys from.
+ * @returns A readonly array of unique string keys.
+ */
 const keysDeep = (obj: UnknownRecord): readonly string[] => {
   const mut_keys: string[] = [];
   keysDeepImpl(obj, mut_keys);
   return mut_keys;
 };
 
+/**
+ * A collection of JSON utility functions.
+ */
 export const Json = {
+  /**
+   * Converts a JavaScript Object Notation (JSON) string into an object.
+   * @see parse
+   */
   parse,
+  /**
+   * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+   * @see stringify
+   */
   stringify,
+  /**
+   * Converts a JavaScript value to a JSON string, including only the specified properties.
+   * @see stringifySelected
+   */
   stringifySelected,
+  /**
+   * Converts a JavaScript record to a JSON string with keys sorted alphabetically at all levels.
+   * @see stringifySortedKey
+   */
   stringifySortedKey,
 } as const;

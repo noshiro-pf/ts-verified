@@ -1,3 +1,13 @@
+/**
+ * Performs a shallow equality check on two records.
+ * It verifies that both records have the same number of entries and that for every key in the first record,
+ * the corresponding value is strictly equal (`===`) to the value in the second record.
+ * Note: This function assumes that the values in the records are primitives.
+ *
+ * @param a The first record, with string keys and primitive values.
+ * @param b The second record, with string keys and primitive values.
+ * @returns `true` if the records are shallowly equal, `false` otherwise.
+ */
 const shallowEq = (
   a: ReadonlyRecord<string, Primitive>,
   b: ReadonlyRecord<string, Primitive>,
@@ -103,6 +113,9 @@ if (import.meta.vitest !== undefined) {
   });
 }
 
+/**
+ * A collection of object utility functions.
+ */
 export const Obj = {
   shallowEq,
   pick,

@@ -1,30 +1,33 @@
 import { isNonNullish } from '../guard/index.mjs';
 
 /**
- * @param err
- * @param prettyPrintObject Use JSON.stringify(err, undefined, 2) instead of
- *   JSON.stringify(err)
+ * Converts an unknown value to its string representation.
+ *
+ * @param value - The unknown value to convert.
+ * @param options - Optional parameters.
+ * @param options.prettyPrintObject - If true, objects will be stringified with an indent of 2 spaces. Otherwise, they will be stringified without indentation.
+ * @returns The string representation of the unknown value.
  */
 export const unknownToString = (
-  err: unknown,
+  value: unknown,
   options?: Partial<Readonly<{ prettyPrintObject: boolean }>>,
 ): string => {
-  switch (typeof err) {
+  switch (typeof value) {
     case 'string':
-      return err;
+      return value;
 
     case 'number':
     case 'bigint':
     case 'boolean':
     case 'symbol':
     case 'function':
-      return err.toString();
+      return value.toString();
 
     case 'object':
-      return isNonNullish(err)
+      return isNonNullish(value)
         ? options?.prettyPrintObject === true
-          ? JSON.stringify(err, undefined, 2)
-          : JSON.stringify(err)
+          ? JSON.stringify(value, undefined, 2)
+          : JSON.stringify(value)
         : 'null';
 
     case 'undefined':

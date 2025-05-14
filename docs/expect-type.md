@@ -12,15 +12,21 @@
 
 > **expectType**\<`A`, `B`\>(`_relation`): `void`
 
-Defined in: [expect-type.mts:12](https://github.com/noshiro-pf/ts-verified/blob/main/src/expect-type.mts#L12)
+Defined in: [expect-type.mts:21](https://github.com/noshiro-pf/ts-verified/blob/main/src/expect-type.mts#L21)
 
-- `expectType<A, B>("=")` passes if `A` is equal to `B`.
-- `expectType<A, B>("~=")` passes if `A` extends `B` and `B` extends `A`.
-- `expectType<A, B>("<=")` passes if `A` extends `B`.
-- `expectType<A, B>(">=")` passes if `B` extends `A`.
-- `expectType<A, B>("!<=")` passes if `A` doesn't extend `B`.
-- `expectType<A, B>("!>=")` passes if `B` doesn't extend `A`.
-- `expectType<A, B>("!=")` passes if `A` is not equal to `B`.
+Compile-time type assertion utility.
+Checks the relationship between type `A` and type `B` based on the `_relation` parameter.
+This function has no runtime effect and is used for static type checking.
+
+Supported relations:
+
+- `expectType<A, B>("=")`: Asserts that type `A` is strictly equal to type `B`.
+- `expectType<A, B>("~=")`: Asserts that type `A` extends type `B`, and type `B` extends type `A` (i.e., they are mutually assignable).
+- `expectType<A, B>("<=")`: Asserts that type `A` extends type `B` (i.e., `A` is a subtype of `B`).
+- `expectType<A, B>(">=")`: Asserts that type `B` extends type `A` (i.e., `B` is a subtype of `A`).
+- `expectType<A, B>("!<=")`: Asserts that type `A` does not extend type `B`.
+- `expectType<A, B>("!>=")`: Asserts that type `B` does not extend type `A`.
+- `expectType<A, B>("!=")`: Asserts that type `A` is not strictly equal to type `B`.
 
 #### Type Parameters
 
@@ -28,9 +34,13 @@ Defined in: [expect-type.mts:12](https://github.com/noshiro-pf/ts-verified/blob/
 
 `A`
 
+The first type for comparison.
+
 ##### B
 
 `B`
+
+The second type for comparison.
 
 #### Parameters
 
@@ -38,7 +48,9 @@ Defined in: [expect-type.mts:12](https://github.com/noshiro-pf/ts-verified/blob/
 
 `TypeEq`\<`A`, `B`\> _extends_ `true` ? `"<="` \| `"="` \| `">="` \| `"~="` : `"!="` \| `TypeExtends`\<`A`, `B`\> _extends_ `true` ? `"<="` \| `TypeExtends`\<`B`, `A`\> _extends_ `true` ? `">="` \| `"~="` : `"!>="` : `"!<="` \| `TypeExtends`\<`B`, `A`\> _extends_ `true` ? `">="` : `"!>="`
 
-`"=" | "~=" | "<=" | ">=" | "!<=" | "!>=" | "!="`
+A string literal representing the expected type relationship.
+TypeScript infers the valid literals based on `A` and `B`.
+Must be one of: `"="`, `"~="`, `"<="`, `">="`, `"!<="`, `"!>="`, `"!="`.
 
 #### Returns
 

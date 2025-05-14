@@ -1,15 +1,34 @@
 /**
- * Represents the type of keys that can be used in a standard JavaScript Set for mapped keys.
- */
-type SetKeyType = number | string;
-
-
-/**
- * Interface for an immutable set where keys of type `K` are mapped to an underlying `SetKeyType` `KM`.
+ * Interface for an immutable set where keys of type `K` are mapped to an underlying `MapSetKeyType` `KM`.
+ * This type alias defines the structure of methods and properties for ISetMapped.
  * @template K The type of the elements in the set.
  * @template KM The type of the mapped keys (number or string).
+ * @example
+ * ```typescript
+ * // This is a type alias describing an interface, so it's not directly instantiated.
+ * // See ISetMapped.new for an example of creating an ISetMapped instance that conforms to this.
+ *
+ * // Example of how you might use a variable that implements this structure:
+ * type MyElementType = { id: number; name: string };
+ * const toKey = (el: MyElementType): string => `key_${el.id}`;
+ * const fromKey = (km: string): MyElementType => {
+ *   const id = parseInt(km.substring(4), 10);
+ *   // In a real scenario, you might fetch the original object or reconstruct it more robustly.
+ *   return { id, name: `Element ${id}` };
+ * };
+ *
+ * declare const myMappedSet: ISetMapped<MyElementType, string>; // ISetMapped implements ISetMappedInterface
+ *
+ * console.log(myMappedSet.size);
+ * const elementToCheck: MyElementType = { id: 1, name: "Element 1" };
+ * if (myMappedSet.has(elementToCheck)) {
+ *   console.log("Set contains elementToCheck");
+ * }
+ * const newElement: MyElementType = { id: 2, name: "Element 2" };
+ * const updatedSet = myMappedSet.add(newElement);
+ * ```
  */
-type ISetMappedInterface<K, KM extends SetKeyType> = {
+type ISetMappedInterface<K, KM extends MapSetKeyType> = {
   /**
    * Creates a new ISetMapped instance.
    * @param iterable An iterable of elements.
@@ -168,15 +187,36 @@ type ISetMappedInterface<K, KM extends SetKeyType> = {
    * @returns The raw ReadonlySet instance.
    */
   toRawSet: () => ReadonlySet<KM>;
-}
+};
 
 /**
- * Represents an immutable set where elements of type `K` are mapped to an underlying `SetKeyType` `KM`.
+ * Represents an immutable set where elements of type `K` are mapped to an underlying `MapSetKeyType` `KM`.
  * It is iterable and provides various methods for manipulation and querying.
  * @template K The type of the elements in the set.
  * @template KM The type of the mapped keys (number or string).
+ * @example
+ * ```typescript
+ * type User = { id: number; username: string };
+ * const userToKey = (user: User): number => user.id;
+ * const keyToUser = (id: number): User => ({ id, username: `user${id}` }); // Simplified for example
+ *
+ * let userSet = ISetMapped.new<User, number>([], userToKey, keyToUser);
+ *
+ * userSet = userSet.add({ id: 1, username: "alice" });
+ * userSet = userSet.add({ id: 2, username: "bob" });
+ *
+ * console.log(userSet.has({ id: 1, username: "alice" })); // Output: true
+ * console.log(userSet.size); // Output: 2
+ *
+ * for (const user of userSet) {
+ *   console.log(user.username);
+ * }
+ * // Output:
+ * // alice
+ * // bob
+ * ```
  */
-export type ISetMapped<K, KM extends SetKeyType> = Iterable<K> &
+export type ISetMapped<K, KM extends MapSetKeyType> = Iterable<K> &
   Readonly<ISetMappedInterface<K, KM>>;
 
 /**
@@ -191,8 +231,34 @@ export const ISetMapped = {
    * @param toKey A function to convert `K` to `KM`.
    * @param fromKey A function to convert `KM` to `K`.
    * @returns A new ISetMapped instance.
+   * @example
+   * ```typescript
+   * type Product = { sku: string; price: number };
+   * const productToKey = (p: Product): string => p.sku;
+   * const keyToProduct = (sku: string): Product => ({ sku, price: 0 }); // Simplified
+   *
+   * const productSet = ISetMapped.new<Product, string>(
+   *   [{ sku: "ABC", price: 10 }, { sku: "DEF", price: 20 }],
+   *   productToKey,
+   *   keyToProduct
+   * );
+   * console.log(productSet.size); // Output: 2
+   * console.log(productSet.has({ sku: "ABC", price: 10 })); // Output: true
+   *
+   * // Example with number keys
+   * type Item = { itemId: number; description: string };
+   * const itemToKey = (i: Item): number => i.itemId;
+   * const keyToItem = (id: number): Item => ({ itemId: id, description: "..." });
+   *
+   * const itemSet = ISetMapped.new<Item, number>(
+   *   [],
+   *   itemToKey,
+   *   keyToItem
+   * ).add({ itemId: 101, description: "Gadget" });
+   * console.log(itemSet.has({ itemId: 101, description: "Gadget" })); // Output: true
+   * ```
    */
-  new: <K, KM extends SetKeyType>(
+  new: <K, KM extends MapSetKeyType>(
     iterable: Iterable<K>,
     toKey: (a: K) => KM,
     fromKey: (k: KM) => K,
@@ -206,8 +272,36 @@ export const ISetMapped = {
    * @param a The first ISetMapped instance.
    * @param b The second ISetMapped instance.
    * @returns `true` if the sets are equal, `false` otherwise.
+   * @example
+   * ```typescript
+   * type DataPoint = { x: number; y: number };
+   * const pointToKey = (p: DataPoint): string => `${p.x},${p.y}`;
+   * const keyToPoint = (s: string): DataPoint => {
+   *   const parts = s.split(',');
+   *   return { x: Number(parts[0]), y: Number(parts[1]) };
+   * };
+   *
+   * const set1 = ISetMapped.new<DataPoint, string>(
+   *   [{ x: 1, y: 2 }, { x: 3, y: 4 }],
+   *   pointToKey,
+   *   keyToPoint
+   * );
+   * const set2 = ISetMapped.new<DataPoint, string>(
+   *   [{ x: 3, y: 4 }, { x: 1, y: 2 }], // Order doesn't matter
+   *   pointToKey,
+   *   keyToPoint
+   * );
+   * const set3 = ISetMapped.new<DataPoint, string>(
+   *   [{ x: 1, y: 2 }, { x: 5, y: 6 }],
+   *   pointToKey,
+   *   keyToPoint
+   * );
+   *
+   * console.log(ISetMapped.equal(set1, set2)); // Output: true
+   * console.log(ISetMapped.equal(set1, set3)); // Output: false
+   * ```
    */
-  equal: <K, KM extends SetKeyType>(
+  equal: <K, KM extends MapSetKeyType>(
     a: ISetMapped<K, KM>,
     b: ISetMapped<K, KM>,
   ): boolean => {
@@ -223,8 +317,33 @@ export const ISetMapped = {
    * @param oldSet The original set.
    * @param newSet The new set.
    * @returns An object containing sets of added and deleted elements.
+   * @example
+   * ```typescript
+   * type Tag = { name: string };
+   * const tagToKey = (t: Tag): string => t.name;
+   * const keyToTag = (name: string): Tag => ({ name });
+   *
+   * const oldTags = ISetMapped.new<Tag, string>(
+   *   [{ name: "typescript" }, { name: "javascript" }],
+   *   tagToKey,
+   *   keyToTag
+   * );
+   * const newTags = ISetMapped.new<Tag, string>(
+   *   [{ name: "javascript" }, { name: "react" }, { name: "nextjs" }],
+   *   tagToKey,
+   *   keyToTag
+   * );
+   *
+   * const diffResult = ISetMapped.diff(oldTags, newTags);
+   *
+   * console.log("Deleted tags:", diffResult.deleted.toArray().map(t => t.name));
+   * // Output: Deleted tags: ["typescript"]
+   *
+   * console.log("Added tags:", diffResult.added.toArray().map(t => t.name));
+   * // Output: Added tags: ["react", "nextjs"]
+   * ```
    */
-  diff: <K, KM extends SetKeyType>(
+  diff: <K, KM extends MapSetKeyType>(
     oldSet: ISetMapped<K, KM>,
     newSet: ISetMapped<K, KM>,
   ): Record<'added' | 'deleted', ISetMapped<K, KM>> => ({
@@ -239,8 +358,28 @@ export const ISetMapped = {
    * @param a The first set.
    * @param b The second set.
    * @returns A new ISetMapped instance representing the intersection.
+   * @example
+   * ```typescript
+   * type Permission = { id: string };
+   * const permToKey = (p: Permission): string => p.id;
+   * const keyToPerm = (id: string): Permission => ({ id });
+   *
+   * const userPermissions = ISetMapped.new<Permission, string>(
+   *   [{ id: "read" }, { id: "write" }, { id: "delete" }],
+   *   permToKey,
+   *   keyToPerm
+   * );
+   * const rolePermissions = ISetMapped.new<Permission, string>(
+   *   [{ id: "read" }, { id: "comment" }, { id: "write" }],
+   *   permToKey,
+   *   keyToPerm
+   * );
+   *
+   * const commonPermissions = ISetMapped.intersection(userPermissions, rolePermissions);
+   * console.log(commonPermissions.toArray().map(p => p.id)); // Output: ["read", "write"]
+   * ```
    */
-  intersection: <K, KM extends SetKeyType>(
+  intersection: <K, KM extends MapSetKeyType>(
     a: ISetMapped<K, KM>,
     b: ISetMapped<K, KM>,
   ): ISetMapped<K, KM> => a.intersect(b),
@@ -252,8 +391,30 @@ export const ISetMapped = {
    * @param a The first set.
    * @param b The second set.
    * @returns A new ISetMapped instance representing the union.
+   * @example
+   * ```typescript
+   * type FeatureFlag = { flagName: string };
+   * const flagToKey = (f: FeatureFlag): string => f.flagName;
+   * const keyToFlag = (name: string): FeatureFlag => ({ flagName: name });
+   *
+   * const setA = ISetMapped.new<FeatureFlag, string>(
+   *   [{ flagName: "newUI" }, { flagName: "betaFeature" }],
+   *   flagToKey,
+   *   keyToFlag
+   * );
+   * const setB = ISetMapped.new<FeatureFlag, string>(
+   *   [{ flagName: "betaFeature" }, { flagName: "darkMode" }],
+   *   flagToKey,
+   *   keyToFlag
+   * );
+   *
+   * const combinedFlags = ISetMapped.union(setA, setB);
+   * // The order might vary as sets are unordered internally.
+   * console.log(combinedFlags.toArray().map(f => f.flagName).sort());
+   * // Output: ["betaFeature", "darkMode", "newUI"]
+   * ```
    */
-  union: <K, KM extends SetKeyType>(
+  union: <K, KM extends MapSetKeyType>(
     a: ISetMapped<K, KM>,
     b: ISetMapped<K, KM>,
   ): ISetMapped<K, KM> => a.union(b),
@@ -266,12 +427,13 @@ export const ISetMapped = {
  * @implements ISetMapped
  * @implements Iterable
  */
-class ISetMappedClass<K, KM extends SetKeyType>
+class ISetMappedClass<K, KM extends MapSetKeyType>
   implements ISetMapped<K, KM>, Iterable<K>
 {
   readonly #set: ReadonlySet<KM>;
   readonly #toKey: (a: K) => KM;
   readonly #fromKey: (k: KM) => K;
+  readonly #showNotFoundMessage: boolean;
 
   /**
    * Constructs an ISetMappedClass instance.
@@ -283,10 +445,12 @@ class ISetMappedClass<K, KM extends SetKeyType>
     iterable: Iterable<K>,
     toKey: (a: K) => KM,
     fromKey: (k: KM) => K,
+    showNotFoundMessage: boolean = false,
   ) {
     this.#set = new Set(Array.from(iterable, toKey));
     this.#toKey = toKey;
     this.#fromKey = fromKey;
+    this.#showNotFoundMessage = showNotFoundMessage;
   }
 
   /** @inheritdoc */
@@ -342,7 +506,9 @@ class ISetMappedClass<K, KM extends SetKeyType>
   /** @inheritdoc */
   delete(key: K): ISetMapped<K, KM> {
     if (!this.has(key)) {
-      console.warn(`ISetMapped.delete: key not found: ${this.#toKey(key)}`);
+      if (this.#showNotFoundMessage) {
+        console.warn(`ISetMapped.delete: key not found: ${this.#toKey(key)}`);
+      }
       return this;
     }
     const keyMapped = this.#toKey(key);
@@ -476,14 +642,16 @@ class ISetMappedClass<K, KM extends SetKeyType>
 
   /** @inheritdoc */
   *values(): IterableIterator<K> {
-    for (const km of this.#set.keys()) { // JavaScript Set's values() is an alias for keys()
+    for (const km of this.#set.keys()) {
+      // JavaScript Set's values() is an alias for keys()
       yield this.#fromKey(km);
     }
   }
 
   /** @inheritdoc */
   *entries(): IterableIterator<readonly [K, K]> {
-    for (const km of this.#set.keys()) { // JavaScript Set's entries() yields [value, value]
+    for (const km of this.#set.keys()) {
+      // JavaScript Set's entries() yields [value, value]
       const a = this.#fromKey(km);
       yield [a, a];
     }

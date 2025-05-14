@@ -14,9 +14,9 @@ Re-exports [match](functional/match.md#match)
 
 ---
 
-### Maybe
+### Optional
 
-Re-exports [Maybe](functional/maybe/README.md#maybe)
+Re-exports [Optional](functional/optional/README.md#optional)
 
 ---
 

@@ -1,12 +1,8 @@
+import { Optional } from '../functional/index.mjs';
 import { IMapMapped } from './imap-mapped.mjs';
 
 const toKey = (a: Readonly<{ v: number }>): number => a.v;
 const fromKey = (k: number): Readonly<{ v: number }> => ({ v: k });
-
-beforeEach(() => {
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
 
 describe('IMapMapped[Symbol.iterator]', () => {
   test('case 1', () => {
@@ -104,7 +100,7 @@ describe('IMapMapped.get', () => {
       fromKey,
     );
 
-    expect(s0.get({ v: 3 })).toBe('3');
+    expect(s0.get({ v: 3 })).toStrictEqual(Optional.some('3'));
   });
   test('case 2', () => {
     const s0 = IMapMapped.new(
@@ -117,7 +113,7 @@ describe('IMapMapped.get', () => {
       fromKey,
     );
 
-    expect(s0.get({ v: 4 })).toBeUndefined();
+    expect(s0.get({ v: 4 })).toStrictEqual(Optional.none);
   });
   test('case 3', () => {
     const s0 = IMapMapped.new<Readonly<{ v: number }>, string, number>(
@@ -126,7 +122,7 @@ describe('IMapMapped.get', () => {
       fromKey,
     );
 
-    expect(s0.get({ v: 3 })).toBeUndefined();
+    expect(s0.get({ v: 3 })).toStrictEqual(Optional.none);
   });
 });
 

@@ -1,9 +1,5 @@
+import { Optional } from '../functional/index.mjs';
 import { IMap } from './imap.mjs';
-
-beforeEach(() => {
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
 
 describe('IMap[Symbol.iterator]', () => {
   test('case 1', () => {
@@ -49,6 +45,7 @@ describe('IMap.has', () => {
 
     expect(m0.has(6)).toBe(true);
   });
+
   test('case 2', () => {
     const m0 = IMap.new<number, number>([
       [1, 10],
@@ -60,11 +57,13 @@ describe('IMap.has', () => {
 
     expect(m0.has(8)).toBe(false);
   });
+
   test('case 3', () => {
     const m0 = IMap.new<number, number>([]);
 
     expect(m0.has(0)).toBe(false);
   });
+
   test('case 4', () => {
     const m0 = IMap.new<number, number>([
       [1, 10],
@@ -89,8 +88,9 @@ describe('IMap.get', () => {
       [7, 70],
     ] as const);
 
-    expect(m0.get(6)).toBe(60);
+    expect(m0.get(6)).toStrictEqual(Optional.some(60));
   });
+
   test('case 2', () => {
     const m0 = IMap.new<number, number>([
       [1, 10],
@@ -100,13 +100,15 @@ describe('IMap.get', () => {
       [7, 70],
     ]);
 
-    expect(m0.get(8)).toBeUndefined();
+    expect(m0.get(8)).toStrictEqual(Optional.none);
   });
+
   test('case 3', () => {
     const m0 = IMap.new<number, number>([]);
 
-    expect(m0.get(0)).toBeUndefined();
+    expect(m0.get(0)).toStrictEqual(Optional.none);
   });
+
   test('case 4', () => {
     const m0 = IMap.new<number, number>([
       [1, 10],
@@ -117,7 +119,7 @@ describe('IMap.get', () => {
       [Number.NaN, 100],
     ] as const);
 
-    expect(m0.get(Number.NaN)).toBe(100);
+    expect(m0.get(Number.NaN)).toStrictEqual(Optional.some(100));
   });
 });
 
@@ -151,6 +153,7 @@ describe('IMap.set', () => {
       ]),
     );
   });
+
   test('case 2', () => {
     const m0 = IMap.new([
       [1, 10],
@@ -179,6 +182,7 @@ describe('IMap.set', () => {
       ]),
     );
   });
+
   test('case 3', () => {
     const m0 = IMap.new<number, number>([]);
 
@@ -216,6 +220,7 @@ describe('IMap.update', () => {
       ]),
     );
   });
+
   test('case 2', () => {
     const m0 = IMap.new([
       [1, 10],
@@ -244,6 +249,7 @@ describe('IMap.update', () => {
       ]),
     );
   });
+
   test('case 3', () => {
     const m0 = IMap.new<number, number>([]);
 
@@ -281,6 +287,7 @@ describe('IMap.delete', () => {
       ]),
     );
   });
+
   test('case 2', () => {
     const m0 = IMap.new([
       [1, 10],
@@ -308,6 +315,7 @@ describe('IMap.delete', () => {
       ]),
     );
   });
+
   test('case 3', () => {
     const m0 = IMap.new<number, number>([]);
 

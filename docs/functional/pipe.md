@@ -10,9 +10,11 @@
 
 ### pipe()
 
-> **pipe**\<`A`\>(`a`): `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
+> **pipe**\<`A`\>(`a`): `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
 
-Defined in: [functional/pipe.mts:3](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/pipe.mts#L3)
+Defined in: [functional/pipe.mts:9](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/pipe.mts#L9)
+
+Creates a new `Pipe` object, which allows for chaining operations on a value.
 
 #### Type Parameters
 
@@ -20,12 +22,18 @@ Defined in: [functional/pipe.mts:3](https://github.com/noshiro-pf/ts-verified/bl
 
 `A`
 
+The type of the initial value.
+
 #### Parameters
 
 ##### a
 
 `A`
 
+The initial value.
+
 #### Returns
 
-`Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
+`Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `mapNullable`: \<`B`\>(`fn`) => `Readonly`\<\{ `map`: ...; `mapNullable`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
+
+A `Pipe<A>` object containing the initial value and chain methods.

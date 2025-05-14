@@ -1,5 +1,8 @@
+import { isRecord } from '../guard/index.mjs';
+
 /** @internal Symbol to identify the 'Some' variant of Optional. */
 const SomeTypeSymbol: unique symbol = Symbol('Optional.some');
+
 /** @internal Symbol to identify the 'None' variant of Optional. */
 const NoneTypeSymbol: unique symbol = Symbol('Optional.none');
 
@@ -31,53 +34,68 @@ type None_ = Readonly<{
 export type Optional<S> = None_ | Some_<S>;
 
 /**
- * Namespace for `Optional` type and related functions.
- * Provides a way to handle values that might be absent, similar to Option types in other languages.
+ * Namespace for the {@link Optional} type and related functions.
+ * Provides utilities to handle values that might be absent, similar to Option types in other languages.
  */
 export namespace Optional {
   /**
-   * Represents an `Optional` that contains a value.
+   * Checks if the given value is an {@link Optional}.
+   * @param maybeOptional The value to check.
+   * @returns `true` if the value is an {@link Optional}, otherwise `false`.
+   */
+  export const isOptional = (
+    maybeOptional: unknown,
+  ): maybeOptional is Optional<unknown> =>
+    isRecord(maybeOptional) &&
+    Object.hasOwn(maybeOptional, 'type') &&
+    ((maybeOptional['type'] === SomeTypeSymbol &&
+      Object.hasOwn(maybeOptional, 'value')) ||
+      maybeOptional['type'] === NoneTypeSymbol);
+
+  /**
+   * Represents an {@link Optional} that contains a value.
    * @template S The type of the contained value.
    */
   export type Some<S> = Some_<S>;
+
   /**
-   * Represents an `Optional` that does not contain a value (is empty).
+   * Represents an {@link Optional} that does not contain a value (is empty).
    */
   export type None = None_;
 
   /**
-   * Base type for any `Optional`, used for generic constraints.
-   * Represents an `Optional` with an unknown value type.
+   * Base type for any {@link Optional}, used for generic constraints.
+   * Represents an {@link Optional} with an unknown value type.
    */
   export type Base = Optional<unknown>;
 
   /**
-   * Extracts the value type `S` from an `Optional.Some<S>`.
-   * If the `Optional` is `Optional.None`, it resolves to `never`.
-   * @template M The `Optional.Base` type to unwrap.
+   * Extracts the value type `S` from an {@link Optional.Some}<S>.
+   * If the {@link Optional} is {@link Optional.None}, resolves to `never`.
+   * @template M The {@link Optional.Base} type to unwrap.
    */
   export type Unwrap<M extends Base> = M extends Some<infer S> ? S : never;
 
   /**
-   * Narrows an `Optional.Base` type to `Optional.Some<S>` if it is indeed a `Some`.
-   * If the `Optional` is `Optional.None`, it resolves to `never`.
-   * @template M The `Optional.Base` type to narrow.
+   * Narrows an {@link Optional.Base} type to {@link Optional.Some}<S> if it is a {@link Optional.Some}.
+   * If the {@link Optional} is {@link Optional.None}, resolves to `never`.
+   * @template M The {@link Optional.Base} type to narrow.
    */
   export type NarrowToSome<M extends Base> = M extends None ? never : M;
 
   /**
-   * Narrows an `Optional.Base` type to `Optional.None` if it is indeed a `None`.
-   * If the `Optional` is `Optional.Some<S>`, it resolves to `never`.
-   * @template M The `Optional.Base` type to narrow.
+   * Narrows an {@link Optional.Base} type to {@link Optional.None} if it is a {@link Optional.None}.
+   * If the {@link Optional} is {@link Optional.Some}<S>, resolves to `never`.
+   * @template M The {@link Optional.Base} type to narrow.
    */
   export type NarrowToNone<M extends Base> =
     M extends Some<unknown> ? never : M;
 
   /**
-   * Creates an `Optional.Some` containing the given value.
+   * Creates an {@link Optional.Some} containing the given value.
    * @template S The type of the value.
-   * @param value The value to wrap in an `Optional.Some`.
-   * @returns An `Optional.Some<S>` containing the value.
+   * @param value The value to wrap in an {@link Optional.Some}.
+   * @returns An {@link Optional.Some}<S> containing the value.
    */
   export const some = <const S,>(value: S): Some<S> => ({
     type: SomeTypeSymbol,
@@ -85,35 +103,35 @@ export namespace Optional {
   });
 
   /**
-   * Represents an `Optional.None` (empty Optional).
+   * The singleton instance representing {@link Optional.None} (an empty Optional).
    */
   export const none: None = { type: NoneTypeSymbol } as const;
 
   /**
-   * Checks if an `Optional` is `Optional.Some`.
+   * Checks if an {@link Optional} is {@link Optional.Some}.
    * Acts as a type guard.
-   * @template M The `Optional.Base` type to check.
-   * @param optional The `Optional` to check.
-   * @returns `true` if the `Optional` is `Optional.Some`, `false` otherwise.
+   * @template M The {@link Optional.Base} type to check.
+   * @param optional The {@link Optional} to check.
+   * @returns `true` if the {@link Optional} is {@link Optional.Some}, `false` otherwise.
    */
   export const isSome = <const M extends Base>(
     optional: M,
   ): optional is NarrowToSome<M> => optional.type === SomeTypeSymbol;
 
   /**
-   * Checks if an `Optional` is `Optional.None`.
+   * Checks if an {@link Optional} is {@link Optional.None}.
    * Acts as a type guard.
-   * @template M The `Optional.Base` type to check.
-   * @param optional The `Optional` to check.
-   * @returns `true` if the `Optional` is `Optional.None`, `false` otherwise.
+   * @template M The {@link Optional.Base} type to check.
+   * @param optional The {@link Optional} to check.
+   * @returns `true` if the {@link Optional} is {@link Optional.None}, `false` otherwise.
    */
   export const isNone = <const M extends Base>(
     optional: M,
   ): optional is NarrowToNone<M> => optional.type === NoneTypeSymbol;
 
   /**
-   * Maps an `Optional<S>` to `Optional<S2>` by applying a function to a contained value.
-   * If the `Optional` is `Optional.None`, it returns `Optional.None`.
+   * Maps an {@link Optional}<S> to {@link Optional}<S2> by applying a function to a contained value.
+   * If the {@link Optional} is {@link Optional.None}, it returns {@link Optional.none}.
    * Otherwise, it applies the `mapFn` to the value in `Optional.Some` and returns a new `Optional.Some` with the result.
    * @template M The input `Optional.Base` type.
    * @template S2 The type of the value returned by the mapping function.

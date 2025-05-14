@@ -1,5 +1,8 @@
+import { isRecord } from '../guard/index.mjs';
+
 /** @internal Symbol to identify the 'Ok' variant of Result. */
 const OkTypeSymbol: unique symbol = Symbol('Result.ok');
+
 /** @internal Symbol to identify the 'Err' variant of Result. */
 const ErrTypeSymbol: unique symbol = Symbol('Result.err');
 
@@ -28,22 +31,37 @@ type Err_<E> = Readonly<{
 }>;
 
 /**
- * Represents a value that can either be a success ('Ok') or an error ('Err').
+ * Represents a value that can either be a success (`Ok`) or an error (`Err`).
  * @template S The type of the success value.
  * @template E The type of the error value.
  */
 export type Result<S, E> = Err_<E> | Ok_<S>;
 
 /**
- * Namespace for `Result` type and related functions.
- * Provides a way to handle operations that can succeed or fail.
+ * Namespace for the `Result` type and related functions.
+ * Provides utilities to handle operations that can succeed or fail.
  */
 export namespace Result {
+  /**
+   * Checks if the given value is a `Result`.
+   * @param maybeOptional The value to check.
+   * @returns `true` if the value is a `Result`, otherwise `false`.
+   */
+  export const isResult = (
+    maybeOptional: unknown,
+  ): maybeOptional is Result<unknown, unknown> =>
+    isRecord(maybeOptional) &&
+    Object.hasOwn(maybeOptional, 'type') &&
+    Object.hasOwn(maybeOptional, 'value') &&
+    (maybeOptional['type'] === ErrTypeSymbol ||
+      maybeOptional['type'] === OkTypeSymbol);
+
   /**
    * Represents a `Result` that is a success, containing a value.
    * @template S The type of the success value.
    */
   export type Ok<S> = Ok_<S>;
+
   /**
    * Represents a `Result` that is an error, containing an error value.
    * @template E The type of the error value.
@@ -58,28 +76,28 @@ export namespace Result {
 
   /**
    * Extracts the success value type `S` from a `Result.Ok<S>`.
-   * If the `Result` is `Result.Err<E>`, it resolves to `never`.
+   * If the `Result` is `Result.Err<E>`, resolves to `never`.
    * @template R The `Result.Base` type to unwrap.
    */
   export type UnwrapOk<R extends Base> = R extends Ok<infer S> ? S : never;
 
   /**
    * Extracts the error value type `E` from a `Result.Err<E>`.
-   * If the `Result` is `Result.Ok<S>`, it resolves to `never`.
+   * If the `Result` is `Result.Ok<S>`, resolves to `never`.
    * @template R The `Result.Base` type to unwrap.
    */
   export type UnwrapErr<R extends Base> = R extends Err<infer E> ? E : never;
 
   /**
-   * Narrows a `Result.Base` type to `Result.Ok<S>` if it is indeed an `Ok`.
-   * If the `Result` is `Result.Err<E>`, it resolves to `never`.
+   * Narrows a `Result.Base` type to `Result.Ok<S>` if it is an `Ok`.
+   * If the `Result` is `Result.Err<E>`, resolves to `never`.
    * @template R The `Result.Base` type to narrow.
    */
   export type NarrowToOk<R extends Base> = R extends Err<unknown> ? never : R;
 
   /**
-   * Narrows a `Result.Base` type to `Result.Err<E>` if it is indeed an `Err`.
-   * If the `Result` is `Result.Ok<S>`, it resolves to `never`.
+   * Narrows a `Result.Base` type to `Result.Err<E>` if it is an `Err`.
+   * If the `Result` is `Result.Ok<S>`, resolves to `never`.
    * @template R The `Result.Base` type to narrow.
    */
   export type NarrowToErr<R extends Base> = R extends Ok<unknown> ? never : R;
@@ -114,7 +132,7 @@ export namespace Result {
    * Acts as a type guard.
    * @template R The `Result.Base` type to check.
    * @param result The `Result` to check.
-   * @returns `true` if the `Result` is `Result.Ok`, `false` otherwise.
+   * @returns `true` if the `Result` is `Result.Ok`, otherwise `false`.
    */
   export const isOk = <const R extends Base>(
     result: R,
@@ -125,20 +143,19 @@ export namespace Result {
    * Acts as a type guard.
    * @template R The `Result.Base` type to check.
    * @param result The `Result` to check.
-   * @returns `true` if the `Result` is `Result.Err`, `false` otherwise.
+   * @returns `true` if the `Result` is `Result.Err`, otherwise `false`.
    */
   export const isErr = <const R extends Base>(
     result: R,
   ): result is NarrowToErr<R> => result.type === ErrTypeSymbol;
 
   /**
-   * Maps a `Result<S, E>` to `Result<S2, E>` by applying a function to a success value.
-   * If the `Result` is `Result.Err`, it returns the original `Err`.
-   * Otherwise, it applies `mapFn` to the success value and returns a new `Result.Ok` with the result.
+   * Maps a `Result<S, E>` to `Result<S2, E>` by applying a function to the success value.
+   * If the `Result` is `Result.Err`, returns the original `Err`.
    * @template R The input `Result.Base` type.
    * @template S2 The type of the success value returned by the mapping function.
    * @param result The `Result` to map.
-   * @param mapFn The function to apply to the success value if it exists.
+   * @param mapFn The function to apply to the success value if present.
    * @returns A new `Result<S2, UnwrapErr<R>>`.
    */
   export const map = <const R extends Base, S2>(
@@ -156,13 +173,12 @@ export namespace Result {
         );
 
   /**
-   * Maps a `Result<S, E>` to `Result<S, E2>` by applying a function to an error value.
-   * If the `Result` is `Result.Ok`, it returns the original `Ok`.
-   * Otherwise, it applies `mapFn` to the error value and returns a new `Result.Err` with the result.
+   * Maps a `Result<S, E>` to `Result<S, E2>` by applying a function to the error value.
+   * If the `Result` is `Result.Ok`, returns the original `Ok`.
    * @template R The input `Result.Base` type.
    * @template E2 The type of the error value returned by the mapping function.
    * @param result The `Result` to map.
-   * @param mapFn The function to apply to the error value if it exists.
+   * @param mapFn The function to apply to the error value if present.
    * @returns A new `Result<UnwrapOk<R>, E2>`.
    */
   export const mapErr = <const R extends Base, E2>(
@@ -234,7 +250,7 @@ export namespace Result {
   };
 
   /**
-   * Unwraps a `Result`, returning the success value or `undefined` if it's `Result.Err`.
+   * Unwraps a `Result`, returning the success value or `undefined` if it is `Result.Err`.
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @returns The success value if `Result.Ok`, otherwise `undefined`.
@@ -248,7 +264,7 @@ export namespace Result {
         (result.value as UnwrapOk<R>);
 
   /**
-   * Unwraps a `Result`, returning the success value or a default value if it's `Result.Err`.
+   * Unwraps a `Result`, returning the success value or a default value if it is `Result.Err`.
    * @template R The `Result.Base` type to unwrap.
    * @template D The type of the default value.
    * @param result The `Result` to unwrap.
@@ -265,7 +281,7 @@ export namespace Result {
         (result.value as UnwrapOk<R>);
 
   /**
-   * Unwraps a `Result`, returning the error value or `undefined` if it's `Result.Ok`.
+   * Unwraps a `Result`, returning the error value or `undefined` if it is `Result.Ok`.
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @returns The error value if `Result.Err`, otherwise `undefined`.
@@ -279,7 +295,7 @@ export namespace Result {
       : undefined;
 
   /**
-   * Unwraps a `Result`, returning the error value or a default value if it's `Result.Ok`.
+   * Unwraps a `Result`, returning the error value or a default value if it is `Result.Ok`.
    * @template R The `Result.Base` type to unwrap.
    * @template D The type of the default value.
    * @param result The `Result` to unwrap.

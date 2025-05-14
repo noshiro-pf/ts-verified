@@ -12,7 +12,9 @@
 
 > `const` **Obj**: `object`
 
-Defined in: [record/object.mts:106](https://github.com/noshiro-pf/ts-verified/blob/main/src/record/object.mts#L106)
+Defined in: [record/object.mts:119](https://github.com/noshiro-pf/ts-verified/blob/main/src/record/object.mts#L119)
+
+A collection of object utility functions.
 
 #### Type declaration
 
@@ -95,16 +97,27 @@ expect(pick({ a: 1, b: 2, c: 3 }, ['a', 'b'])).toStrictEqual({
 
 > **shallowEq**: (`a`, `b`) => `boolean`
 
+Performs a shallow equality check on two records.
+It verifies that both records have the same number of entries and that for every key in the first record,
+the corresponding value is strictly equal (`===`) to the value in the second record.
+Note: This function assumes that the values in the records are primitives.
+
 ###### Parameters
 
 ###### a
 
 `ReadonlyRecord`\<`string`, `Primitive`\>
 
+The first record, with string keys and primitive values.
+
 ###### b
 
 `ReadonlyRecord`\<`string`, `Primitive`\>
 
+The second record, with string keys and primitive values.
+
 ###### Returns
 
 `boolean`
+
+`true` if the records are shallowly equal, `false` otherwise.

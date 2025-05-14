@@ -3,11 +3,6 @@ import { ISetMapped } from './iset-mapped.mjs';
 const toKey = (a: Readonly<{ v: number }>): number => a.v;
 const fromKey = (k: number): Readonly<{ v: number }> => ({ v: k });
 
-beforeEach(() => {
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
-
 describe('ISetMapped[Symbol.iterator]', () => {
   test('case 1', () => {
     const s0 = ISetMapped.new(

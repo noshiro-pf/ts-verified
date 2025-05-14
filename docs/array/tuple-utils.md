@@ -12,7 +12,7 @@
 
 > `const` **Tpl**: `object`
 
-Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verified/blob/main/src/array/tuple-utils.mts#L121)
+Defined in: [array/tuple-utils.mts:215](https://github.com/noshiro-pf/ts-verified/blob/main/src/array/tuple-utils.mts#L215)
 
 #### Type declaration
 
@@ -20,35 +20,49 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 > **findIndex**: \<`T`\>(`tpl`, `predicate`) => `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+Finds the index of the first element in a tuple that satisfies the predicate.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
 
+The type of the tuple.
+
 ###### Parameters
 
 ###### tpl
 
 `T`
+
+The input tuple.
 
 ###### predicate
 
 (`value`, `index`) => `boolean`
 
+A function to test each element for a condition.
+
 ###### Returns
 
 `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
+
+The index of the first element that satisfies the predicate, or -1 if no such element is found.
 
 ##### indexOf()
 
 > **indexOf**: \<`T`\>(`tpl`, `searchElement`, `fromIndex?`) => `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+Returns the first index at which a given element can be found in the tuple.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the tuple.
 
 ###### Parameters
 
@@ -56,27 +70,39 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### searchElement
 
 `T`\[`number`\]
+
+Element to locate in the tuple.
 
 ###### fromIndex?
 
 `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+The index to start the search at. If omitted, search starts from the beginning.
+
 ###### Returns
 
 `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
+
+The first index of the element in the tuple; -1 if not found.
 
 ##### lastIndexOf()
 
 > **lastIndexOf**: \<`T`\>(`tpl`, `searchElement`, `fromIndex?`) => `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+Returns the last index at which a given element can be found in the tuple.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the tuple.
 
 ###### Parameters
 
@@ -84,27 +110,39 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### searchElement
 
 `T`\[`number`\]
+
+Element to locate in the tuple.
 
 ###### fromIndex?
 
 `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+The index to start searching backwards from. If omitted, search starts from the end.
+
 ###### Returns
 
 `-1` \| `MapNumberToArraySearchResult`\<`IndexOfTupleImpl`\<`T`, keyof `T`\>\>
 
+The last index of the element in the tuple; -1 if not found.
+
 ##### length()
 
 > **length**: \<`T`\>(`list`) => `Length`\<`T`\>
+
+Returns the length of a tuple.
 
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the tuple.
 
 ###### Parameters
 
@@ -112,61 +150,87 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### Returns
 
 `Length`\<`T`\>
+
+The length of the tuple.
 
 ##### map()
 
 > **map**: \<`T`, `B`\>(`tpl`, `mapFn`) => \{ readonly \[K in string \| number \| symbol\]: B \}
 
+Creates a new tuple with the results of calling a provided function on every element in the calling tuple.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the input tuple.
 
 ###### B
 
 `B`
 
+The type of the elements in the new tuple.
+
 ###### Parameters
 
 ###### tpl
 
 `T`
+
+The input tuple.
 
 ###### mapFn
 
 (`a`, `index`) => `B`
 
+Function that produces an element of the new tuple.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: B \}
+
+A new tuple with each element being the result of the callback function.
 
 ##### reversed()
 
 > **reversed**: \<`T`\>(`tpl`) => `ReverseImpl`\<`T`\>
 
+Reverses a tuple.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
 
+The type of the tuple.
+
 ###### Parameters
 
 ###### tpl
 
 `T`
+
+The input tuple.
 
 ###### Returns
 
 `ReverseImpl`\<`T`\>
 
+A new tuple with elements in reverse order.
+
 ##### set()
 
 > **set**: \<`T`, `N`\>(`tpl`, `index`, `newValue`) => \{ readonly \[K in string \| number \| symbol\]: N \| T\[K\<K\>\] \}
+
+Returns a new tuple with the element at the specified index replaced by a new value.
 
 ###### Type Parameters
 
@@ -174,9 +238,13 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T` _extends_ readonly `unknown`[]
 
+The type of the input tuple.
+
 ###### N
 
 `N`
+
+The type of the new value.
 
 ###### Parameters
 
@@ -184,17 +252,25 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### index
 
 `IndexOfTupleImpl`\<`MakeTupleImpl`\<`0`, `` `${Length<T>}` ``, \[\]\>\>
+
+The index of the element to replace.
 
 ###### newValue
 
 `N`
 
+The new value.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: N \| T\[K\<K\>\] \}
+
+A new tuple with the element at the specified index replaced.
 
 ##### sorted()
 
@@ -204,11 +280,15 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 > \<`T`\>(`tpl`): \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
 
+Sorts a tuple of numbers in ascending order.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `number`[]
+
+The type of the tuple, constrained to readonly numbers.
 
 ###### Parameters
 
@@ -216,13 +296,19 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple of numbers.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
 
+A new tuple with elements sorted in ascending order.
+
 ###### Call Signature
 
 > \<`T`\>(`tpl`, `comparator`): \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
+
+Sorts a tuple using a custom comparator function.
 
 ###### Type Parameters
 
@@ -230,19 +316,27 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T` _extends_ readonly `unknown`[]
 
+The type of the tuple.
+
 ###### Parameters
 
 ###### tpl
 
 `T`
 
+The input tuple.
+
 ###### comparator
 
 (`x`, `y`) => `number`
 
+A function that defines the sort order.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
+
+A new tuple with elements sorted according to the comparator.
 
 ##### sortedBy()
 
@@ -252,11 +346,16 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 > \<`T`\>(`tpl`, `comparatorValueMapper`, `comparator?`): \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
 
+Sorts a tuple by a value derived from its elements.
+The derived values are numbers, and an optional number comparator can be provided.
+
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the tuple.
 
 ###### Parameters
 
@@ -264,27 +363,40 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### comparatorValueMapper
 
 (`value`) => `number`
+
+A function that maps an element to a number for comparison.
 
 ###### comparator?
 
 (`x`, `y`) => `number`
 
+An optional custom comparator function for the mapped numbers.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
 
+A new tuple sorted by the mapped values.
+
 ###### Call Signature
 
 > \<`T`, `B`\>(`tpl`, `comparatorValueMapper`, `comparator`): \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
+
+Sorts a tuple by a value derived from its elements.
+The derived values are numbers, and an optional number comparator can be provided.
 
 ###### Type Parameters
 
 ###### T
 
 `T` _extends_ readonly `unknown`[]
+
+The type of the tuple.
 
 ###### B
 
@@ -296,21 +408,31 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### comparatorValueMapper
 
 (`value`) => `B`
+
+A function that maps an element to a number for comparison.
 
 ###### comparator
 
 (`x`, `y`) => `number`
 
+An optional custom comparator function for the mapped numbers.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: T\[number\] \}
 
+A new tuple sorted by the mapped values.
+
 ##### update()
 
 > **update**: \<`T`, `N`\>(`tpl`, `index`, `updater`) => \{ readonly \[K in string \| number \| symbol\]: N \| T\[K\<K\>\] \}
+
+Returns a new tuple with the element at the specified index updated by a function.
 
 ###### Type Parameters
 
@@ -318,9 +440,13 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T` _extends_ readonly `unknown`[]
 
+The type of the input tuple.
+
 ###### N
 
 `N`
+
+The type of the updated value.
 
 ###### Parameters
 
@@ -328,7 +454,11 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 `T`
 
+The input tuple.
+
 ###### index
+
+The index of the element to update.
 
 `number` | IndexOfTupleImpl\<MakeTupleImpl\<0, \`$\{Length\<T\>\}\`, \[\]\>, keyof MakeTupleImpl\<0, \`$\{Length\<T\>\}\`, \[\]\>\> & (0 \| ... 38 more ... \| 39)
 
@@ -336,6 +466,10 @@ Defined in: [array/tuple-utils.mts:121](https://github.com/noshiro-pf/ts-verifie
 
 (`prev`) => `N`
 
+A function that takes the previous value and returns the updated value.
+
 ###### Returns
 
 \{ readonly \[K in string \| number \| symbol\]: N \| T\[K\<K\>\] \}
+
+A new tuple with the element at the specified index updated.

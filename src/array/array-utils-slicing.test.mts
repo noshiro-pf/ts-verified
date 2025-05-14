@@ -104,7 +104,7 @@ describe('Arr', () => {
       expect(Arr.rest).toStrictEqual(Arr.tail);
     });
     test('alias 2', () => {
-      expect(Arr.shift).toStrictEqual(Arr.tail);
+      expect(Arr.toShifted).toStrictEqual(Arr.tail);
     });
   });
 

@@ -1,11 +1,6 @@
 import { expectType } from '../expect-type.mjs';
 import { ISet } from './iset.mjs';
 
-beforeEach(() => {
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
-
 describe('ISet[Symbol.iterator]', () => {
   test('case 1', () => {
     const s0 = ISet.new(ISet.new([1, 2, 3]));
@@ -83,7 +78,7 @@ describe('ISet.some', () => {
 
 describe('ISet.add', () => {
   test('case 1', () => {
-    const s0 = ISet.new([1, 3, 5, 6, 7]);
+    const s0 = ISet.new<number>([1, 3, 5, 6, 7]);
 
     expect(s0.add(10)).toStrictEqual(ISet.new([1, 3, 5, 6, 7, 10]));
     expect(s0).toStrictEqual(ISet.new([1, 3, 5, 6, 7]));
@@ -101,7 +96,7 @@ describe('ISet.add', () => {
     expect(s0).toStrictEqual(ISet.new<number>([]));
   });
   test('case 4', () => {
-    const s0 = ISet.new([1, 2, 3, Number.NaN]);
+    const s0 = ISet.new<number>([1, 2, 3, Number.NaN]);
 
     expect(s0.add(Number.NaN)).toStrictEqual(ISet.new([1, 2, 3, Number.NaN]));
     expect(s0).toStrictEqual(ISet.new([1, 2, 3, Number.NaN]));
@@ -110,13 +105,13 @@ describe('ISet.add', () => {
 
 describe('ISet.delete', () => {
   test('case 1', () => {
-    const s0 = ISet.new([1, 3, 5, 6, 7]);
+    const s0 = ISet.new<number>([1, 3, 5, 6, 7]);
 
     expect(s0.delete(10)).toStrictEqual(ISet.new([1, 3, 5, 6, 7]));
     expect(s0).toStrictEqual(ISet.new([1, 3, 5, 6, 7]));
   });
   test('case 2', () => {
-    const s0 = ISet.new([1, 3, 5, 6, 7]);
+    const s0 = ISet.new<number>([1, 3, 5, 6, 7]);
 
     expect(s0.delete(3)).toStrictEqual(ISet.new([1, 5, 6, 7]));
     expect(s0).toStrictEqual(ISet.new([1, 3, 5, 6, 7]));
@@ -128,7 +123,7 @@ describe('ISet.delete', () => {
     expect(s0).toStrictEqual(ISet.new<number>([]));
   });
   test('case 4', () => {
-    const s0 = ISet.new([1, 2, 3, Number.NaN]);
+    const s0 = ISet.new<number>([1, 2, 3, Number.NaN]);
 
     expect(s0.delete(Number.NaN)).toStrictEqual(ISet.new([1, 2, 3]));
     expect(s0).toStrictEqual(ISet.new([1, 2, 3, Number.NaN]));
@@ -137,7 +132,7 @@ describe('ISet.delete', () => {
 
 describe('ISet.map', () => {
   test('case 1', () => {
-    const s0 = ISet.new([1, 3, 5, 6, 7]);
+    const s0 = ISet.new<number>([1, 3, 5, 6, 7]);
     const result = s0.map((x) => (x * 2).toString());
 
     expectType<typeof result, ISet<string>>('=');
@@ -148,7 +143,7 @@ describe('ISet.map', () => {
 
 describe('ISet.filter', () => {
   test('case 1', () => {
-    const s0 = ISet.new([1, 2, 3] as const);
+    const s0 = ISet.new<number>([1, 2, 3]);
     const result = s0.filter((x): x is 1 => x === 1);
 
     expectType<typeof result, ISet<1>>('=');
@@ -181,13 +176,13 @@ describe('ISet.isSupersetOf', () => {
 
 describe('ISet.subtract', () => {
   test('case 1', () => {
-    expect(ISet.new([1, 3, 5, 6, 7]).subtract(ISet.new([1, 3]))).toStrictEqual(
-      ISet.new([5, 6, 7]),
-    );
+    expect(
+      ISet.new<number>([1, 3, 5, 6, 7]).subtract(ISet.new([1, 3])),
+    ).toStrictEqual(ISet.new([5, 6, 7]));
   });
   test('case 2', () => {
     expect(
-      ISet.new([1, 3, 5, 6, 7]).subtract(ISet.new([1, 2, 3])),
+      ISet.new<number>([1, 3, 5, 6, 7]).subtract(ISet.new([1, 2, 3])),
     ).toStrictEqual(ISet.new([5, 6, 7]));
   });
 });
@@ -195,12 +190,18 @@ describe('ISet.subtract', () => {
 describe('ISet.intersection', () => {
   test('case 1', () => {
     expect(
-      ISet.intersection(ISet.new([1, 3, 5, 6, 7]), ISet.new<number>([])),
+      ISet.intersection(
+        ISet.new<number>([1, 3, 5, 6, 7]),
+        ISet.new<number>([]),
+      ),
     ).toStrictEqual(ISet.new([]));
   });
   test('case 2', () => {
     expect(
-      ISet.intersection(ISet.new([1, 3, 5, 6, 7]), ISet.new([1, 2, 3])),
+      ISet.intersection(
+        ISet.new<number>([1, 3, 5, 6, 7]),
+        ISet.new<number>([1, 2, 3]),
+      ),
     ).toStrictEqual(ISet.new([1, 3]));
   });
 });

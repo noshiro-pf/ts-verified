@@ -8,7 +8,7 @@ import { keyIsIn } from '../guard/index.mjs';
  * @template T The PropertyKey type to check.
  * @returns `true` if `T` is a literal type, `false` otherwise.
  */
-type IsLiteralTypeImpl<T extends PropertyKey> = string extends T
+type IsLiteralType<T extends PropertyKey> = string extends T
   ? false
   : number extends T
     ? false
@@ -60,7 +60,7 @@ export const strictMatch = <
 export function match<const Case extends PropertyKey, const V>(
   target: Case,
   cases: Record<Case, V>,
-): IsLiteralTypeImpl<Case> extends true ? V : V | undefined;
+): IsLiteralType<Case> extends true ? V : V | undefined;
 
 /**
  * Matches a `target` case against a subset of `cases` and returns the corresponding value.
@@ -98,13 +98,7 @@ export function match<
   return keyIsIn(target, cases) ? cases[target] : undefined;
 }
 
-if (import.meta.vitest !== undefined) {
-  expectType<IsLiteralTypeImpl<'aaa'>, true>('=');
-  expectType<IsLiteralTypeImpl<33>, true>('=');
-  expectType<IsLiteralTypeImpl<number | 'aa'>, false>('=');
-  expectType<IsLiteralTypeImpl<'aa' | 32>, true>('=');
-
-  test('dummy', () => {
-    expect(true).toBe(true);
-  });
-}
+expectType<IsLiteralType<'aaa'>, true>('=');
+expectType<IsLiteralType<33>, true>('=');
+expectType<IsLiteralType<number | 'aa'>, false>('=');
+expectType<IsLiteralType<'aa' | 32>, true>('=');

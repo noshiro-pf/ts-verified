@@ -12,13 +12,17 @@
 
 > **Queue**\<`T`\> = `Readonly`\<\{ `dequeue`: () => `T` \| `undefined`; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
 
-Defined in: [collections/queue.mts:1](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L1)
+Defined in: [collections/queue.mts:5](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L5)
+
+Represents a read-only interface for a queue (FIFO - First-In, First-Out).
 
 #### Type Parameters
 
 ##### T
 
 `T`
+
+The type of elements in the queue.
 
 ## Functions
 
@@ -26,7 +30,9 @@ Defined in: [collections/queue.mts:1](https://github.com/noshiro-pf/ts-verified/
 
 > **createQueue**\<`T`\>(): `Readonly`\<\{ `dequeue`: () => `undefined` \| `T`; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
 
-Defined in: [collections/queue.mts:29](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L29)
+Defined in: [collections/queue.mts:72](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L72)
+
+Creates a new Queue instance.
 
 #### Type Parameters
 
@@ -34,6 +40,10 @@ Defined in: [collections/queue.mts:29](https://github.com/noshiro-pf/ts-verified
 
 `T`
 
+The type of elements in the queue.
+
 #### Returns
 
 `Readonly`\<\{ `dequeue`: () => `undefined` \| `T`; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
+
+A new Queue instance.

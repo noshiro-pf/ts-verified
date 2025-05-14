@@ -4,16 +4,12 @@ import { unknownToString } from '../others/unknown-to-string.mjs';
  * Interface for an immutable set.
  * @template K The type of the elements in the set.
  */
-type ISetInterface<K> = {
-  /**
-   * Creates a new ISet instance.
-   * @param iterable An iterable of elements.
-   */
-  new (iterable: Iterable<K>): void;
-
+type ISetInterface<K extends MapSetKeyType> = Readonly<{
   // Getting information
+
   /** The number of elements in the set. */
   size: number;
+
   /** Checks if the set is empty. */
   isEmpty: boolean;
   /**
@@ -25,6 +21,7 @@ type ISetInterface<K> = {
   has: (key: K | (WidenLiteral<K> & {})) => boolean;
 
   // Reducing a value
+
   /**
    * Checks if all elements in the set satisfy a predicate.
    * @param predicate A function to test each element.
@@ -39,6 +36,7 @@ type ISetInterface<K> = {
      * @returns `true` if all elements satisfy the predicate, `false` otherwise.
      */
     (<L extends K>(predicate: (key: K) => key is L) => this is ISet<L>);
+
   /**
    * Checks if at least one element in the set satisfies a predicate.
    * @param predicate A function to test each element.
@@ -47,18 +45,21 @@ type ISetInterface<K> = {
   some: (predicate: (key: K) => boolean) => boolean;
 
   // Mutation
+
   /**
    * Adds an element to the set.
    * @param key The element to add.
    * @returns A new ISet instance with the element added.
    */
   add: (key: K) => ISet<K>;
+
   /**
    * Deletes an element from the set.
    * @param key The element to delete.
    * @returns A new ISet instance without the specified element.
    */
   delete: (key: K) => ISet<K>;
+
   /**
    * Applies a series of mutations to the set.
    * @param actions An array of mutation actions (add or delete).
@@ -71,13 +72,14 @@ type ISetInterface<K> = {
   ) => ISet<K>;
 
   // Sequence algorithms
+
   /**
    * Maps the elements of the set to new elements.
    * @template K2 The type of the new elements.
    * @param mapFn A function that maps an element to a new element.
    * @returns A new ISet instance with mapped elements.
    */
-  map: <K2>(mapFn: (key: K) => K2) => ISet<K2>;
+  map: <K2 extends MapSetKeyType>(mapFn: (key: K) => K2) => ISet<K2>;
 
   /**
    * Filters the elements of the set based on a type predicate.
@@ -107,13 +109,13 @@ type ISetInterface<K> = {
    * @param set The other set.
    * @returns `true` if this set is a subset of the other set, `false` otherwise.
    */
-  isSubsetOf: (set: ISet<K>) => boolean;
+  isSubsetOf: (set: ISet<WidenLiteral<K>>) => boolean;
   /**
    * Checks if this set is a superset of another set.
    * @param set The other set.
    * @returns `true` if this set is a superset of the other set, `false` otherwise.
    */
-  isSupersetOf: (set: ISet<K>) => boolean;
+  isSupersetOf: (set: ISet<WidenLiteral<K>>) => boolean;
   /**
    * Returns a new set with elements that are in this set but not in another set.
    * @param set The other set.
@@ -132,7 +134,7 @@ type ISetInterface<K> = {
    * @param set The other set.
    * @returns A new ISet instance representing the set union.
    */
-  union: <K2>(set: ISet<K2>) => ISet<K | K2>;
+  union: <K2 extends MapSetKeyType>(set: ISet<K2>) => ISet<K | K2>;
 
   // Side effects
   /**
@@ -169,14 +171,14 @@ type ISetInterface<K> = {
    * @returns The raw ReadonlySet instance.
    */
   toRawSet: () => ReadonlySet<K>;
-};
+}>;
 
 /**
  * Represents an immutable set.
  * It is iterable and provides various methods for manipulation and querying.
  * @template K The type of the elements in the set.
  */
-export type ISet<K> = Iterable<K> & Readonly<ISetInterface<K>>;
+export type ISet<K extends MapSetKeyType> = Iterable<K> & ISetInterface<K>;
 
 /**
  * Provides utility functions for ISet.
@@ -188,7 +190,8 @@ export const ISet = {
    * @param iterable An iterable of elements.
    * @returns A new ISet instance.
    */
-  new: <K,>(iterable: Iterable<K>): ISet<K> => new ISetClass<K>(iterable),
+  new: <K extends MapSetKeyType>(iterable: Iterable<K>): ISet<K> =>
+    new ISetClass<K>(iterable),
 
   /**
    * Checks if two ISet instances are equal.
@@ -198,7 +201,7 @@ export const ISet = {
    * @param b The second ISet instance.
    * @returns `true` if the sets are equal, `false` otherwise.
    */
-  equal: <K,>(a: ISet<K>, b: ISet<K>): boolean => {
+  equal: <K extends MapSetKeyType>(a: ISet<K>, b: ISet<K>): boolean => {
     if (a.size !== b.size) return false;
 
     return a.every((e) => b.has(e));
@@ -211,7 +214,7 @@ export const ISet = {
    * @param newSet The new set.
    * @returns An object containing sets of added and deleted elements.
    */
-  diff: <K,>(
+  diff: <K extends MapSetKeyType>(
     oldSet: ISet<K>,
     newSet: ISet<K>,
   ): Record<'added' | 'deleted', ISet<K>> => ({
@@ -226,7 +229,8 @@ export const ISet = {
    * @param b The second set.
    * @returns A new ISet instance representing the intersection.
    */
-  intersection: <K,>(a: ISet<K>, b: ISet<K>): ISet<K> => a.intersect(b),
+  intersection: <K extends MapSetKeyType>(a: ISet<K>, b: ISet<K>): ISet<K> =>
+    a.intersect(b),
 
   /**
    * Computes the union of two ISet instances.
@@ -236,7 +240,10 @@ export const ISet = {
    * @param b The second set.
    * @returns A new ISet instance representing the union.
    */
-  union: <K1, K2>(a: ISet<K1>, b: ISet<K2>): ISet<K1 | K2> => a.union(b),
+  union: <K1 extends MapSetKeyType, K2 extends MapSetKeyType>(
+    a: ISet<K1>,
+    b: ISet<K2>,
+  ): ISet<K1 | K2> => a.union(b),
 } as const;
 
 /**
@@ -245,15 +252,17 @@ export const ISet = {
  * @implements ISet
  * @implements Iterable
  */
-class ISetClass<K> implements ISet<K>, Iterable<K> {
+class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
   readonly #set: ReadonlySet<K>;
+  readonly #showNotFoundMessage: boolean;
 
   /**
    * Constructs an ISetClass instance.
    * @param iterable An iterable of elements.
    */
-  constructor(iterable: Iterable<K>) {
+  constructor(iterable: Iterable<K>, showNotFoundMessage: boolean = false) {
     this.#set = new Set(iterable);
+    this.#showNotFoundMessage = showNotFoundMessage;
   }
 
   /** @inheritdoc */
@@ -274,8 +283,10 @@ class ISetClass<K> implements ISet<K>, Iterable<K> {
 
   /** @inheritdoc */
   every<L extends K>(predicate: (key: K) => key is L): this is ISet<L>;
+
   /** @inheritdoc */
   every(predicate: (key: K) => boolean): boolean;
+
   /** @inheritdoc */
   every(predicate: (key: K) => boolean): boolean {
     for (const key of this.values()) {
@@ -304,7 +315,9 @@ class ISetClass<K> implements ISet<K>, Iterable<K> {
   /** @inheritdoc */
   delete(key: K): ISet<K> {
     if (!this.has(key)) {
-      console.warn(`ISet.delete: key not found: ${unknownToString(key)}`);
+      if (this.#showNotFoundMessage) {
+        console.warn(`ISet.delete: key not found: ${unknownToString(key)}`);
+      }
       return this;
     }
 
@@ -335,14 +348,16 @@ class ISetClass<K> implements ISet<K>, Iterable<K> {
   }
 
   /** @inheritdoc */
-  map<K2>(mapFn: (key: K) => K2): ISet<K2> {
+  map<K2 extends MapSetKeyType>(mapFn: (key: K) => K2): ISet<K2> {
     return ISet.new(this.toArray().map(mapFn));
   }
 
   /** @inheritdoc */
   filter<K2 extends K>(predicate: (key: K) => key is K2): ISet<K2>;
+
   /** @inheritdoc */
   filter(predicate: (key: K) => boolean): ISet<K>;
+
   /** @inheritdoc */
   filter(predicate: (key: K) => boolean): ISet<K> {
     return ISet.new(this.toArray().filter(predicate));
@@ -361,12 +376,13 @@ class ISetClass<K> implements ISet<K>, Iterable<K> {
   }
 
   /** @inheritdoc */
-  isSubsetOf(set: ISet<K>): boolean {
-    return this.every((k) => set.has(k));
+  isSubsetOf(set: ISet<WidenLiteral<K>>): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    return this.every((k) => set.has(k as WidenLiteral<K>));
   }
 
   /** @inheritdoc */
-  isSupersetOf(set: ISet<K>): boolean {
+  isSupersetOf(set: ISet<WidenLiteral<K>>): boolean {
     return set.every((k) => this.has(k));
   }
 
@@ -381,7 +397,7 @@ class ISetClass<K> implements ISet<K>, Iterable<K> {
   }
 
   /** @inheritdoc */
-  union<K2>(set: ISet<K2>): ISet<K | K2> {
+  union<K2 extends MapSetKeyType>(set: ISet<K2>): ISet<K | K2> {
     return ISet.new([...this, ...set]);
   }
 

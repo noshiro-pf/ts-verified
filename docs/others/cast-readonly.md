@@ -12,7 +12,11 @@
 
 > **castDeepReadonly**\<`T`\>(`mutable`): `DeepReadonly`\<`T`\>
 
-Defined in: [others/cast-readonly.mts:4](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/cast-readonly.mts#L4)
+Defined in: [others/cast-readonly.mts:19](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/cast-readonly.mts#L19)
+
+Casts a mutable type `T` to its `DeepReadonly<T>` equivalent.
+This is a type assertion and does not change the runtime value.
+It assumes that `DeepReadonly<T>` is a defined type that recursively makes all properties readonly.
 
 #### Type Parameters
 
@@ -20,15 +24,21 @@ Defined in: [others/cast-readonly.mts:4](https://github.com/noshiro-pf/ts-verifi
 
 `T`
 
+The type of the mutable value.
+
 #### Parameters
 
 ##### mutable
 
 `T`
 
+The mutable value to cast.
+
 #### Returns
 
 `DeepReadonly`\<`T`\>
+
+The value cast to `DeepReadonly<T>`.
 
 ---
 
@@ -36,7 +46,10 @@ Defined in: [others/cast-readonly.mts:4](https://github.com/noshiro-pf/ts-verifi
 
 > **castReadonly**\<`T`\>(`mutable`): `Readonly`\<`T`\>
 
-Defined in: [others/cast-readonly.mts:1](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/cast-readonly.mts#L1)
+Defined in: [others/cast-readonly.mts:8](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/cast-readonly.mts#L8)
+
+Casts a mutable type `T` to its `Readonly<T>` equivalent.
+This is a type assertion and does not change the runtime value.
 
 #### Type Parameters
 
@@ -44,12 +57,18 @@ Defined in: [others/cast-readonly.mts:1](https://github.com/noshiro-pf/ts-verifi
 
 `T`
 
+The type of the mutable value.
+
 #### Parameters
 
 ##### mutable
 
 `T`
 
+The mutable value to cast.
+
 #### Returns
 
 `Readonly`\<`T`\>
+
+The value cast to `Readonly<T>`.

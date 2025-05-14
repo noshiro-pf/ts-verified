@@ -1,82 +1,82 @@
 import { Arr } from './array-utils.mjs';
 
 describe('Arr', () => {
-  describe('slice', () => {
+  describe('sliceClamped', () => {
     const list = [0, 1, 2, 3, 4] as const;
 
     test.each([
       {
         start: 0,
         end: 5,
-        toBe: [0, 1, 2, 3, 4],
+        expected: [0, 1, 2, 3, 4],
       }, // 正常
       {
         start: 0,
         end: 6,
-        toBe: [0, 1, 2, 3, 4],
+        expected: [0, 1, 2, 3, 4],
       }, // 片方オーバー
       {
         start: -1,
         end: 5,
-        toBe: [0, 1, 2, 3, 4],
+        expected: [0, 1, 2, 3, 4],
       }, // 片方オーバー
       {
         start: -1,
         end: 6,
-        toBe: [0, 1, 2, 3, 4],
+        expected: [0, 1, 2, 3, 4],
       }, // 両方オーバー
       {
         start: 0,
         end: 3,
-        toBe: [0, 1, 2],
+        expected: [0, 1, 2],
       }, // 正常
       {
         start: 1,
         end: 3,
-        toBe: [1, 2],
+        expected: [1, 2],
       }, // 正常
       {
         start: -1,
         end: 3,
-        toBe: [0, 1, 2],
+        expected: [0, 1, 2],
       }, // 片方オーバー
       {
         start: 3,
         end: 5,
-        toBe: [3, 4],
+        expected: [3, 4],
       }, // 正常
       {
         start: 3,
         end: 6,
-        toBe: [3, 4],
+        expected: [3, 4],
       }, // 片方オーバー
       {
         start: 4,
         end: 3,
-        toBe: [],
+        expected: [],
       }, // start > end
       {
         start: 0,
         end: -1,
-        toBe: [],
+        expected: [],
       }, // start > end
       {
         start: -1,
         end: -2,
-        toBe: [],
+        expected: [],
       }, // start > end
       {
         start: 6,
         end: 9,
-        toBe: [],
+        expected: [],
       },
       {
         start: 6,
         end: 3,
-        toBe: [],
+        expected: [],
       },
-    ] as const)('slice($start, $end)', ({ start, end, toBe }) => {
-      expect(Arr.sliceClamped(list, start, end)).toStrictEqual(toBe);
+    ] as const)('sliceClamped($start, $end)', ({ start, end, expected }) => {
+      expect(Arr.sliceClamped(list, start, end)).toStrictEqual(expected);
     });
   });
 });

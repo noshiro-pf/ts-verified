@@ -2,20 +2,9 @@ import { expectType } from '../expect-type.mjs';
 import { Arr } from './array-utils.mjs';
 
 describe('Arr', () => {
-  describe('set', () => {
+  describe('toUpdated', () => {
     const xs = [1, 2, 3] as const;
-    const result = Arr.set(xs, 1, 4 as const);
-
-    expectType<typeof result, readonly (1 | 2 | 3 | 4)[]>('=');
-
-    test('case 1', () => {
-      expect(result).toStrictEqual([1, 4, 3]);
-    });
-  });
-
-  describe('update', () => {
-    const xs = [1, 2, 3] as const;
-    const result = Arr.update(xs, 1, (x) => x + 2);
+    const result = Arr.toUpdated(xs, 1, (x) => x + 2);
 
     expectType<typeof result, readonly number[]>('=');
 
@@ -24,11 +13,11 @@ describe('Arr', () => {
     });
   });
 
-  describe('insert', () => {
+  describe('toInserted', () => {
     const xs = [1, 2, 3] as const;
 
     {
-      const result = Arr.inserted(xs, 1, 5);
+      const result = Arr.toInserted(xs, 1, 5);
 
       expectType<typeof result, readonly (1 | 2 | 3 | 5)[]>('=');
 
@@ -37,7 +26,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.inserted(xs, 0, 5);
+      const result = Arr.toInserted(xs, 0, 5);
 
       expectType<typeof result, readonly (1 | 2 | 3 | 5)[]>('=');
 
@@ -46,7 +35,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.inserted(xs, 3, 5);
+      const result = Arr.toInserted(xs, 3, 5);
 
       expectType<typeof result, readonly (1 | 2 | 3 | 5)[]>('=');
 
@@ -55,7 +44,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.inserted(xs, 999, 5);
+      const result = Arr.toInserted(xs, 999, 5);
 
       expectType<typeof result, readonly (1 | 2 | 3 | 5)[]>('=');
 
@@ -65,11 +54,11 @@ describe('Arr', () => {
     }
   });
 
-  describe('remove', () => {
+  describe('toRemoved', () => {
     const xs = [1, 2, 3] as const;
 
     {
-      const result = Arr.removed(xs, 1);
+      const result = Arr.toRemoved(xs, 1);
 
       expectType<typeof result, readonly (1 | 2 | 3)[]>('=');
 
@@ -78,7 +67,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.removed(xs, 0);
+      const result = Arr.toRemoved(xs, 0);
 
       expectType<typeof result, readonly (1 | 2 | 3)[]>('=');
 
@@ -87,7 +76,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.removed(xs, 2);
+      const result = Arr.toRemoved(xs, 2);
 
       expectType<typeof result, readonly (1 | 2 | 3)[]>('=');
 
@@ -96,7 +85,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.removed(xs, 3);
+      const result = Arr.toRemoved(xs, 3);
 
       expectType<typeof result, readonly (1 | 2 | 3)[]>('=');
 
@@ -105,7 +94,7 @@ describe('Arr', () => {
       });
     }
     {
-      const result = Arr.removed(xs, 5);
+      const result = Arr.toRemoved(xs, 5);
 
       expectType<typeof result, readonly (1 | 2 | 3)[]>('=');
 
@@ -115,9 +104,9 @@ describe('Arr', () => {
     }
   });
 
-  describe('push', () => {
+  describe('toPushed', () => {
     const xs = [1, 2, 3] as const;
-    const result = Arr.pushed(xs, 4 as const);
+    const result = Arr.toPushed(xs, 4 as const);
 
     expectType<typeof result, readonly [1, 2, 3, 4]>('=');
 
@@ -126,9 +115,9 @@ describe('Arr', () => {
     });
   });
 
-  describe('unshift', () => {
+  describe('toUnshifted', () => {
     const xs = [1, 2, 3] as const;
-    const result = Arr.unshifted(xs, 4 as const);
+    const result = Arr.toUnshifted(xs, 4 as const);
 
     expectType<typeof result, readonly [4, 1, 2, 3]>('=');
 

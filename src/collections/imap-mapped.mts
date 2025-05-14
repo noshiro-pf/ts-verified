@@ -1,43 +1,50 @@
-import { pipe } from '../functional/index.mjs';
+import { Optional, pipe } from '../functional/index.mjs';
 import { tp } from '../others/index.mjs';
 
 /**
- * Represents the type of keys that can be used in a standard JavaScript Map.
- */
-type MapKeyType = number | string;
-
-/**
  * Interface for an immutable map where keys of type `K` are mapped to an underlying `MapKeyType` `KM`.
+ * This type alias defines the structure of methods and properties for IMapMapped.
  * @template K The type of the keys in the map.
  * @template V The type of the values in the map.
  * @template KM The type of the mapped keys (number or string).
+ * @example
+ * ```typescript
+ * // This is a type alias describing an interface, so it's not directly instantiated.
+ * // See IMapMapped.new for an example of creating an IMapMapped instance that conforms to this.
+ *
+ * // Example of how you might use a variable that implements this structure:
+ * declare const myMap: IMapMapped<string, number, string>; // IMapMapped implements IMapMappedInterface
+ *
+ * console.log(myMap.size);
+ * if (myMap.has("myKey")) {
+ *   const value = myMap.get("myKey").unwrapOr(-1);
+ *   console.log(value);
+ * }
+ * const updatedMap = myMap.set("newKey", 123);
+ * ```
  */
-type IMapMappedInterface<K, V, KM extends MapKeyType> = {
-  /**
-   * Creates a new IMapMapped instance.
-   * @param iterable An iterable of key-value pairs.
-   * @param toKey A function that converts a key of type `K` to `KM`.
-   * @param fromKey A function that converts a mapped key of type `KM` back to `K`.
-   */
-  new (iterable: Iterable<K>, toKey: (a: K) => KM, fromKey: (k: KM) => K): void;
-
+type IMapMappedInterface<K, V, KM extends MapSetKeyType> = Readonly<{
   // Getting information
+
   /** The number of elements in the map. */
   size: number;
+
   /**
    * Checks if a key exists in the map.
    * @param key The key to check.
    * @returns `true` if the key exists, `false` otherwise.
    */
   has: (key: K) => boolean;
+
   /**
    * Retrieves the value associated with a key.
    * @param key The key to retrieve.
-   * @returns The value associated with the key, or `undefined` if the key does not exist.
+   * @returns The value associated with the key wrapped with `Optional.some`, or `Optional.none` if the key does not exist.
    */
-  get: (key: K) => V | undefined;
+  get: (key: K) => Optional<V>;
 
   // Reducing a value
+
   /**
    * Checks if all elements in the map satisfy a predicate.
    * @param predicate A function to test each key-value pair.
@@ -54,6 +61,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
     (<W extends V>(
       predicate: (value: V, key: K) => value is W,
     ) => this is IMapMapped<K, W, KM>);
+
   /**
    * Checks if at least one element in the map satisfies a predicate.
    * @param predicate A function to test each key-value pair.
@@ -68,6 +76,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
    * @returns A new IMapMapped instance without the specified key.
    */
   delete: (key: K) => IMapMapped<K, V, KM>;
+
   /**
    * Sets a key-value pair in the map.
    * @param key The key to set.
@@ -75,6 +84,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
    * @returns A new IMapMapped instance with the specified key-value pair.
    */
   set: (key: K, value: V) => IMapMapped<K, V, KM>;
+
   /**
    * Updates the value associated with a key using an updater function.
    * @param key The key whose value to update.
@@ -82,6 +92,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
    * @returns A new IMapMapped instance with the updated value.
    */
   update: (key: K, updater: (value: V) => V) => IMapMapped<K, V, KM>;
+
   /**
    * Applies a series of mutations to the map.
    * @param actions An array of mutation actions (delete, set, or update).
@@ -96,6 +107,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
   ) => IMapMapped<K, V, KM>;
 
   // Sequence algorithms
+
   /**
    * Maps the values of the map to new values.
    * @template V2 The type of the new values.
@@ -103,6 +115,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
    * @returns A new IMapMapped instance with mapped values.
    */
   map: <V2>(mapFn: (value: V, key: K) => V2) => IMapMapped<K, V2, KM>;
+
   /**
    * Maps the keys of the map to new keys.
    * Note: The key type cannot be changed because `toKey` and `fromKey` would become unusable.
@@ -110,6 +123,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
    * @returns A new IMapMapped instance with mapped keys.
    */
   mapKeys: (mapFn: (key: K) => K) => IMapMapped<K, V, KM>;
+
   /**
    * Maps the entries (key-value pairs) of the map to new entries.
    * @template V2 The type of the new values in the entries.
@@ -121,6 +135,7 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
   ) => IMapMapped<K, V2, KM>;
 
   // Side effects
+
   /**
    * Executes a callback function for each key-value pair in the map.
    * @param callbackfn A function to execute for each element.
@@ -128,16 +143,19 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
   forEach: (callbackfn: (value: V, key: K) => void) => void;
 
   // Iterators
+
   /**
    * Returns an iterator for the keys in the map.
    * @returns An iterable iterator of keys.
    */
   keys: () => IterableIterator<K>;
+
   /**
    * Returns an iterator for the values in the map.
    * @returns An iterable iterator of values.
    */
   values: () => IterableIterator<V>;
+
   /**
    * Returns an iterator for the entries (key-value pairs) in the map.
    * @returns An iterable iterator of entries.
@@ -145,33 +163,38 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
   entries: () => IterableIterator<readonly [K, V]>;
 
   // Conversion
+
   /**
    * Converts the keys of the map to an array.
    * @returns A readonly array of keys.
    */
   toKeysArray: () => readonly K[];
+
   /**
    * Converts the values of the map to an array.
    * @returns A readonly array of values.
    */
   toValuesArray: () => readonly V[];
+
   /**
    * Converts the entries (key-value pairs) of the map to an array.
    * @returns A readonly array of entries.
    */
   toEntriesArray: () => readonly (readonly [K, V])[];
+
   /**
    * Converts the map to an array of entries (key-value pairs).
    * Alias for `toEntriesArray`.
    * @returns A readonly array of entries.
    */
   toArray: () => readonly (readonly [K, V])[];
+
   /**
    * Returns the underlying readonly JavaScript Map.
    * @returns The raw ReadonlyMap instance.
    */
   toRawMap: () => ReadonlyMap<KM, V>;
-};
+}>;
 
 /**
  * Represents an immutable map where keys of type `K` are mapped to an underlying `MapKeyType` `KM`.
@@ -179,11 +202,44 @@ type IMapMappedInterface<K, V, KM extends MapKeyType> = {
  * @template K The type of the keys in the map.
  * @template V The type of the values in the map.
  * @template KM The type of the mapped keys (number or string).
+ * @example
+ * ```typescript
+ * // Define a custom key type and its mapping functions
+ * type MyKey = { id: number; category: string };
+ * const toKey = (key: MyKey): string => `${key.category}_${key.id}`;
+ * const fromKey = (km: string): MyKey => {
+ *   const [category, idStr] = km.split('_');
+ *   return { id: Number(idStr), category };
+ * };
+ *
+ * // Create an IMapMapped instance
+ * let map: IMapMapped<MyKey, string, string> = IMapMapped.new<MyKey, string, string>(
+ *   [],
+ *   toKey,
+ *   fromKey
+ * );
+ *
+ * const key1: MyKey = { id: 1, category: "A" };
+ * const key2: MyKey = { id: 2, category: "B" };
+ *
+ * map = map.set(key1, "Value for A1");
+ * map = map.set(key2, "Value for B2");
+ *
+ * console.log(map.get(key1).unwrapOr("Not found")); // Output: Value for A1
+ * console.log(map.size); // Output: 2
+ *
+ * for (const [key, value] of map) {
+ *   console.log(`Key: ${toKey(key)}, Value: ${value}`);
+ * }
+ * // Output:
+ * // Key: A_1, Value: Value for A1
+ * // Key: B_2, Value: Value for B2
+ * ```
  */
-export type IMapMapped<K, V, KM extends MapKeyType> = Iterable<
+export type IMapMapped<K, V, KM extends MapSetKeyType> = Iterable<
   readonly [K, V]
 > &
-  Readonly<IMapMappedInterface<K, V, KM>>;
+  IMapMappedInterface<K, V, KM>;
 
 /**
  * Provides utility functions for IMapMapped.
@@ -198,8 +254,38 @@ export const IMapMapped = {
    * @param toKey A function to convert `K` to `KM`.
    * @param fromKey A function to convert `KM` to `K`.
    * @returns A new IMapMapped instance.
+   * @example
+   * ```typescript
+   * type ComplexKey = { partA: string; partB: number };
+   * const complexKeyToString = (ck: ComplexKey): string => `${ck.partA}-${ck.partB}`;
+   * const stringToComplexKey = (s: string): ComplexKey => {
+   *   const [partA, partBStr] = s.split('-');
+   *   return { partA, partB: Number(partBStr) };
+   * };
+   *
+   * const initialData: Array<[ComplexKey, boolean]> = [
+   *   [{ partA: "item", partB: 1 }, true],
+   *   [{ partA: "item", partB: 2 }, false],
+   * ];
+   *
+   * const myMappedMap = IMapMapped.new<ComplexKey, boolean, string>(
+   *   initialData,
+   *   complexKeyToString,
+   *   stringToComplexKey
+   * );
+   *
+   * console.log(myMappedMap.size); // Output: 2
+   * console.log(myMappedMap.get({ partA: "item", partB: 1 }).unwrap()); // Output: true
+   *
+   * const mapWithSimpleKeys = IMapMapped.new<string, number, string>(
+   *   [["a", 1], ["b", 2]],
+   *   (s) => s, // identity for string keys
+   *   (s) => s  // identity for string keys
+   * );
+   * console.log(mapWithSimpleKeys.get("b").unwrap()); // Output: 2
+   * ```
    */
-  new: <K, V, KM extends MapKeyType>(
+  new: <K, V, KM extends MapSetKeyType>(
     iterable: Iterable<readonly [K, V]>,
     toKey: (a: K) => KM,
     fromKey: (k: KM) => K,
@@ -215,15 +301,42 @@ export const IMapMapped = {
    * @param a The first IMapMapped instance.
    * @param b The second IMapMapped instance.
    * @returns `true` if the maps are equal, `false` otherwise.
+   * @example
+   * ```typescript
+   * const toKey = (s: string) => s;
+   * const fromKey = (s: string) => s;
+   *
+   * const map1 = IMapMapped.new<string, number, string>([["a", 1], ["b", 2]], toKey, fromKey);
+   * const map2 = IMapMapped.new<string, number, string>([["a", 1], ["b", 2]], toKey, fromKey);
+   * const map3 = IMapMapped.new<string, number, string>([["a", 1], ["c", 3]], toKey, fromKey);
+   * const map4 = IMapMapped.new<string, number, string>([["a", 1], ["b", 99]], toKey, fromKey);
+   *
+   * console.log(IMapMapped.equal(map1, map2)); // Output: true
+   * console.log(IMapMapped.equal(map1, map3)); // Output: false (different keys/values)
+   * console.log(IMapMapped.equal(map1, map4)); // Output: false (different value for key "b")
+   *
+   * // Example with custom key type
+   * type MyObjKey = { id: number };
+   * const toObjKey = (k: MyObjKey): string => `id_${k.id}`;
+   * const fromObjKey = (s: string): MyObjKey => ({ id: Number(s.substring(3)) });
+   *
+   * const mapObj1 = IMapMapped.new<MyObjKey, string, string>(
+   *   [[{ id: 1 }, "val1"]],
+   *   toObjKey,
+   *   fromObjKey
+   * );
+   * const mapObj2 = IMapMapped.new<MyObjKey, string, string>(
+   *   [[{ id: 1 }, "val1"]],
+   *   toObjKey,
+   *   fromObjKey
+   * );
+   * console.log(IMapMapped.equal(mapObj1, mapObj2)); // Output: true
+   * ```
    */
-  equal: <K, V, KM extends MapKeyType>(
+  equal: <K, V, KM extends MapSetKeyType>(
     a: IMapMapped<K, V, KM>,
     b: IMapMapped<K, V, KM>,
-  ): boolean => {
-    if (a.size !== b.size) return false;
-
-    return a.every((v, k) => b.get(k) === v);
-  },
+  ): boolean => a.size === b.size && a.every((v, k) => b.get(k) === v),
 };
 
 /**
@@ -234,27 +347,31 @@ export const IMapMapped = {
  * @implements IMapMapped
  * @implements Iterable
  */
-class IMapMappedClass<K, V, KM extends MapKeyType>
+class IMapMappedClass<K, V, KM extends MapSetKeyType>
   implements IMapMapped<K, V, KM>, Iterable<readonly [K, V]>
 {
   readonly #map: ReadonlyMap<KM, V>;
   readonly #toKey: (a: K) => KM;
   readonly #fromKey: (k: KM) => K;
+  readonly #showNotFoundMessage: boolean;
 
   /**
    * Constructs an IMapMappedClass instance.
    * @param iterable An iterable of key-value pairs.
    * @param toKey A function to convert `K` to `KM`.
    * @param fromKey A function to convert `KM` to `K`.
+   * @param showNotFoundMessage A flag to control not found messages.
    */
   constructor(
     iterable: Iterable<readonly [K, V]>,
     toKey: (a: K) => KM,
     fromKey: (k: KM) => K,
+    showNotFoundMessage: boolean = false,
   ) {
     this.#map = new Map(Array.from(iterable, ([k, v]) => [toKey(k), v]));
     this.#toKey = toKey;
     this.#fromKey = fromKey;
+    this.#showNotFoundMessage = showNotFoundMessage;
   }
 
   /** @inheritdoc */
@@ -268,8 +385,10 @@ class IMapMappedClass<K, V, KM extends MapKeyType>
   }
 
   /** @inheritdoc */
-  get(key: K): V | undefined {
-    return this.#map.get(this.#toKey(key));
+  get(key: K): Optional<V> {
+    if (!this.has(key)) return Optional.none;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return Optional.some(this.#map.get(this.#toKey(key))!);
   }
 
   /** @inheritdoc */
@@ -299,7 +418,9 @@ class IMapMappedClass<K, V, KM extends MapKeyType>
   /** @inheritdoc */
   delete(key: K): IMapMapped<K, V, KM> {
     if (!this.has(key)) {
-      console.warn(`IMapMapped.delete: key not found: ${this.#toKey(key)}`);
+      if (this.#showNotFoundMessage) {
+        console.warn(`IMapMapped.delete: key not found: ${this.#toKey(key)}`);
+      }
       return this;
     }
     const keyMapped = this.#toKey(key);
@@ -341,8 +462,10 @@ class IMapMappedClass<K, V, KM extends MapKeyType>
   update(key: K, updater: (value: V) => V): IMapMapped<K, V, KM> {
     const curr = this.get(key);
 
-    if (!this.has(key) || curr === undefined) {
-      console.error(`IMapMapped.update: key not found: ${this.#toKey(key)}`);
+    if (Optional.isNone(curr)) {
+      if (this.#showNotFoundMessage) {
+        console.warn(`IMapMapped.update: key not found: ${this.#toKey(key)}`);
+      }
       return this;
     }
 
@@ -354,7 +477,7 @@ class IMapMappedClass<K, V, KM extends MapKeyType>
         (keyValue) =>
           pipe(keyValue)
             .map(([km, v]) =>
-              tp(km, Object.is(km, keyMapped) ? updater(curr) : v),
+              tp(km, Object.is(km, keyMapped) ? updater(curr.value) : v),
             )
             .map(([km, v]) => tp(this.#fromKey(km), v)).value,
       ),
@@ -389,13 +512,16 @@ class IMapMappedClass<K, V, KM extends MapKeyType>
           const curr = mut_result.get(key);
 
           if (!mut_result.has(key) || curr === undefined) {
-            console.warn(
-              `IMapMapped.withMutations::update: key not found: ${key}`,
-            );
+            if (this.#showNotFoundMessage) {
+              console.warn(
+                `IMapMapped.withMutations::update: key not found: ${key}`,
+              );
+            }
             break;
           }
 
           mut_result.set(key, action.updater(curr));
+
           break;
         }
       }

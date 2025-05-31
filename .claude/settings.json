@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(mkdir *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(touch *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(open *)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run test)",
+      "Bash(npm run type-check)"
+    ],
+    "deny": []
+  }
+}

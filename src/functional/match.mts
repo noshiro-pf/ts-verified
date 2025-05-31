@@ -8,64 +8,45 @@ import { keyIsIn } from '../guard/index.mjs';
  * @template T The object type to check.
  * @template ExpectedKeys The union of string literal types representing the allowed keys.
  */
-type StrictPropertyCheck<T, ExpectedKeys extends string> =
+type StrictPropertyCheck<T, ExpectedKeys extends PropertyKey> =
   RelaxedExclude<keyof T, ExpectedKeys> extends never ? T : never;
 
 /**
- * A strict version of `match` that ensures the `cases` object only contains keys
- * present in the `Case` union type.
- * It returns the value corresponding to the `target` case.
+ * @internal
+ * Helper type to check if all cases in `Case` union are fully covered by keys in `R`.
+ * This checks bidirectional coverage: all Case members are in R, and no extra keys.
  * @template Case A union of string literal types representing the possible cases.
- * @template R A record where keys are from `Case` and values are of any type.
- * @param target The specific case to match.
- * @param cases An object mapping cases to their corresponding values.
- *              This object must strictly conform to the `Case` type for its keys.
- * @returns The value associated with the `target` case in the `cases` object.
+ * @template R A record type.
  */
-export function strictMatch<
-  const Case extends string,
-  const R extends ReadonlyRecord<Case, unknown>,
->(
-  target: Case,
-  cases: StrictPropertyCheck<R, Case>,
-): R[Case];
+type AllCasesCovered<Case extends PropertyKey, R> =
+  TypeEq<Case, keyof R> extends true ? true : false;
+
+expectType<AllCasesCovered<'a' | 'b', { a: 1; b: 2 }>, true>('=');
+expectType<AllCasesCovered<'a' | 'b' | 'c', { a: 1; b: 2 }>, false>('=');
+expectType<AllCasesCovered<'a' | 'b', { a: 1; b: 2; c: 3 }>, false>('=');
+expectType<AllCasesCovered<string, Record<string, string>>, true>('=');
 
 /**
- * A strict version of `match` that ensures the `cases` object only contains keys
- * present in the `Case` union type, with a default value for unmatched cases.
- * It returns the value corresponding to the `target` case, or the default value if not found.
- * @template Case A union of string literal types representing the possible cases.
- * @template R A record where keys are a subset of `Case` and values are of any type.
- * @template D The type of the default value.
- * @param target The specific case to match.
- * @param cases An object mapping cases to their corresponding values.
- * @param defaultValue The value to return if the `target` case is not found in `cases`.
- * @returns The value associated with the `target` case in the `cases` object, or `defaultValue`.
+ * @internal
+ * Helper type to check if Case is a literal union type and all cases are covered.
+ * @template Case A union of string literal types.
+ * @template R A record type.
  */
-export function strictMatch<
-  const Case extends string,
-  const R extends ReadonlyRecord<string, unknown>,
-  const D,
->(
-  target: Case,
-  cases: R,
-  defaultValue: D,
-): R[Case] | D;
+type IsLiteralUnionFullyCovered<
+  Case extends PropertyKey,
+  R extends UnknownRecord,
+> = IsLiteralType<Case> extends true ? AllCasesCovered<Case, R> : false;
 
-export function strictMatch<
-  const Case extends string,
-  const R extends ReadonlyRecord<string, unknown>,
-  const D,
->(
-  target: Case,
-  cases: R,
-  defaultValue?: D,
-): R[Case] | D {
-  if (defaultValue !== undefined && !keyIsIn(target, cases)) {
-    return defaultValue;
-  }
-  return cases[target] as R[Case];
-}
+expectType<IsLiteralUnionFullyCovered<'a' | 'b', { a: 1; b: 2 }>, true>('=');
+expectType<IsLiteralUnionFullyCovered<'a' | 'b' | 'c', { a: 1; b: 2 }>, false>(
+  '=',
+);
+expectType<IsLiteralUnionFullyCovered<'a' | 'b', { a: 1; b: 2; c: 3 }>, false>(
+  '=',
+);
+expectType<IsLiteralUnionFullyCovered<string, Record<string, string>>, false>(
+  '=',
+);
 
 /**
  * @internal
@@ -81,6 +62,64 @@ type IsLiteralType<T extends PropertyKey> = string extends T
     : symbol extends T
       ? false
       : true;
+
+expectType<IsLiteralType<'a' | 'b'>, true>('=');
+expectType<IsLiteralType<'a'>, true>('=');
+expectType<IsLiteralType<string>, false>('=');
+expectType<IsLiteralType<number>, false>('=');
+expectType<IsLiteralType<1>, true>('=');
+expectType<IsLiteralType<number | 'aa'>, false>('=');
+expectType<IsLiteralType<'aa' | 32>, true>('=');
+
+/**
+ * A strict version of `match` that ensures the `cases` object only contains keys
+ * present in the `Case` union type.
+ * This overload is available when Case is a literal union and all cases are covered.
+ * @template Case A union of string literal types representing the possible cases.
+ * @template R A record where keys are from `Case` and values are of any type.
+ * @param target The specific case to match.
+ * @param cases An object mapping cases to their corresponding values.
+ *              This object must strictly conform to the `Case` type for its keys.
+ * @returns The value associated with the `target` case in the `cases` object.
+ */
+export function strictMatch<
+  const Case extends string,
+  const R extends ReadonlyRecord<Case, unknown>,
+>(target: Case, cases: StrictPropertyCheck<R, Case>): R[Case];
+
+/**
+ * A strict version of `match` that ensures the `cases` object only contains keys
+ * present in the `Case` union type, with a required default value for unmatched cases.
+ * This overload is available when Case is not a literal union or not all cases are covered.
+ * @template Case A union of string literal types representing the possible cases.
+ * @template R A record where keys are a subset of `Case` and values are of any type.
+ * @template D The type of the default value.
+ * @param target The specific case to match.
+ * @param cases An object mapping cases to their corresponding values.
+ * @param defaultValue The value to return if the `target` case is not found in `cases`.
+ * @returns The value associated with the `target` case in the `cases` object, or `defaultValue`.
+ */
+export function strictMatch<
+  const Case extends string,
+  const R extends UnknownRecord,
+  const D,
+>(
+  target: Case,
+  cases: StrictPropertyCheck<R, Case>,
+  defaultValue: IsLiteralUnionFullyCovered<Case, R> extends true ? never : D,
+): ValueOf<R> | D;
+
+export function strictMatch<
+  const Case extends string,
+  const R extends UnknownRecord,
+  const D,
+>(target: Case, cases: R, defaultValue?: D): ValueOf<R> | D {
+  if (!keyIsIn(target, cases)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return defaultValue!;
+  }
+  return cases[target];
+}
 
 /**
  * Matches a `target` case against a set of `cases` and returns the corresponding value.
@@ -134,8 +173,3 @@ export function match<
 >(target: Case, cases: ReadonlyRecord<CaseSub, V>): V | undefined {
   return keyIsIn(target, cases) ? cases[target] : undefined;
 }
-
-expectType<IsLiteralType<'aaa'>, true>('=');
-expectType<IsLiteralType<33>, true>('=');
-expectType<IsLiteralType<number | 'aa'>, false>('=');
-expectType<IsLiteralType<'aa' | 32>, true>('=');

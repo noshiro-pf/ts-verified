@@ -3,21 +3,6 @@ import { keyIsIn } from '../guard/index.mjs';
 
 /**
  * @internal
- * Helper type to determine if a given PropertyKey `T` is a literal type (e.g., 'a', 1)
- * or a general type (e.g., string, number).
- * @template T The PropertyKey type to check.
- * @returns `true` if `T` is a literal type, `false` otherwise.
- */
-type IsLiteralType<T extends PropertyKey> = string extends T
-  ? false
-  : number extends T
-    ? false
-    : symbol extends T
-      ? false
-      : true;
-
-/**
- * @internal
  * Helper type to ensure that an object `T` only contains keys specified in `ExpectedKeys`.
  * If `T` has any keys not in `ExpectedKeys`, this type resolves to `never`.
  * @template T The object type to check.
@@ -44,6 +29,21 @@ export const strictMatch = <
   target: Case,
   cases: StrictPropertyCheck<R, Case>,
 ): R[Case] => cases[target];
+
+/**
+ * @internal
+ * Helper type to determine if a given PropertyKey `T` is a literal type (e.g., 'a', 1)
+ * or a general type (e.g., string, number).
+ * @template T The PropertyKey type to check.
+ * @returns `true` if `T` is a literal type, `false` otherwise.
+ */
+type IsLiteralType<T extends PropertyKey> = string extends T
+  ? false
+  : number extends T
+    ? false
+    : symbol extends T
+      ? false
+      : true;
 
 /**
  * Matches a `target` case against a set of `cases` and returns the corresponding value.

@@ -2,6 +2,14 @@
  * Converts an unknown value to a number. Alias for the `Number` constructor.
  * @param n The value to convert.
  * @returns The numeric representation of `n`.
+ * @example
+ * ```typescript
+ * Num.from('123'); // 123
+ * Num.from('123.45'); // 123.45
+ * Num.from(true); // 1
+ * Num.from(false); // 0
+ * Num.from('hello'); // NaN
+ * ```
  */
 const from: (n: unknown) => number = Number;
 
@@ -10,6 +18,14 @@ const from: (n: unknown) => number = Number;
  * @param lowerBound The lower bound (inclusive).
  * @param upperBound The upper bound (exclusive).
  * @returns A function that takes a number `x` and returns `true` if `x` is in the range, `false` otherwise.
+ * @example
+ * ```typescript
+ * const isInRange0to10 = Num.isInRange(0, 10);
+ * isInRange0to10(5); // true
+ * isInRange0to10(0); // true (inclusive lower bound)
+ * isInRange0to10(10); // false (exclusive upper bound)
+ * isInRange0to10(-1); // false
+ * ```
  */
 const isInRange =
   (lowerBound: number, upperBound: number) =>
@@ -201,6 +217,20 @@ const increment = <N extends SmallUint>(n: N): Increment<N> =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
   (n + 1) as Increment<N>;
 
+/**
+ * Decrements a positive small integer by 1 at the type level.
+ * @template N A positive small integer type (1-40).
+ * @param n The positive small integer to decrement.
+ * @returns The decremented value with the correct type.
+ * @example
+ * ```typescript
+ * const three = 3 as 3;
+ * const two = Num.decrement(three); // type is 2, value is 2
+ * 
+ * const one = 1 as 1;
+ * const zero = Num.decrement(one); // type is 0, value is 0
+ * ```
+ */
 const decrement = <N extends PositiveSmallInt>(n: N): Decrement<N> =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
   (n - 1) as Decrement<N>;

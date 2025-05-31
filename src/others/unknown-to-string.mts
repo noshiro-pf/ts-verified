@@ -7,6 +7,21 @@ import { isNonNullish } from '../guard/index.mjs';
  * @param options - Optional parameters.
  * @param options.prettyPrintObject - If true, objects will be stringified with an indent of 2 spaces. Otherwise, they will be stringified without indentation.
  * @returns The string representation of the unknown value.
+ * @example
+ * ```typescript
+ * unknownToString('hello'); // 'hello'
+ * unknownToString(123); // '123'
+ * unknownToString(true); // 'true'
+ * unknownToString(null); // 'null'
+ * unknownToString(undefined); // 'undefined'
+ * unknownToString(Symbol('test')); // 'Symbol(test)'
+ * unknownToString(() => {}); // '() => {}'
+ * unknownToString({ a: 1, b: 2 }); // '{"a":1,"b":2}'
+ * unknownToString({ a: 1 }, { prettyPrintObject: true }); 
+ * // {
+ * //   "a": 1
+ * // }
+ * ```
  */
 export const unknownToString = (
   value: unknown,

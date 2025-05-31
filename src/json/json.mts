@@ -12,6 +12,18 @@ import { unknownToString } from '../others/unknown-to-string.mjs';
  *   called for each member of the object. If a member contains nested objects,
  *   the nested objects are transformed before the parent object is.
  * @returns A `Result` containing the parsed `JsonValue` on success, or an error message string on failure.
+ * @example
+ * ```typescript
+ * const result = Json.parse('{"name": "John", "age": 30}');
+ * if (Result.isOk(result)) {
+ *   console.log(result.value); // { name: 'John', age: 30 }
+ * }
+ * 
+ * const invalid = Json.parse('invalid json');
+ * if (Result.isErr(invalid)) {
+ *   console.log(invalid.value); // SyntaxError message
+ * }
+ * ```
  */
 const parse = (
   text: string,
@@ -38,6 +50,32 @@ const parse = (
  * @param space Adds indentation, white space, and line break characters to the
  *   return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
  * @returns A `Result` containing the JSON string on success, or an error message string on failure.
+ * @example
+ * ```typescript
+ * const obj = { name: 'John', age: 30 };
+ * const result = Json.stringify(obj);
+ * if (Result.isOk(result)) {
+ *   console.log(result.value); // '{"name":"John","age":30}'
+ * }
+ * 
+ * // With formatting
+ * const formatted = Json.stringify(obj, null, 2);
+ * if (Result.isOk(formatted)) {
+ *   console.log(formatted.value);
+ *   // {
+ *   //   "name": "John",
+ *   //   "age": 30
+ *   // }
+ * }
+ * 
+ * // Circular reference error
+ * const circular: any = { a: 1 };
+ * circular.self = circular;
+ * const error = Json.stringify(circular);
+ * if (Result.isErr(error)) {
+ *   console.log(error.value); // TypeError message
+ * }
+ * ```
  */
 const stringify = (
   value: unknown,

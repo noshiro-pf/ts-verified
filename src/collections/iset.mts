@@ -189,6 +189,23 @@ export const ISet = {
    * @template K The type of the elements.
    * @param iterable An iterable of elements.
    * @returns A new ISet instance.
+   * @example
+   * ```typescript
+   * // Create from array
+   * const set1 = ISet.new([1, 2, 3, 3]); // ISet with elements: 1, 2, 3
+   * 
+   * // Create from another Set
+   * const set2 = ISet.new(new Set(['a', 'b', 'c']));
+   * 
+   * // Create empty set
+   * const emptySet = ISet.new<string>([]);
+   * 
+   * // Chain operations
+   * const result = ISet.new([1, 2, 3])
+   *   .add(4)
+   *   .delete(2)
+   *   .filter(x => x > 1); // ISet with elements: 3, 4
+   * ```
    */
   new: <K extends MapSetKeyType>(iterable: Iterable<K>): ISet<K> =>
     new ISetClass<K>(iterable),

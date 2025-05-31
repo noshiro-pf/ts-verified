@@ -22,13 +22,50 @@ type StrictPropertyCheck<T, ExpectedKeys extends string> =
  *              This object must strictly conform to the `Case` type for its keys.
  * @returns The value associated with the `target` case in the `cases` object.
  */
-export const strictMatch = <
+export function strictMatch<
   const Case extends string,
   const R extends ReadonlyRecord<Case, unknown>,
 >(
   target: Case,
   cases: StrictPropertyCheck<R, Case>,
-): R[Case] => cases[target];
+): R[Case];
+
+/**
+ * A strict version of `match` that ensures the `cases` object only contains keys
+ * present in the `Case` union type, with a default value for unmatched cases.
+ * It returns the value corresponding to the `target` case, or the default value if not found.
+ * @template Case A union of string literal types representing the possible cases.
+ * @template R A record where keys are a subset of `Case` and values are of any type.
+ * @template D The type of the default value.
+ * @param target The specific case to match.
+ * @param cases An object mapping cases to their corresponding values.
+ * @param defaultValue The value to return if the `target` case is not found in `cases`.
+ * @returns The value associated with the `target` case in the `cases` object, or `defaultValue`.
+ */
+export function strictMatch<
+  const Case extends string,
+  const R extends ReadonlyRecord<string, unknown>,
+  const D,
+>(
+  target: Case,
+  cases: R,
+  defaultValue: D,
+): R[Case] | D;
+
+export function strictMatch<
+  const Case extends string,
+  const R extends ReadonlyRecord<string, unknown>,
+  const D,
+>(
+  target: Case,
+  cases: R,
+  defaultValue?: D,
+): R[Case] | D {
+  if (defaultValue !== undefined && !keyIsIn(target, cases)) {
+    return defaultValue;
+  }
+  return cases[target] as R[Case];
+}
 
 /**
  * @internal

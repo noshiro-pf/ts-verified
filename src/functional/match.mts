@@ -81,8 +81,27 @@ expectType<IsLiteralType<'aa' | 32>, true>('=');
  * @param cases An object mapping cases to their corresponding values.
  *              This object must strictly conform to the `Case` type for its keys.
  * @returns The value associated with the `target` case in the `cases` object.
+ * @example
+ * ```typescript
+ * type Direction = 'north' | 'south' | 'east' | 'west';
+ * const direction: Direction = 'north';
+ *
+ * // All cases must be covered
+ * const result = match(direction, {
+ *   north: 0,
+ *   south: 180,
+ *   east: 90,
+ *   west: 270
+ * }); // result: number (0)
+ *
+ * // Type error: missing 'west' case
+ * // match(direction, { north: 0, south: 180, east: 90 });
+ *
+ * // Type error: extra 'up' case
+ * // match(direction, { north: 0, south: 180, east: 90, west: 270, up: 45 });
+ * ```
  */
-export function strictMatch<
+export function match<
   const Case extends string,
   const R extends ReadonlyRecord<Case, unknown>,
 >(target: Case, cases: StrictPropertyCheck<R, Case>): R[Case];
@@ -98,8 +117,27 @@ export function strictMatch<
  * @param cases An object mapping cases to their corresponding values.
  * @param defaultValue The value to return if the `target` case is not found in `cases`.
  * @returns The value associated with the `target` case in the `cases` object, or `defaultValue`.
+ * @example
+ * ```typescript
+ * type Direction = 'north' | 'south' | 'east' | 'west';
+ * const direction: Direction = 'north';
+ *
+ * // Partial cases with default
+ * const result = match(direction, {
+ *   north: 'N',
+ *   south: 'S'
+ * }, 'Unknown'); // result: 'N' | 'S' | 'Unknown'
+ *
+ * // With string type (not literal union)
+ * const key: string = getUserInput();
+ * const value = match(key, {
+ *   home: '/home',
+ *   about: '/about',
+ *   contact: '/contact'
+ * }, '/404'); // default is required for string type
+ * ```
  */
-export function strictMatch<
+export function match<
   const Case extends string,
   const R extends UnknownRecord,
   const D,
@@ -109,7 +147,7 @@ export function strictMatch<
   defaultValue: IsLiteralUnionFullyCovered<Case, R> extends true ? never : D,
 ): ValueOf<R> | D;
 
-export function strictMatch<
+export function match<
   const Case extends string,
   const R extends UnknownRecord,
   const D,
@@ -119,57 +157,4 @@ export function strictMatch<
     return defaultValue!;
   }
   return cases[target];
-}
-
-/**
- * Matches a `target` case against a set of `cases` and returns the corresponding value.
- * If the `target` case is a literal type, it's assumed to be present in `cases`,
- * and the return type is `V`. Otherwise, the return type is `V | undefined`
- * as the key might not be present.
- * @template Case The type of the target case (a PropertyKey).
- * @template V The type of the values in the `cases` object.
- * @param target The specific case to match.
- * @param cases An object mapping cases to their corresponding values.
- * @returns The value associated with the `target` case, or `undefined` if the
- *          `target` is not a literal type and not found in `cases`.
- */
-export function match<const Case extends PropertyKey, const V>(
-  target: Case,
-  cases: ReadonlyRecord<Case, V>,
-): IsLiteralType<Case> extends true ? V : V | undefined;
-
-/**
- * Matches a `target` case against a subset of `cases` and returns the corresponding value.
- * This overload is used when `cases` is a record with a subset of keys from `Case`.
- * It assumes the `target` will be one of the keys in `CaseSub`.
- * @template Case The general type of the target case (a PropertyKey).
- * @template V The type of the values in the `cases` object.
- * @template CaseSub A subtype of `Case`, representing the actual keys present in `cases`.
- * @param target The specific case to match.
- * @param cases An object mapping a subset of cases (`CaseSub`) to their corresponding values.
- * @returns The value associated with the `target` case.
- */
-export function match<
-  const Case extends PropertyKey,
-  const V,
-  const CaseSub extends Case,
->(target: Case, cases: ReadonlyRecord<CaseSub, V>): V;
-
-/**
- * Implementation of the `match` function.
- * It checks if the `target` key exists in the `cases` object.
- * If it exists, the corresponding value is returned; otherwise, `undefined` is returned.
- * @template Case The type of the target case (a PropertyKey).
- * @template V The type of the values in the `cases` object.
- * @template CaseSub A subtype of `Case`, representing the actual keys present in `cases`.
- * @param target The specific case to match.
- * @param cases An object mapping cases to their corresponding values.
- * @returns The value associated with the `target` case, or `undefined` if not found.
- */
-export function match<
-  const Case extends PropertyKey,
-  const V,
-  const CaseSub extends Case,
->(target: Case, cases: ReadonlyRecord<CaseSub, V>): V | undefined {
-  return keyIsIn(target, cases) ? cases[target] : undefined;
 }

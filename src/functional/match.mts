@@ -24,7 +24,7 @@ type StrictPropertyCheck<T, ExpectedKeys extends string> =
  */
 export const strictMatch = <
   const Case extends string,
-  const R extends Record<Case, unknown>,
+  const R extends ReadonlyRecord<Case, unknown>,
 >(
   target: Case,
   cases: StrictPropertyCheck<R, Case>,
@@ -59,7 +59,7 @@ type IsLiteralType<T extends PropertyKey> = string extends T
  */
 export function match<const Case extends PropertyKey, const V>(
   target: Case,
-  cases: Record<Case, V>,
+  cases: ReadonlyRecord<Case, V>,
 ): IsLiteralType<Case> extends true ? V : V | undefined;
 
 /**
@@ -77,7 +77,7 @@ export function match<
   const Case extends PropertyKey,
   const V,
   const CaseSub extends Case,
->(target: Case, cases: Record<CaseSub, V>): V;
+>(target: Case, cases: ReadonlyRecord<CaseSub, V>): V;
 
 /**
  * Implementation of the `match` function.
@@ -94,7 +94,7 @@ export function match<
   const Case extends PropertyKey,
   const V,
   const CaseSub extends Case,
->(target: Case, cases: Record<CaseSub, V>): V | undefined {
+>(target: Case, cases: ReadonlyRecord<CaseSub, V>): V | undefined {
   return keyIsIn(target, cases) ? cases[target] : undefined;
 }
 

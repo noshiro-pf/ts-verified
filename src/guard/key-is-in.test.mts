@@ -2,7 +2,7 @@ import { keyIsIn } from './key-is-in.mjs';
 
 const f = <Key extends string, V, KeySub extends Key>(
   key: Key,
-  obj: Record<KeySub, V>,
+  obj: ReadonlyRecord<KeySub, V>,
 ): V | undefined => (keyIsIn(key, obj) ? obj[key] : undefined);
 
 describe('keyIsIn', () => {

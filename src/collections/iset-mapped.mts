@@ -346,7 +346,7 @@ export const ISetMapped = {
   diff: <K, KM extends MapSetKeyType>(
     oldSet: ISetMapped<K, KM>,
     newSet: ISetMapped<K, KM>,
-  ): Record<'added' | 'deleted', ISetMapped<K, KM>> => ({
+  ): ReadonlyRecord<'added' | 'deleted', ISetMapped<K, KM>> => ({
     deleted: oldSet.subtract(newSet),
     added: newSet.subtract(oldSet),
   }),

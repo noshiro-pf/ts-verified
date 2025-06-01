@@ -10,5 +10,7 @@ export default {
     'list-indent': false, // prefer Prettier's setting
     'code-block-style': false, // prefer Prettier's setting
     MD041: false,
+    indentation: false, // prefer Prettier's setting
+    'ul-indent': false, // prefer Prettier's setting
   },
 };

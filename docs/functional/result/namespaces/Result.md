@@ -102,7 +102,7 @@ Defined in: [functional/result.mts:22](https://github.com/noshiro-pf/ts-verified
 
 ### err()
 
-> **err**\<`E`\>(`value`): `Readonly`\<\{ `type`: _typeof_ `ErrTypeSymbol`; `value`: `E`; \}\>
+> **err**\<`E`\>(`value`): [`Err`](#err)\<`E`\>
 
 Defined in: [functional/result.mts:35](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/result.mts#L35)
 
@@ -120,7 +120,7 @@ Defined in: [functional/result.mts:35](https://github.com/noshiro-pf/ts-verified
 
 #### Returns
 
-`Readonly`\<\{ `type`: _typeof_ `ErrTypeSymbol`; `value`: `E`; \}\>
+[`Err`](#err)\<`E`\>
 
 ---
 
@@ -336,7 +336,7 @@ Defined in: [functional/result.mts:64](https://github.com/noshiro-pf/ts-verified
 
 ### ok()
 
-> **ok**\<`S`\>(`value`): `Readonly`\<\{ `type`: _typeof_ `OkTypeSymbol`; `value`: `S`; \}\>
+> **ok**\<`S`\>(`value`): [`Ok`](#ok)\<`S`\>
 
 Defined in: [functional/result.mts:30](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/result.mts#L30)
 
@@ -354,7 +354,7 @@ Defined in: [functional/result.mts:30](https://github.com/noshiro-pf/ts-verified
 
 #### Returns
 
-`Readonly`\<\{ `type`: _typeof_ `OkTypeSymbol`; `value`: `S`; \}\>
+[`Ok`](#ok)\<`S`\>
 
 ---
 

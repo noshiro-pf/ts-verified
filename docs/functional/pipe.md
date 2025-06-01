@@ -10,7 +10,7 @@
 
 ### pipe()
 
-> **pipe**\<`A`\>(`a`): `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
+> **pipe**\<`A`\>(`a`): `Pipe`\<`A`\>
 
 Defined in: [functional/pipe.mts:3](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/pipe.mts#L3)
 
@@ -28,4 +28,4 @@ Defined in: [functional/pipe.mts:3](https://github.com/noshiro-pf/ts-verified/bl
 
 #### Returns
 
-`Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `B`; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `chainOptional`: \<`B`\>(`fn`) => `Readonly`\<\{ `chain`: ...; `chainOptional`: ...; `value`: ...; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `undefined` \| `B`; \}\>; `value`: `A`; \}\>
+`Pipe`\<`A`\>

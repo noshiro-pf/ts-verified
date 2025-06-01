@@ -1792,11 +1792,11 @@ readonly \[`B`, `B`\]
 
 ##### seq()
 
-> **seq**: \{\<`N`\>(`len`): `SeqImpl`\<`MakeTupleImpl`\<`unknown`, `` `${N}` ``, \[\]\>\>; (`len`): readonly \[`number`, `number`\]; (`len`): readonly `number`[]; \}
+> **seq**: \{\<`N`\>(`len`): `Seq`\<`N`\>; (`len`): readonly \[`number`, `number`\]; (`len`): readonly `number`[]; \}
 
 ###### Call Signature
 
-> \<`N`\>(`len`): `SeqImpl`\<`MakeTupleImpl`\<`unknown`, `` `${N}` ``, \[\]\>\>
+> \<`N`\>(`len`): `Seq`\<`N`\>
 
 ###### Type Parameters
 
@@ -1812,7 +1812,7 @@ readonly \[`B`, `B`\]
 
 ###### Returns
 
-`SeqImpl`\<`MakeTupleImpl`\<`unknown`, `` `${N}` ``, \[\]\>\>
+`Seq`\<`N`\>
 
 ###### Call Signature
 

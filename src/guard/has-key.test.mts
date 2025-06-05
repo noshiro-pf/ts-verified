@@ -1,0 +1,213 @@
+import { expectType } from '../expect-type.mjs';
+import { hasKey, type HasKeyReturnType } from './has-key.mjs';
+
+{
+  expectType<
+    HasKeyReturnType<Readonly<{ a: 0 }> | Readonly<{ b: 1 }>, 'a'>,
+    Readonly<{ a: 0 }>
+  >('=');
+
+  expectType<
+    HasKeyReturnType<Readonly<{ a: 0 }> | Readonly<{ b: 1 }>, 'b'>,
+    Readonly<{ b: 1 }>
+  >('=');
+
+  expectType<
+    HasKeyReturnType<Readonly<{ a: 0 }> | Readonly<{ b: 1 }>, 'd'>,
+    never
+  >('=');
+
+  expectType<
+    HasKeyReturnType<
+      | Readonly<{ a: 0 }>
+      | Readonly<{ a: 1; b: 1 }>
+      | Readonly<{ b: 2 }>
+      | Readonly<{ c: 3 }>,
+      'a'
+    >,
+    Readonly<{ a: 0 }> | Readonly<{ a: 1; b: 1 }>
+  >('=');
+
+  expectType<
+    HasKeyReturnType<
+      | Readonly<{ a: 0 }>
+      | Readonly<{ a: 1; b: 1 }>
+      | Readonly<{ b: 2 }>
+      | Readonly<{ c: 3 }>,
+      'b'
+    >,
+    Readonly<{ a: 1; b: 1 }> | Readonly<{ b: 2 }>
+  >('=');
+
+  expectType<
+    HasKeyReturnType<
+      | MutableRecord<string, number>
+      | Readonly<{ a: 0 }>
+      | Readonly<{ a: 1; b: 1 }>
+      | Readonly<{ b: 2 }>,
+      'a'
+    >,
+    | Readonly<{ a: 0 }>
+    | Readonly<{ a: 1; b: 1 }>
+    | (MutableRecord<'a', number> & MutableRecord<string, number>)
+  >('=');
+
+  expectType<
+    HasKeyReturnType<MutableRecord<string, unknown>, 'a'>,
+    MutableRecord<'a', unknown> & MutableRecord<string, unknown>
+  >('=');
+}
+
+{
+  type R = Readonly<{ a: 0 }> | Readonly<{ b: 1 }>;
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const obj: R = { a: 0 } as R;
+
+  if (hasKey(obj, 'a')) {
+    expectType<typeof obj.a, 0>('=');
+    expectType<typeof obj, Readonly<{ a: 0 }>>('=');
+  }
+
+  if (hasKey(obj, 'c')) {
+    expectType<typeof obj, never>('=');
+  }
+}
+
+{
+  type R =
+    | Readonly<{ a: 0 }>
+    | Readonly<{ a: 1; b: 1 }>
+    | Readonly<{ b: 2 }>
+    | Readonly<{ c: 3 }>;
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const obj: R = { a: 0 } as R;
+
+  if (hasKey(obj, 'a') && hasKey(obj, 'b')) {
+    expectType<typeof obj.a, 1>('=');
+    expectType<typeof obj.b, 1>('=');
+    expectType<typeof obj, Readonly<{ a: 1; b: 1 }>>('=');
+  }
+}
+
+{
+  type R =
+    | MutableRecord<string, number>
+    | Readonly<{ a: 0 }>
+    | Readonly<{ a: 1; b: 1 }>
+    | Readonly<{ b: 2 }>;
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const obj: R = { a: 0 } as R;
+
+  expectType<R, MutableRecord<string, number>>('!=');
+
+  if (hasKey(obj, 'a')) {
+    expectType<typeof obj.a, number>('=');
+
+    expectType<
+      typeof obj,
+      | Readonly<{ a: 0 }>
+      | Readonly<{ a: 1; b: 1 }>
+      | (MutableRecord<'a', number> & MutableRecord<string, number>)
+    >('=');
+  }
+
+  if (hasKey(obj, 'a') && hasKey(obj, 'b')) {
+    expectType<typeof obj.a, number>('=');
+    expectType<typeof obj.b, number>('=');
+    expectType<
+      typeof obj,
+      | Readonly<{ a: 1; b: 1 }>
+      | (MutableRecord<'a', number> &
+          MutableRecord<'b', number> &
+          MutableRecord<string, number>)
+    >('=');
+  }
+}
+
+{
+  const o: MutableRecord<string, unknown> = { a: 0, b: 1 };
+
+  if (hasKey(o, 'a')) {
+    expectType<typeof o.a, unknown>('=');
+    expectType<
+      typeof o,
+      MutableRecord<'a', unknown> & MutableRecord<string, unknown>
+    >('=');
+  }
+
+  if (hasKey(o, 'c')) {
+    expectType<typeof o.c, unknown>('=');
+    expectType<
+      typeof o,
+      MutableRecord<'c', unknown> & MutableRecord<string, unknown>
+    >('=');
+  }
+
+  if (hasKey(o, 'a') && hasKey(o, 'b')) {
+    expectType<typeof o.a, unknown>('=');
+    expectType<typeof o.b, unknown>('=');
+    expectType<
+      typeof o,
+      MutableRecord<'a', unknown> &
+        MutableRecord<'b', unknown> &
+        MutableRecord<string, unknown>
+    >('=');
+  }
+
+  {
+    /**
+     * @note Simply using `R & Record<K, R[K]>` as the return type of hasKey may seem good enough
+     * since it works as intended for cases like `obj: Record<string, unknown>`.
+     * However, for finite-sized types like `obj: { a: 0 } | { b: 1 }`,
+     * filtering with `hasKey(obj, 'a')` causes `obj.a` to widen to `unknown` instead of `0`,
+     * which doesn't work well.
+     */
+
+    const hasOwnNaive = <R extends UnknownRecord, K extends string>(
+      obj: R,
+      key: K,
+    ): obj is R & Record<K, R[K]> => hasKey(obj, key);
+
+    {
+      type O =
+        | Readonly<{ a: 0 }>
+        | Readonly<{ a: 1; b: 1 }>
+        | Readonly<{ b: 2 }>
+        | Record<string, number>;
+
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const o2 = { b: 2 } as O;
+
+      if (hasOwnNaive(o2, 'a')) {
+        expectType<typeof o2.a, unknown>('=');
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      if ('a' in o2) {
+        expectType<typeof o2.a, number>('=');
+      }
+    }
+
+    {
+      type O =
+        | Readonly<{ a: 0 }>
+        | Readonly<{ a: 1; b: 1 }>
+        | Readonly<{ b: 2 }>;
+
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const o2 = { b: 2 } as O;
+
+      if (hasOwnNaive(o2, 'a')) {
+        expectType<typeof o2.a, unknown>('=');
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      if ('a' in o2) {
+        expectType<typeof o2.a, 0 | 1>('=');
+      }
+    }
+  }
+}

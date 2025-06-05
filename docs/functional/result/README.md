@@ -14,9 +14,11 @@
 
 ### Result\<S, E\>
 
-> **Result**\<`S`, `E`\> = `Err_`\<`E`\> \| `Ok_`\<`S`\>
+> **Result**\<`S`, `E`\> = `Ok_`\<`S`\> \| `Err_`\<`E`\>
 
-Defined in: [functional/result.mts:14](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/result.mts#L14)
+Defined in: [src/functional/result.mts:39](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/result.mts#L39)
+
+Represents a value that can either be a success (`Ok`) or an error (`Err`).
 
 #### Type Parameters
 
@@ -24,6 +26,10 @@ Defined in: [functional/result.mts:14](https://github.com/noshiro-pf/ts-verified
 
 `S`
 
+The type of the success value.
+
 ##### E
 
 `E`
+
+The type of the error value.

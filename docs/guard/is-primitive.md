@@ -10,16 +10,39 @@
 
 ### isPrimitive()
 
-> **isPrimitive**(`a`): `boolean`
+> **isPrimitive**(`u`): `u is Primitive`
 
-Defined in: [guard/is-primitive.mts:1](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-primitive.mts#L1)
+Defined in: [src/guard/is-primitive.mts:23](https://github.com/noshiro-pf/ts-verified/blob/main/src/guard/is-primitive.mts#L23)
+
+Checks if a value is a primitive type.
+Primitive types are: string, number, boolean, undefined, symbol, bigint.
+Note: `null` is considered an object by `typeof`, so this function will return `false` for `null`.
 
 #### Parameters
 
-##### a
+##### u
 
 `unknown`
 
+The value to check.
+
 #### Returns
 
-`boolean`
+`u is Primitive`
+
+`true` if `u` is a primitive type, `false` otherwise.
+
+#### Example
+
+```typescript
+isPrimitive('hello'); // true
+isPrimitive(42); // true
+isPrimitive(true); // true
+isPrimitive(undefined); // true
+isPrimitive(Symbol('test')); // true
+isPrimitive(123n); // true
+isPrimitive(null); // false (null is object)
+isPrimitive({}); // false
+isPrimitive([]); // false
+isPrimitive(() => {}); // false
+```

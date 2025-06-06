@@ -24,7 +24,7 @@ Represents an [Optional](../README.md#optional) with an unknown value type.
 
 ### NarrowToNone\<O\>
 
-> **NarrowToNone**\<`O`\> = `O` _extends_ [`Some`](#some)\<`unknown`\> ? `never` : `O`
+> **NarrowToNone**\<`O`\> = `O` _extends_ [`None`](#none) ? `O` : `never`
 
 Defined in: [src/functional/optional.mts:92](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L92)
 
@@ -111,7 +111,7 @@ The [Optional.Base](#base) type to unwrap.
 
 > `const` **none**: [`None`](#none)
 
-Defined in: [src/functional/optional.mts:126](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L126)
+Defined in: [src/functional/optional.mts:125](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L125)
 
 The singleton instance representing [Optional.None](#none) (an empty Optional).
 
@@ -129,34 +129,21 @@ console.log(Optional.unwrapOr(emptyValue, 'default')); // "default"
 
 ### expectToBe()
 
-> **expectToBe**\<`O`\>(`message`): (`optional`) => [`Unwrap`](#unwrap)\<`O`\>
+#### Call Signature
 
-Defined in: [src/functional/optional.mts:341](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L341)
+> **expectToBe**\<`O`\>(`optional`, `message`): [`Unwrap`](#unwrap)\<`O`\>
 
-Returns a function that unwraps an `Optional`, returning the contained value.
-Throws an error with the provided message if the `Optional` is `Optional.None`.
+Defined in: [src/functional/optional.mts:468](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L468)
 
-#### Type Parameters
+Unwraps an `Optional`, returning the contained value or throwing an error with the provided message.
 
-##### O
+##### Type Parameters
+
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The `Optional.Base` type to unwrap.
-
-#### Parameters
-
-##### message
-
-`string`
-
-The error message to throw if the `Optional` is `Optional.None`.
-
-#### Returns
-
-A function that takes an `Optional` and returns its contained value or throws.
-
-> (`optional`): [`Unwrap`](#unwrap)\<`O`\>
 
 ##### Parameters
 
@@ -164,122 +151,256 @@ A function that takes an `Optional` and returns its contained value or throws.
 
 `O`
 
+The `Optional` to unwrap.
+
+###### message
+
+`string`
+
+The error message to throw if the `Optional` is `Optional.None`.
+
 ##### Returns
 
 [`Unwrap`](#unwrap)\<`O`\>
 
-#### Example
+The contained value if `Optional.Some`.
+
+##### Throws
+
+Error with the provided message if the `Optional` is `Optional.None`.
+
+##### Example
 
 ```typescript
-const getValue = Optional.expectToBe<Optional<number>>('Value must exist');
+// Regular usage
 const some = Optional.some(42);
-console.log(getValue(some)); // 42
+const value = Optional.expectToBe(some, 'Value must exist');
+console.log(value); // 42
 
-const none = Optional.none;
-// getValue(none); // throws Error: "Value must exist"
+// Curried usage for pipe composition
+const getValue = Optional.expectToBe('Value must exist');
+const value2 = pipe(Optional.some(42)).map(getValue).value;
+console.log(value2); // 42
+```
+
+#### Call Signature
+
+> **expectToBe**\<`S`\>(`message`): (`optional`) => `S`
+
+Defined in: [src/functional/optional.mts:473](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L473)
+
+Unwraps an `Optional`, returning the contained value or throwing an error with the provided message.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+##### Parameters
+
+###### message
+
+`string`
+
+The error message to throw if the `Optional` is `Optional.None`.
+
+##### Returns
+
+The contained value if `Optional.Some`.
+
+> (`optional`): `S`
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+`S`
+
+##### Throws
+
+Error with the provided message if the `Optional` is `Optional.None`.
+
+##### Example
+
+```typescript
+// Regular usage
+const some = Optional.some(42);
+const value = Optional.expectToBe(some, 'Value must exist');
+console.log(value); // 42
+
+// Curried usage for pipe composition
+const getValue = Optional.expectToBe('Value must exist');
+const value2 = pipe(Optional.some(42)).map(getValue).value;
+console.log(value2); // 42
 ```
 
 ---
 
 ### filter()
 
+#### Call Signature
+
 > **filter**\<`O`\>(`optional`, `predicate`): [`Optional`](../README.md#optional)\<[`Unwrap`](#unwrap)\<`O`\>\>
 
-Defined in: [src/functional/optional.mts:314](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L314)
+Defined in: [src/functional/optional.mts:414](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L414)
 
 Filters an `Optional` based on a predicate.
 If the `Optional` is `Some` and the predicate returns true, returns the original `Optional`.
 Otherwise returns `None`.
 
-#### Type Parameters
+##### Type Parameters
 
-##### O
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The input `Optional.Base` type.
 
-#### Parameters
+##### Parameters
 
-##### optional
+###### optional
 
 `O`
 
 The `Optional` to filter.
 
-##### predicate
+###### predicate
 
 (`value`) => `boolean`
 
 The predicate function.
 
-#### Returns
+##### Returns
 
 [`Optional`](../README.md#optional)\<[`Unwrap`](#unwrap)\<`O`\>\>
 
 The filtered `Optional`.
 
-#### Example
+##### Example
 
 ```typescript
+// Regular usage
 const someEven = Optional.some(4);
 const filtered = Optional.filter(someEven, (x) => x % 2 === 0);
 console.log(Optional.unwrap(filtered)); // 4
 
-const someOdd = Optional.some(5);
-const filteredOdd = Optional.filter(someOdd, (x) => x % 2 === 0);
-console.log(Optional.isNone(filteredOdd)); // true
+// Curried usage for pipe composition
+const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+const result = pipe(Optional.some(4)).map(evenFilter).value;
+console.log(Optional.unwrap(result)); // 4
+```
+
+#### Call Signature
+
+> **filter**\<`S`\>(`predicate`): (`optional`) => [`Optional`](../README.md#optional)\<`S`\>
+
+Defined in: [src/functional/optional.mts:419](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L419)
+
+Filters an `Optional` based on a predicate.
+If the `Optional` is `Some` and the predicate returns true, returns the original `Optional`.
+Otherwise returns `None`.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+##### Parameters
+
+###### predicate
+
+(`value`) => `boolean`
+
+The predicate function.
+
+##### Returns
+
+The filtered `Optional`.
+
+> (`optional`): [`Optional`](../README.md#optional)\<`S`\>
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+##### Example
+
+```typescript
+// Regular usage
+const someEven = Optional.some(4);
+const filtered = Optional.filter(someEven, (x) => x % 2 === 0);
+console.log(Optional.unwrap(filtered)); // 4
+
+// Curried usage for pipe composition
+const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+const result = pipe(Optional.some(4)).map(evenFilter).value;
+console.log(Optional.unwrap(result)); // 4
 ```
 
 ---
 
 ### flatMap()
 
+#### Call Signature
+
 > **flatMap**\<`O`, `S2`\>(`optional`, `flatMapFn`): [`Optional`](../README.md#optional)\<`S2`\>
 
-Defined in: [src/functional/optional.mts:290](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L290)
+Defined in: [src/functional/optional.mts:371](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L371)
 
 Applies a function that returns an `Optional` to the value in an `Optional.Some`.
 If the input is `Optional.None`, returns `Optional.None`.
 This is the monadic bind operation for `Optional`.
 
-#### Type Parameters
+##### Type Parameters
 
-##### O
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The input `Optional.Base` type.
 
-##### S2
+###### S2
 
 `S2`
 
 The value type of the `Optional` returned by the function.
 
-#### Parameters
+##### Parameters
 
-##### optional
+###### optional
 
 `O`
 
 The `Optional` to flat map.
 
-##### flatMapFn
+###### flatMapFn
 
 (`value`) => [`Optional`](../README.md#optional)\<`S2`\>
 
 The function to apply that returns an `Optional`.
 
-#### Returns
+##### Returns
 
 [`Optional`](../README.md#optional)\<`S2`\>
 
 The result of applying the function, or `Optional.None`.
 
-#### Example
+##### Example
 
 ```typescript
+// Regular usage
 const parseNumber = (s: string): Optional<number> => {
     const n = Number(s);
     return isNaN(n) ? Optional.none : Optional.some(n);
@@ -288,8 +409,74 @@ const parseNumber = (s: string): Optional<number> => {
 const result = Optional.flatMap(Optional.some('42'), parseNumber);
 console.log(Optional.unwrap(result)); // 42
 
-const invalid = Optional.flatMap(Optional.some('abc'), parseNumber);
-console.log(Optional.isNone(invalid)); // true
+// Curried usage for pipe composition
+const parser = Optional.flatMap(parseNumber);
+const result2 = pipe(Optional.some('42')).map(parser).value;
+console.log(Optional.unwrap(result2)); // 42
+```
+
+#### Call Signature
+
+> **flatMap**\<`S`, `S2`\>(`flatMapFn`): (`optional`) => [`Optional`](../README.md#optional)\<`S2`\>
+
+Defined in: [src/functional/optional.mts:375](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L375)
+
+Applies a function that returns an `Optional` to the value in an `Optional.Some`.
+If the input is `Optional.None`, returns `Optional.None`.
+This is the monadic bind operation for `Optional`.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+###### S2
+
+`S2`
+
+The value type of the `Optional` returned by the function.
+
+##### Parameters
+
+###### flatMapFn
+
+(`value`) => [`Optional`](../README.md#optional)\<`S2`\>
+
+The function to apply that returns an `Optional`.
+
+##### Returns
+
+The result of applying the function, or `Optional.None`.
+
+> (`optional`): [`Optional`](../README.md#optional)\<`S2`\>
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+[`Optional`](../README.md#optional)\<`S2`\>
+
+##### Example
+
+```typescript
+// Regular usage
+const parseNumber = (s: string): Optional<number> => {
+    const n = Number(s);
+    return isNaN(n) ? Optional.none : Optional.some(n);
+};
+
+const result = Optional.flatMap(Optional.some('42'), parseNumber);
+console.log(Optional.unwrap(result)); // 42
+
+// Curried usage for pipe composition
+const parser = Optional.flatMap(parseNumber);
+const result2 = pipe(Optional.some('42')).map(parser).value;
+console.log(Optional.unwrap(result2)); // 42
 ```
 
 ---
@@ -298,7 +485,7 @@ console.log(Optional.isNone(invalid)); // true
 
 > **fromNullable**\<`T`\>(`value`): [`Optional`](../README.md#optional)\<`NonNullable`\<`T`\>\>
 
-Defined in: [src/functional/optional.mts:393](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L393)
+Defined in: [src/functional/optional.mts:540](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L540)
 
 Converts a nullable value to an `Optional`.
 
@@ -342,7 +529,7 @@ console.log(Optional.isNone(noneOptional)); // true
 
 > **isNone**\<`O`\>(`optional`): `optional is NarrowToNone<O>`
 
-Defined in: [src/functional/optional.mts:146](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L146)
+Defined in: [src/functional/optional.mts:145](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L145)
 
 Checks if an [Optional](../README.md#optional) is [Optional.None](#none).
 Acts as a type guard.
@@ -399,7 +586,7 @@ The value to check.
 
 > **isSome**\<`O`\>(`optional`): `optional is NarrowToSome<O>`
 
-Defined in: [src/functional/optional.mts:135](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L135)
+Defined in: [src/functional/optional.mts:134](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L134)
 
 Checks if an [Optional](../README.md#optional) is [Optional.Some](#some).
 Acts as a type guard.
@@ -430,49 +617,51 @@ The [Optional](../README.md#optional) to check.
 
 ### map()
 
+#### Call Signature
+
 > **map**\<`O`, `S2`\>(`optional`, `mapFn`): [`Optional`](../README.md#optional)\<`S2`\>
 
-Defined in: [src/functional/optional.mts:260](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L260)
+Defined in: [src/functional/optional.mts:319](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L319)
 
 Maps an [Optional](../README.md#optional)<S> to [Optional](../README.md#optional)<S2> by applying a function to a contained value.
 If the [Optional](../README.md#optional) is [Optional.None](#none), it returns [Optional.none](#none-1).
 Otherwise, it applies the `mapFn` to the value in `Optional.Some` and returns a new `Optional.Some` with the result.
 
-#### Type Parameters
+##### Type Parameters
 
-##### O
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The input `Optional.Base` type.
 
-##### S2
+###### S2
 
 `S2`
 
 The type of the value returned by the mapping function.
 
-#### Parameters
+##### Parameters
 
-##### optional
+###### optional
 
 `O`
 
 The `Optional` to map.
 
-##### mapFn
+###### mapFn
 
 (`value`) => `S2`
 
 The function to apply to the value if it exists.
 
-#### Returns
+##### Returns
 
 [`Optional`](../README.md#optional)\<`S2`\>
 
 A new `Optional<S2>` resulting from the mapping, or `Optional.None` if the input was `Optional.None`.
 
-#### Example
+##### Example
 
 ```typescript
 const someNumber = Optional.some(5);
@@ -489,57 +678,197 @@ const result = Optional.map(
     (s) => s.length,
 );
 console.log(Optional.unwrap(result)); // 5
+
+// Curried version for use with pipe
+const doubler = Optional.map((x: number) => x * 2);
+const result2 = pipe(Optional.some(5)).map(doubler).value;
+console.log(Optional.unwrap(result2)); // 10
+```
+
+#### Call Signature
+
+> **map**\<`S`, `S2`\>(`mapFn`): (`optional`) => [`Optional`](../README.md#optional)\<`S2`\>
+
+Defined in: [src/functional/optional.mts:324](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L324)
+
+Maps an [Optional](../README.md#optional)<S> to [Optional](../README.md#optional)<S2> by applying a function to a contained value.
+If the [Optional](../README.md#optional) is [Optional.None](#none), it returns [Optional.none](#none-1).
+Otherwise, it applies the `mapFn` to the value in `Optional.Some` and returns a new `Optional.Some` with the result.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+###### S2
+
+`S2`
+
+The type of the value returned by the mapping function.
+
+##### Parameters
+
+###### mapFn
+
+(`value`) => `S2`
+
+The function to apply to the value if it exists.
+
+##### Returns
+
+A new `Optional<S2>` resulting from the mapping, or `Optional.None` if the input was `Optional.None`.
+
+> (`optional`): [`Optional`](../README.md#optional)\<`S2`\>
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+[`Optional`](../README.md#optional)\<`S2`\>
+
+##### Example
+
+```typescript
+const someNumber = Optional.some(5);
+const mapped = Optional.map(someNumber, (x) => x * 2);
+console.log(Optional.unwrap(mapped)); // 10
+
+const noneValue = Optional.none;
+const mappedNone = Optional.map(noneValue, (x) => x * 2);
+console.log(Optional.isNone(mappedNone)); // true
+
+// Chaining maps
+const result = Optional.map(
+    Optional.map(Optional.some('hello'), (s) => s.toUpperCase()),
+    (s) => s.length,
+);
+console.log(Optional.unwrap(result)); // 5
+
+// Curried version for use with pipe
+const doubler = Optional.map((x: number) => x * 2);
+const result2 = pipe(Optional.some(5)).map(doubler).value;
+console.log(Optional.unwrap(result2)); // 10
 ```
 
 ---
 
 ### orElse()
 
+#### Call Signature
+
 > **orElse**\<`O`, `O2`\>(`optional`, `alternative`): `O` \| `O2`
 
-Defined in: [src/functional/optional.mts:228](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L228)
+Defined in: [src/functional/optional.mts:263](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L263)
 
 Returns the `Optional` if it is `Some`, otherwise returns the alternative.
 
-#### Type Parameters
+##### Type Parameters
 
-##### O
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The input `Optional.Base` type.
 
-##### O2
+###### O2
 
 `O2` _extends_ [`Base`](#base)
 
-#### Parameters
+##### Parameters
 
-##### optional
+###### optional
 
 `O`
 
 The `Optional` to check.
 
-##### alternative
+###### alternative
 
 `O2`
 
 The alternative `Optional` to return if the first is `None`.
 
-#### Returns
+##### Returns
 
 `O` \| `O2`
 
 The first `Optional` if `Some`, otherwise the alternative.
 
-#### Example
+##### Example
 
 ```typescript
+// Regular usage
 const primary = Optional.none;
 const fallback = Optional.some('default');
 const result = Optional.orElse(primary, fallback);
 console.log(Optional.unwrap(result)); // "default"
+
+// Curried usage for pipe composition
+const fallbackTo = Optional.orElse(Optional.some('fallback'));
+const result2 = pipe(Optional.none).map(fallbackTo).value;
+console.log(Optional.unwrap(result2)); // "fallback"
+```
+
+#### Call Signature
+
+> **orElse**\<`S`, `S2`\>(`alternative`): (`optional`) => `Readonly`\<\{ `type`: _typeof_ `NoneTypeSymbol`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S2`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S`; \}\>
+
+Defined in: [src/functional/optional.mts:268](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L268)
+
+Returns the `Optional` if it is `Some`, otherwise returns the alternative.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+###### S2
+
+`S2`
+
+##### Parameters
+
+###### alternative
+
+[`Optional`](../README.md#optional)\<`S2`\>
+
+The alternative `Optional` to return if the first is `None`.
+
+##### Returns
+
+The first `Optional` if `Some`, otherwise the alternative.
+
+> (`optional`): `Readonly`\<\{ `type`: _typeof_ `NoneTypeSymbol`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S2`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S`; \}\>
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+`Readonly`\<\{ `type`: _typeof_ `NoneTypeSymbol`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S2`; \}\> \| `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `S`; \}\>
+
+##### Example
+
+```typescript
+// Regular usage
+const primary = Optional.none;
+const fallback = Optional.some('default');
+const result = Optional.orElse(primary, fallback);
+console.log(Optional.unwrap(result)); // "default"
+
+// Curried usage for pipe composition
+const fallbackTo = Optional.orElse(Optional.some('fallback'));
+const result2 = pipe(Optional.none).map(fallbackTo).value;
+console.log(Optional.unwrap(result2)); // "fallback"
 ```
 
 ---
@@ -548,7 +877,7 @@ console.log(Optional.unwrap(result)); // "default"
 
 > **some**\<`S`\>(`value`): [`Some`](#some)\<`S`\>
 
-Defined in: [src/functional/optional.mts:110](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L110)
+Defined in: [src/functional/optional.mts:109](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L109)
 
 Creates an [Optional.Some](#some) containing the given value.
 
@@ -591,7 +920,7 @@ console.log(Optional.unwrap(someValue)); // 42
 
 > **toNullable**\<`O`\>(`optional`): `undefined` \| [`Unwrap`](#unwrap)\<`O`\>
 
-Defined in: [src/functional/optional.mts:411](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L411)
+Defined in: [src/functional/optional.mts:558](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L558)
 
 Converts an `Optional` to a nullable value.
 
@@ -631,85 +960,183 @@ console.log(Optional.toNullable(none)); // null
 
 ### unwrap()
 
+#### Call Signature
+
 > **unwrap**\<`O`\>(`optional`): [`Unwrap`](#unwrap)\<`O`\>
 
-Defined in: [src/functional/optional.mts:181](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L181)
+Defined in: [src/functional/optional.mts:180](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L180)
 
-Unwraps an `Optional`, returning the contained value or `undefined` if it's `Optional.None`.
+Unwraps an `Optional` that is known to be `Some`, returning the contained value.
 
-#### Type Parameters
+##### Type Parameters
 
-##### O
+###### O
 
 `O` _extends_ `Readonly`\<\{ `type`: _typeof_ `SomeTypeSymbol`; `value`: `unknown`; \}\>
 
 The `Optional.Some` type to unwrap.
 
-#### Parameters
+##### Parameters
 
-##### optional
+###### optional
 
 `O`
 
 The `Optional.Some` to unwrap.
 
-#### Returns
+##### Returns
 
 [`Unwrap`](#unwrap)\<`O`\>
 
-The contained value if `Optional.Some`, otherwise `undefined`.
+The contained value.
 
-#### Template
+#### Call Signature
 
-The `Optional.Base` type to unwrap.
+> **unwrap**\<`O`\>(`optional`): `undefined` \| [`Unwrap`](#unwrap)\<`O`\>
 
-#### Param
+Defined in: [src/functional/optional.mts:187](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L187)
 
-The `Optional` to unwrap.
+Unwraps an `Optional`, returning the contained value or `undefined` if it's `Optional.None`.
 
----
+##### Type Parameters
 
-### unwrapOr()
-
-> **unwrapOr**\<`O`, `D`\>(`optional`, `defaultValue`): `D` \| [`Unwrap`](#unwrap)\<`O`\>
-
-Defined in: [src/functional/optional.mts:205](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L205)
-
-Unwraps an `Optional`, returning the contained value or a default value if it's `Optional.None`.
-
-#### Type Parameters
-
-##### O
+###### O
 
 `O` _extends_ [`Base`](#base)
 
 The `Optional.Base` type to unwrap.
 
-##### D
+##### Parameters
 
-`D`
-
-The type of the default value.
-
-#### Parameters
-
-##### optional
+###### optional
 
 `O`
 
 The `Optional` to unwrap.
 
-##### defaultValue
+##### Returns
+
+`undefined` \| [`Unwrap`](#unwrap)\<`O`\>
+
+The contained value if `Optional.Some`, otherwise `undefined`.
+
+---
+
+### unwrapOr()
+
+#### Call Signature
+
+> **unwrapOr**\<`O`, `D`\>(`optional`, `defaultValue`): `D` \| [`Unwrap`](#unwrap)\<`O`\>
+
+Defined in: [src/functional/optional.mts:216](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L216)
+
+Unwraps an `Optional`, returning the contained value or a default value if it's `Optional.None`.
+
+##### Type Parameters
+
+###### O
+
+`O` _extends_ [`Base`](#base)
+
+The `Optional.Base` type to unwrap.
+
+###### D
+
+`D`
+
+The type of the default value.
+
+##### Parameters
+
+###### optional
+
+`O`
+
+The `Optional` to unwrap.
+
+###### defaultValue
 
 `D`
 
 The value to return if `optional` is `Optional.None`.
 
-#### Returns
+##### Returns
 
 `D` \| [`Unwrap`](#unwrap)\<`O`\>
 
 The contained value if `Optional.Some`, otherwise `defaultValue`.
+
+##### Example
+
+```typescript
+// Regular usage
+const some = Optional.some(42);
+const value = Optional.unwrapOr(some, 0);
+console.log(value); // 42
+
+// Curried usage for pipe composition
+const unwrapWithDefault = Optional.unwrapOr(0);
+const value2 = pipe(Optional.none).map(unwrapWithDefault).value;
+console.log(value2); // 0
+```
+
+#### Call Signature
+
+> **unwrapOr**\<`S`, `D`\>(`defaultValue`): (`optional`) => `S` \| `D`
+
+Defined in: [src/functional/optional.mts:221](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L221)
+
+Unwraps an `Optional`, returning the contained value or a default value if it's `Optional.None`.
+
+##### Type Parameters
+
+###### S
+
+`S`
+
+###### D
+
+`D`
+
+The type of the default value.
+
+##### Parameters
+
+###### defaultValue
+
+`D`
+
+The value to return if `optional` is `Optional.None`.
+
+##### Returns
+
+The contained value if `Optional.Some`, otherwise `defaultValue`.
+
+> (`optional`): `S` \| `D`
+
+###### Parameters
+
+###### optional
+
+[`Optional`](../README.md#optional)\<`S`\>
+
+###### Returns
+
+`S` \| `D`
+
+##### Example
+
+```typescript
+// Regular usage
+const some = Optional.some(42);
+const value = Optional.unwrapOr(some, 0);
+console.log(value); // 42
+
+// Curried usage for pipe composition
+const unwrapWithDefault = Optional.unwrapOr(0);
+const value2 = pipe(Optional.none).map(unwrapWithDefault).value;
+console.log(value2); // 0
+```
 
 ---
 
@@ -717,7 +1144,7 @@ The contained value if `Optional.Some`, otherwise `defaultValue`.
 
 > **unwrapThrow**\<`O`\>(`optional`): [`Unwrap`](#unwrap)\<`O`\>
 
-Defined in: [src/functional/optional.mts:166](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L166)
+Defined in: [src/functional/optional.mts:165](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L165)
 
 Unwraps an `Optional`, returning the contained value.
 Throws an error if the `Optional` is `Optional.None`.
@@ -764,7 +1191,7 @@ const none = Optional.none;
 
 > **zip**\<`A`, `B`\>(`optionalA`, `optionalB`): [`Optional`](../README.md#optional)\<readonly \[`A`, `B`\]\>
 
-Defined in: [src/functional/optional.mts:369](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L369)
+Defined in: [src/functional/optional.mts:516](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L516)
 
 Combines two `Optional` values into a single `Optional` containing a tuple.
 If either `Optional` is `None`, returns `None`.

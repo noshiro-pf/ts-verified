@@ -214,7 +214,7 @@ describe('Arr', () => {
 
     test('case 1', () => {
       expect(result).toStrictEqual(
-        IMap.new<
+        IMap.create<
           1 | 2 | 3,
           readonly (
             | Readonly<{ x: 1; y: 1 }>

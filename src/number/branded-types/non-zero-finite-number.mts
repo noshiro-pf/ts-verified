@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = NonZeroFiniteNumber;
-const typeName = 'NonZeroFiniteNumber';
+
 const typeNameInMessage = 'a non-zero finite number';
 
 const {
@@ -16,7 +16,7 @@ const {
   div,
   randomNonZero: random,
   is,
-  castTo,
+  castType,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForFloat<
   ElementType,
   undefined,
@@ -52,6 +52,7 @@ expectType<
   TsVerifiedInternals.RefinedNumberUtils.ToInt<ElementType>,
   NonZeroInt
 >('=');
+
 expectType<
   TsVerifiedInternals.RefinedNumberUtils.RemoveNonZeroBrandKey<
     TsVerifiedInternals.RefinedNumberUtils.ToInt<ElementType>
@@ -79,69 +80,150 @@ export const isNonZeroFiniteNumber = is;
  * // asNonZeroFiniteNumber(Infinity); // throws TypeError
  * ```
  */
-export const asNonZeroFiniteNumber = castTo;
+export const asNonZeroFiniteNumber = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for non-zero finite numbers.
+ *
+ * All operations maintain the non-zero constraint while ensuring results remain finite
+ * (excluding NaN and Infinity). This type is useful for values that must never be zero,
+ * such as denominators, scaling factors, and ratios.
+ *
+ * @example
+ * ```typescript
+ * const factor = asNonZeroFiniteNumber(2.5);
+ * const multiplier = asNonZeroFiniteNumber(-1.5);
+ *
+ * // Arithmetic operations that preserve non-zero constraint
+ * const result = NonZeroFiniteNumber.add(factor, multiplier);        // NonZeroFiniteNumber (1.0)
+ * const difference = NonZeroFiniteNumber.sub(factor, multiplier);    // NonZeroFiniteNumber (4.0)
+ * const product = NonZeroFiniteNumber.mul(factor, multiplier);       // NonZeroFiniteNumber (-3.75)
+ * const quotient = NonZeroFiniteNumber.div(factor, multiplier);      // NonZeroFiniteNumber (-1.666...)
+ *
+ * // Utility operations
+ * const absolute = NonZeroFiniteNumber.abs(multiplier);              // NonZeroFiniteNumber (1.5)
+ * const minimum = NonZeroFiniteNumber.min(factor, multiplier);       // NonZeroFiniteNumber (-1.5)
+ * const maximum = NonZeroFiniteNumber.max(factor, multiplier);       // NonZeroFiniteNumber (2.5)
+ *
+ * // Rounding operations (return NonZeroInt)
+ * const rounded = NonZeroFiniteNumber.round(factor);                 // NonZeroInt (3)
+ * const floored = NonZeroFiniteNumber.floor(factor);                 // NonZeroInt (2)
+ * const ceiled = NonZeroFiniteNumber.ceil(factor);                   // NonZeroInt (3)
+ *
+ * // Random generation
+ * const randomValue = NonZeroFiniteNumber.random();                  // NonZeroFiniteNumber (random non-zero value)
+ * ```
+ */
 export const NonZeroFiniteNumber = {
+  /**
+   * Type guard to check if a value is a NonZeroFiniteNumber.
+   * @param value The value to check.
+   * @returns `true` if the value is a non-zero finite number, `false` otherwise.
+   */
   is,
 
+  /**
+   * Returns the absolute value of a non-zero finite number.
+   * @param a The NonZeroFiniteNumber.
+   * @returns The absolute value as a NonZeroFiniteNumber.
+   */
   abs,
 
+  /**
+   * Returns the smaller of two NonZeroFiniteNumber values.
+   * @param a The first NonZeroFiniteNumber.
+   * @param b The second NonZeroFiniteNumber.
+   * @returns The minimum value as a NonZeroFiniteNumber.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two NonZeroFiniteNumber values.
+   * @param a The first NonZeroFiniteNumber.
+   * @param b The second NonZeroFiniteNumber.
+   * @returns The maximum value as a NonZeroFiniteNumber.
+   */
   max: max_,
 
+  /**
+   * Rounds down a NonZeroFiniteNumber to the nearest integer.
+   * @param x The NonZeroFiniteNumber to round down.
+   * @returns The floor value as a NonZeroInt.
+   */
   floor,
+
+  /**
+   * Rounds up a NonZeroFiniteNumber to the nearest integer.
+   * @param x The NonZeroFiniteNumber to round up.
+   * @returns The ceiling value as a NonZeroInt.
+   */
   ceil,
+
+  /**
+   * Rounds a NonZeroFiniteNumber to the nearest integer.
+   * @param x The NonZeroFiniteNumber to round.
+   * @returns The rounded value as a NonZeroInt.
+   */
   round,
+
+  /**
+   * Generates a random NonZeroFiniteNumber value.
+   * @returns A random non-zero finite number.
+   */
   random,
 
-  /** @returns `a ** b` */
+  /**
+   * Raises a NonZeroFiniteNumber to the power of another NonZeroFiniteNumber.
+   * @param a The base NonZeroFiniteNumber.
+   * @param b The exponent NonZeroFiniteNumber.
+   * @returns `a ** b` as a NonZeroFiniteNumber.
+   */
   pow,
 
-  /** @returns `a + b` */
+  /**
+   * Adds two NonZeroFiniteNumber values.
+   * @param a The first NonZeroFiniteNumber.
+   * @param b The second NonZeroFiniteNumber.
+   * @returns `a + b` as a NonZeroFiniteNumber.
+   */
   add,
 
-  /** @returns `a - b` */
+  /**
+   * Subtracts one NonZeroFiniteNumber from another.
+   * @param a The minuend NonZeroFiniteNumber.
+   * @param b The subtrahend NonZeroFiniteNumber.
+   * @returns `a - b` as a NonZeroFiniteNumber.
+   */
   sub,
 
-  /** @returns `a * b` */
+  /**
+   * Multiplies two NonZeroFiniteNumber values.
+   * @param a The first NonZeroFiniteNumber.
+   * @param b The second NonZeroFiniteNumber.
+   * @returns `a * b` as a NonZeroFiniteNumber.
+   */
   mul,
 
-  /** @returns `a / b` */
+  /**
+   * Divides one NonZeroFiniteNumber by another.
+   * @param a The dividend NonZeroFiniteNumber.
+   * @param b The divisor NonZeroFiniteNumber.
+   * @returns `a / b` as a NonZeroFiniteNumber.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '0', value: 0 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  TsVerifiedInternals.RefinedNumberUtils.ToNonNegative<ElementType>,
+  PositiveFiniteNumber
+>('=');
 
-  expectType<
-    TsVerifiedInternals.RefinedNumberUtils.ToNonNegative<ElementType>,
-    PositiveFiniteNumber
-  >('=');
+expectType<
+  keyof typeof NonZeroFiniteNumber,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, never>
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = castTo(-2.3);
-    const max = castTo(4.5);
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-    expect(result).not.toBe(0);
-  });
-
-  expectType<
-    keyof typeof NonZeroFiniteNumber,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, never>
-  >('=');
-  expectType<
-    typeof NonZeroFiniteNumber,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, never>
-  >('<=');
-}
+expectType<
+  typeof NonZeroFiniteNumber,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, never>
+>('<=');

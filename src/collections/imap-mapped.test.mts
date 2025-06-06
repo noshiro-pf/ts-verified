@@ -6,8 +6,8 @@ const fromKey = (k: number): Readonly<{ v: number }> => ({ v: k });
 
 describe('IMapMapped[Symbol.iterator]', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
-      IMapMapped.new(
+    const s0 = IMapMapped.create(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -21,7 +21,7 @@ describe('IMapMapped[Symbol.iterator]', () => {
     );
 
     expect(s0).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -36,7 +36,7 @@ describe('IMapMapped[Symbol.iterator]', () => {
 
 describe('IMapMapped.size', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -52,7 +52,7 @@ describe('IMapMapped.size', () => {
 
 describe('IMapMapped.has', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -65,7 +65,7 @@ describe('IMapMapped.has', () => {
     expect(s0.has({ v: 3 })).toBe(true);
   });
   test('case 2', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -78,7 +78,7 @@ describe('IMapMapped.has', () => {
     expect(s0.has({ v: 4 })).toBe(false);
   });
   test('case 3', () => {
-    const s0 = IMapMapped.new<Readonly<{ v: number }>, string, number>(
+    const s0 = IMapMapped.create<Readonly<{ v: number }>, string, number>(
       [],
       toKey,
       fromKey,
@@ -90,7 +90,7 @@ describe('IMapMapped.has', () => {
 
 describe('IMapMapped.get', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -103,7 +103,7 @@ describe('IMapMapped.get', () => {
     expect(s0.get({ v: 3 })).toStrictEqual(Optional.some('3'));
   });
   test('case 2', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -116,7 +116,7 @@ describe('IMapMapped.get', () => {
     expect(s0.get({ v: 4 })).toStrictEqual(Optional.none);
   });
   test('case 3', () => {
-    const s0 = IMapMapped.new<Readonly<{ v: number }>, string, number>(
+    const s0 = IMapMapped.create<Readonly<{ v: number }>, string, number>(
       [],
       toKey,
       fromKey,
@@ -128,7 +128,7 @@ describe('IMapMapped.get', () => {
 
 describe('IMapMapped.set', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -139,7 +139,7 @@ describe('IMapMapped.set', () => {
     );
 
     expect(s0.set({ v: 5 }, '5')).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -151,7 +151,7 @@ describe('IMapMapped.set', () => {
       ),
     );
     expect(s0).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -163,7 +163,7 @@ describe('IMapMapped.set', () => {
     );
   });
   test('case 2', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -174,7 +174,7 @@ describe('IMapMapped.set', () => {
     );
 
     expect(s0.set({ v: 3 }, '3')).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -185,7 +185,7 @@ describe('IMapMapped.set', () => {
       ),
     );
     expect(s0).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -197,18 +197,18 @@ describe('IMapMapped.set', () => {
     );
   });
   test('case 3', () => {
-    const s0 = IMapMapped.new([], toKey, fromKey);
+    const s0 = IMapMapped.create([], toKey, fromKey);
 
     expect(s0.set({ v: 1 }, '1')).toStrictEqual(
-      IMapMapped.new([[{ v: 1 }, '1']], toKey, fromKey),
+      IMapMapped.create([[{ v: 1 }, '1']], toKey, fromKey),
     );
-    expect(s0).toStrictEqual(IMapMapped.new([], toKey, fromKey));
+    expect(s0).toStrictEqual(IMapMapped.create([], toKey, fromKey));
   });
 });
 
 describe('IMapMapped.delete', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -219,7 +219,7 @@ describe('IMapMapped.delete', () => {
     );
 
     expect(s0.delete({ v: 10 })).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -230,7 +230,7 @@ describe('IMapMapped.delete', () => {
       ),
     );
     expect(s0).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -242,7 +242,7 @@ describe('IMapMapped.delete', () => {
     );
   });
   test('case 2', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -253,7 +253,7 @@ describe('IMapMapped.delete', () => {
     );
 
     expect(s0.delete({ v: 3 })).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -263,7 +263,7 @@ describe('IMapMapped.delete', () => {
       ),
     );
     expect(s0).toStrictEqual(
-      IMapMapped.new(
+      IMapMapped.create(
         [
           [{ v: 1 }, '1'],
           [{ v: 2 }, '2'],
@@ -275,18 +275,18 @@ describe('IMapMapped.delete', () => {
     );
   });
   test('case 3', () => {
-    const s0 = IMapMapped.new([], toKey, fromKey);
+    const s0 = IMapMapped.create([], toKey, fromKey);
 
     expect(s0.delete({ v: 1 })).toStrictEqual(
-      IMapMapped.new([], toKey, fromKey),
+      IMapMapped.create([], toKey, fromKey),
     );
-    expect(s0).toStrictEqual(IMapMapped.new([], toKey, fromKey));
+    expect(s0).toStrictEqual(IMapMapped.create([], toKey, fromKey));
   });
 });
 
 describe('IMapMapped.forEach', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -307,7 +307,7 @@ describe('IMapMapped.forEach', () => {
 
 describe('IMapMapped.keys', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -326,7 +326,7 @@ describe('IMapMapped.keys', () => {
 
 describe('IMapMapped.values', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],
@@ -345,7 +345,7 @@ describe('IMapMapped.values', () => {
 
 describe('IMapMapped.entries', () => {
   test('case 1', () => {
-    const s0 = IMapMapped.new(
+    const s0 = IMapMapped.create(
       [
         [{ v: 1 }, '1'],
         [{ v: 2 }, '2'],

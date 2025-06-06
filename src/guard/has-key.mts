@@ -52,7 +52,7 @@ export const hasKey = <
  * @internal
  * When R is a union type (including the case with only one element), if any element in the union
  * contains K as a key, returns a type that narrows the union to only those elements that contain K as a key.
- * If none of the elements in the union contain K as a key, returns `MutableRecord<K, unknown>`.
+ * If none of the elements in the union contain K as a key, returns `ReadonlyRecord<K, unknown>`.
  * The result is made readonly.
  */
 export type HasKeyReturnType<
@@ -61,11 +61,11 @@ export type HasKeyReturnType<
 > = R extends R // union distribution
   ? K extends keyof R
     ? string extends keyof R
-      ? MutableRecord<K, R[keyof R]> & R
+      ? ReadonlyRecord<K, R[keyof R]> & R
       : number extends keyof R
-        ? MutableRecord<K, R[keyof R]> & R
+        ? ReadonlyRecord<K, R[keyof R]> & R
         : symbol extends keyof R
-          ? MutableRecord<K, R[keyof R]> & R
+          ? ReadonlyRecord<K, R[keyof R]> & R
           : R
     : never // omit union member that does not have key K
   : never; // dummy case for union distribution

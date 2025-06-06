@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = SafeInt;
-const typeName = 'SafeInt';
+
 const typeNameInMessage = 'a safe integer';
 
 const {
@@ -18,7 +18,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -53,74 +53,144 @@ export const isSafeInt = is;
  * // asSafeInt(Number.MAX_SAFE_INTEGER + 1); // throws TypeError
  * ```
  */
-export const asSafeInt = castTo;
+export const asSafeInt = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for safe integers.
+ *
+ * All operations automatically clamp results to the safe integer range [MIN_SAFE_INTEGER, MAX_SAFE_INTEGER].
+ * This ensures that all arithmetic maintains IEEE 754 precision guarantees, preventing precision loss
+ * that can occur with very large integers in JavaScript.
+ *
+ * @example
+ * ```typescript
+ * const a = asSafeInt(9007199254740000);  // Near MAX_SAFE_INTEGER
+ * const b = asSafeInt(1000);
+ *
+ * // Arithmetic operations with automatic clamping
+ * const sum = SafeInt.add(a, b);          // SafeInt (clamped to MAX_SAFE_INTEGER)
+ * const diff = SafeInt.sub(a, b);         // SafeInt (9007199254739000)
+ * const product = SafeInt.mul(a, b);      // SafeInt (clamped to MAX_SAFE_INTEGER)
+ *
+ * // Range operations
+ * const clamped = SafeInt.clamp(1e20);        // SafeInt (MAX_SAFE_INTEGER)
+ * const minimum = SafeInt.min(a, b);          // SafeInt (1000)
+ * const maximum = SafeInt.max(a, b);          // SafeInt (a)
+ *
+ * // Utility operations
+ * const absolute = SafeInt.abs(asSafeInt(-1000)); // SafeInt (1000)
+ * const random = SafeInt.random();                // SafeInt (random safe integer)
+ * ```castType
+ */
 export const SafeInt = {
+  /**
+   * Type guard to check if a value is a SafeInt.
+   * @param value The value to check.
+   * @returns `true` if the value is a safe integer, `false` otherwise.
+   */
   is,
 
-  /** `Number.MIN_SAFE_INTEGER` */
+  /**
+   * The minimum safe integer value (-(2^53 - 1)).
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `Number.MAX_SAFE_INTEGER` */
+  /**
+   * The maximum safe integer value (2^53 - 1).
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the absolute value of a safe integer.
+   * @param a The SafeInt value.
+   * @returns The absolute value as a SafeInt, clamped to safe range.
+   */
   abs,
 
+  /**
+   * Returns the smaller of two SafeInt values.
+   * @param a The first SafeInt.
+   * @param b The second SafeInt.
+   * @returns The minimum value as a SafeInt.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two SafeInt values.
+   * @param a The first SafeInt.
+   * @param b The second SafeInt.
+   * @returns The maximum value as a SafeInt.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the safe integer range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [MIN_SAFE_INTEGER, MAX_SAFE_INTEGER] as a SafeInt.
+   */
   clamp,
 
+  /**
+   * Generates a random SafeInt value within the safe integer range.
+   * @returns A random SafeInt between MIN_SAFE_INTEGER and MAX_SAFE_INTEGER.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Raises a SafeInt to the power of another SafeInt.
+   * @param a The base SafeInt.
+   * @param b The exponent SafeInt.
+   * @returns `a ** b` clamped to safe integer range as a SafeInt.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Adds two SafeInt values.
+   * @param a The first SafeInt.
+   * @param b The second SafeInt.
+   * @returns `a + b` clamped to safe integer range as a SafeInt.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Subtracts one SafeInt from another.
+   * @param a The minuend SafeInt.
+   * @param b The subtrahend SafeInt.
+   * @returns `a - b` clamped to safe integer range as a SafeInt.
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Multiplies two SafeInt values.
+   * @param a The first SafeInt.
+   * @param b The second SafeInt.
+   * @returns `a * b` clamped to safe integer range as a SafeInt.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Divides one SafeInt by another using floor division.
+   * @param a The dividend SafeInt.
+   * @param b The divisor SafeInt.
+   * @returns `⌊a / b⌋` clamped to safe integer range as a SafeInt.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof SafeInt,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 0;
-    const max = 5;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof SafeInt,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof SafeInt,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof SafeInt,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('<=');

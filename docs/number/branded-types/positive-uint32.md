@@ -10,7 +10,7 @@
 
 ### asPositiveUint32()
 
-> `const` **asPositiveUint32**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asPositiveUint32**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
 Defined in: [src/number/branded-types/positive-uint32.mts:54](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-uint32.mts#L54)
 
@@ -76,13 +76,21 @@ Checks if a number is a PositiveUint32 (32-bit positive unsigned integer in the 
 
 > `const` **PositiveUint32**: `object`
 
-Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-uint32.mts#L56)
+Defined in: [src/number/branded-types/positive-uint32.mts:84](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-uint32.mts#L84)
+
+Namespace providing type-safe arithmetic operations for 32-bit positive unsigned integers.
+
+All operations automatically clamp results to the valid PositiveUint32 range [1, 4294967295].
+This ensures that all arithmetic maintains the 32-bit positive unsigned integer constraint,
+with results below 1 clamped to MIN_VALUE and overflow results clamped to MAX_VALUE.
 
 #### Type declaration
 
 ##### add()
 
 > **add**: (`x`, `y`) => `PositiveUint32`
+
+Adds two PositiveUint32 values.
 
 ###### Parameters
 
@@ -98,11 +106,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
-`a + b`, but clamped to `[1, 2^32)`
+`a + b` clamped to [1, 4294967295] as a PositiveUint32.
 
 ##### clamp()
 
 > **clamp**: (`x`) => `PositiveUint32`
+
+Clamps a number to the PositiveUint32 range.
 
 ###### Parameters
 
@@ -114,9 +124,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
+The value clamped to [1, 4294967295] as a PositiveUint32.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `PositiveUint32`
+
+Divides one PositiveUint32 by another using floor division.
 
 ###### Parameters
 
@@ -132,11 +146,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
-`⌊a / b⌋`, but clamped to `[1, 2^32)`
+`⌊a / b⌋` clamped to [1, 4294967295] as a PositiveUint32.
 
 ##### is()
 
 > **is**: (`a`) => `a is PositiveUint32`
+
+Type guard to check if a value is a PositiveUint32.
 
 ###### Parameters
 
@@ -148,9 +164,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `a is PositiveUint32`
 
+`true` if the value is a 32-bit positive unsigned integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `PositiveUint32` = `max_`
+
+Returns the larger of two PositiveUint32 values.
 
 ###### Parameters
 
@@ -162,16 +182,20 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
+The maximum value as a PositiveUint32.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `number`
+> `readonly` **MAX_VALUE**: `number`
 
-`2^32 - 1`
+The maximum value for a 32-bit positive unsigned integer.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `PositiveUint32` = `min_`
 
+Returns the smaller of two PositiveUint32 values.
+
 ###### Parameters
 
 ###### values
@@ -182,16 +206,20 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
+The minimum value as a PositiveUint32.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `1`
+> `readonly` **MIN_VALUE**: `1`
 
-`1`
+The minimum value for a 32-bit positive unsigned integer.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `PositiveUint32`
 
+Multiplies two PositiveUint32 values.
+
 ###### Parameters
 
 ###### x
@@ -206,12 +234,14 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
-`a * b`, but clamped to `[1, 2^32)`
+`a * b` clamped to [1, 4294967295] as a PositiveUint32.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `PositiveUint32`
 
+Raises a PositiveUint32 to the power of another PositiveUint32.
+
 ###### Parameters
 
 ###### x
@@ -226,11 +256,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
-`a ** b`, but clamped to `[1, 2^32)`
+`a ** b` clamped to [1, 4294967295] as a PositiveUint32.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `PositiveUint32`
+
+Generates a random PositiveUint32 value within the valid range.
 
 ###### Parameters
 
@@ -246,9 +278,13 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
+A random PositiveUint32 between 1 and 4294967295.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `PositiveUint32`
+
+Subtracts one PositiveUint32 from another.
 
 ###### Parameters
 
@@ -264,4 +300,26 @@ Defined in: [src/number/branded-types/positive-uint32.mts:56](https://github.com
 
 `PositiveUint32`
 
-`a - b`, but clamped to `[1, 2^32)`
+`a - b` clamped to [1, 4294967295] as a PositiveUint32 (minimum 1).
+
+#### Example
+
+```typescript
+const a = asPositiveUint32(4000000000);
+const b = asPositiveUint32(1000000000);
+
+// Arithmetic operations with automatic clamping and positive constraint
+const sum = PositiveUint32.add(a, b); // PositiveUint32 (4294967295 - clamped to MAX_VALUE)
+const diff = PositiveUint32.sub(a, b); // PositiveUint32 (3000000000)
+const reverseDiff = PositiveUint32.sub(b, a); // PositiveUint32 (1 - clamped to MIN_VALUE)
+const product = PositiveUint32.mul(a, b); // PositiveUint32 (4294967295 - clamped due to overflow)
+
+// Range operations (maintaining positive constraint)
+const clamped = PositiveUint32.clamp(-100); // PositiveUint32 (1)
+const minimum = PositiveUint32.min(a, b); // PositiveUint32 (1000000000)
+const maximum = PositiveUint32.max(a, b); // PositiveUint32 (4000000000)
+
+// Utility operations
+const random = PositiveUint32.random(); // PositiveUint32 (random value in [1, 4294967295])
+const power = PositiveUint32.pow(asPositiveUint32(2), asPositiveUint32(20)); // PositiveUint32 (1048576)
+```

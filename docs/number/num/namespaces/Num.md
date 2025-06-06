@@ -47,31 +47,13 @@ Num.from('hello'); // NaN
 
 ### clamp()
 
-> **clamp**(`lowerBound`, `upperBound`): (`target`) => `number`
+#### Call Signature
 
-Defined in: [src/number/num.mts:183](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L183)
+> **clamp**(`target`, `lowerBound`, `upperBound`): `number`
+
+Defined in: [src/number/num.mts:194](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L194)
 
 Clamps a value within the given range. If the target value is invalid (not finite), returns the lower bound.
-
-#### Parameters
-
-##### lowerBound
-
-`number`
-
-The lower bound of the range.
-
-##### upperBound
-
-`number`
-
-The upper bound of the range.
-
-#### Returns
-
-A function that takes a target number and returns the clamped value.
-
-> (`target`): `number`
 
 ##### Parameters
 
@@ -79,13 +61,95 @@ A function that takes a target number and returns the clamped value.
 
 `number`
 
+The value to clamp.
+
+###### lowerBound
+
+`number`
+
+The lower bound of the range.
+
+###### upperBound
+
+`number`
+
+The upper bound of the range.
+
 ##### Returns
 
 `number`
 
-#### Example
+The clamped value.
 
-```ts
+##### Example
+
+```typescript
+// Regular usage
+Num.clamp(0, 10, 15); // 10
+Num.clamp(0, 10, -5); // 0
+Num.clamp(0, 10, 5); // 5
+
+// Curried usage for pipe composition
+const clampTo0_10 = Num.clamp(0, 10);
+const result = pipe(15).map(clampTo0_10).value; // 10
+
+// Traditional curried form (already supported)
+clamp(0, 2)(2.3); // 2
+clamp(0, 2)(-0.5); // 0
+clamp(0, 2)(1.5); // 1.5
+```
+
+#### Call Signature
+
+> **clamp**(`lowerBound`, `upperBound`): (`target`) => `number`
+
+Defined in: [src/number/num.mts:199](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L199)
+
+Clamps a value within the given range. If the target value is invalid (not finite), returns the lower bound.
+
+##### Parameters
+
+###### lowerBound
+
+`number`
+
+The lower bound of the range.
+
+###### upperBound
+
+`number`
+
+The upper bound of the range.
+
+##### Returns
+
+The clamped value.
+
+> (`target`): `number`
+
+###### Parameters
+
+###### target
+
+`number`
+
+###### Returns
+
+`number`
+
+##### Example
+
+```typescript
+// Regular usage
+Num.clamp(0, 10, 15); // 10
+Num.clamp(0, 10, -5); // 0
+Num.clamp(0, 10, 5); // 5
+
+// Curried usage for pipe composition
+const clampTo0_10 = Num.clamp(0, 10);
+const result = pipe(15).map(clampTo0_10).value; // 10
+
+// Traditional curried form (already supported)
 clamp(0, 2)(2.3); // 2
 clamp(0, 2)(-0.5); // 0
 clamp(0, 2)(1.5); // 1.5
@@ -97,7 +161,7 @@ clamp(0, 2)(1.5); // 1.5
 
 > **decrement**\<`N`\>(`n`): `Decrement`\<`N`\>
 
-Defined in: [src/number/num.mts:287](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L287)
+Defined in: [src/number/num.mts:323](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L323)
 
 Decrements a positive small integer by 1 at the type level.
 
@@ -139,7 +203,7 @@ const zero = Num.decrement(one); // type is 0, value is 0
 
 > **div**(`a`, `b`): `number`
 
-Defined in: [src/number/num.mts:200](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L200)
+Defined in: [src/number/num.mts:236](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L236)
 
 Performs division of two numbers.
 
@@ -155,7 +219,7 @@ The dividend.
 
 The divisor. Must be non-zero (enforced at compile time).
 
-`1` | `2` | `3` | `32` | `4` | `5` | `10` | `12` | `NonZeroNumber` | `6` | `7` | `8` | `9` | `11` | `24` | `14` | `34` | `13` | `15` | `16` | `17` | `18` | `19` | `20` | `21` | `22` | `23` | `25` | `26` | `27` | `28` | `29` | `30` | `31` | `33` | `35` | `36` | `37` | `38` | `39` | `-1` | `-2` | `-3` | `-32` | `-4` | `-5` | `-10` | `-12` | `-6` | `-7` | `-8` | `-9` | `-11` | `-24` | `-14` | `-34` | `-13` | `-15` | `-16` | `-17` | `-18` | `-19` | `-20` | `-21` | `-22` | `-23` | `-25` | `-26` | `-27` | `-28` | `-29` | `-30` | `-31` | `-33` | `-35` | `-36` | `-37` | `-38` | `-39` | `-40`
+`1` | `2` | `3` | `32` | `NonZeroNumber` | `4` | `5` | `6` | `7` | `8` | `9` | `11` | `10` | `24` | `14` | `34` | `12` | `13` | `15` | `16` | `17` | `18` | `19` | `20` | `21` | `22` | `23` | `25` | `26` | `27` | `28` | `29` | `30` | `31` | `33` | `35` | `36` | `37` | `38` | `39` | `-1` | `-2` | `-3` | `-32` | `-4` | `-5` | `-6` | `-7` | `-8` | `-9` | `-11` | `-10` | `-24` | `-14` | `-34` | `-12` | `-13` | `-15` | `-16` | `-17` | `-18` | `-19` | `-20` | `-21` | `-22` | `-23` | `-25` | `-26` | `-27` | `-28` | `-29` | `-30` | `-31` | `-33` | `-35` | `-36` | `-37` | `-38` | `-39` | `-40`
 
 #### Returns
 
@@ -176,7 +240,7 @@ const result = Num.div(10, 2); // 5
 
 > **divInt**(`a`, `b`): `number`
 
-Defined in: [src/number/num.mts:209](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L209)
+Defined in: [src/number/num.mts:245](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L245)
 
 Performs integer division (Math.floor(a / b)).
 
@@ -206,7 +270,7 @@ The result of integer division. Returns `NaN` if `b` is zero.
 
 > **increment**\<`N`\>(`n`): `Increment`\<`N`\>
 
-Defined in: [src/number/num.mts:269](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L269)
+Defined in: [src/number/num.mts:305](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L305)
 
 Increments a `SmallUint` value.
 
@@ -567,7 +631,7 @@ if (isValidScore(85)) {
 
 > **mapNaN2Undefined**\<`N`\>(`num`): `undefined` \| `RelaxedExclude`\<`N`, `NaNType`\>
 
-Defined in: [src/number/num.mts:255](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L255)
+Defined in: [src/number/num.mts:291](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L291)
 
 Maps `NaN` to `undefined`, otherwise returns the original number.
 
@@ -599,7 +663,7 @@ The original number if it's not `NaN`, otherwise `undefined`.
 
 > **round**(`digit`): (`num`) => `number`
 
-Defined in: [src/number/num.mts:241](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L241)
+Defined in: [src/number/num.mts:277](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L277)
 
 Returns a function that rounds a number to a specified number of decimal places.
 
@@ -633,7 +697,7 @@ A function that takes a target number and returns it rounded to `digit` decimal 
 
 > **roundAt**(`num`, `precision`): `number`
 
-Defined in: [src/number/num.mts:218](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L218)
+Defined in: [src/number/num.mts:254](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L254)
 
 Rounds a number to a specified number of decimal places (precision).
 
@@ -663,7 +727,7 @@ The rounded number.
 
 > **roundToInt**(`num`): `Int`
 
-Defined in: [src/number/num.mts:234](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L234)
+Defined in: [src/number/num.mts:270](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/num.mts#L270)
 
 Rounds a number to the nearest integer.
 Uses a bitwise OR for potentially faster rounding for positive numbers.

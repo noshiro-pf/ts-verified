@@ -10,7 +10,7 @@
 
 ### unknownToString()
 
-> **unknownToString**(`value`, `options?`): [`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+> **unknownToString**(`value`, `options?`): [`Result`](../functional/result/README.md#result)\<`string`, `Error`\>
 
 Defined in: [src/others/unknown-to-string.mts:32](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/unknown-to-string.mts#L32)
 
@@ -32,7 +32,7 @@ Optional parameters.
 
 #### Returns
 
-[`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+[`Result`](../functional/result/README.md#result)\<`string`, `Error`\>
 
 A Result containing the string representation of the unknown value, or an error message if JSON.stringify fails (e.g., circular references).
 

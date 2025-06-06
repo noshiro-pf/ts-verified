@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = Int;
-const typeName = 'Int';
+
 const typeNameInMessage = 'an integer';
 
 const {
@@ -16,7 +16,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
   undefined,
@@ -47,65 +47,145 @@ export const isInt = is;
  * // asInt(5.5); // throws TypeError
  * ```
  */
-export const asInt = castTo;
+export const asInt = castType;
 
 /**
  * Utility functions for working with Int (integer) branded types.
  * Provides type-safe operations that ensure results remain integers.
+ *
+ * @example
+ * ```typescript
+ * // Type checking
+ * Int.is(5); // true
+ * Int.is(5.5); // false
+ *
+ * // Arithmetic operations
+ * const a = asInt(10);
+ * const b = asInt(3);
+ *
+ * Int.add(a, b); // Int (13)
+ * Int.sub(a, b); // Int (7)
+ * Int.mul(a, b); // Int (30)
+ * Int.div(a, b); // Int (3) - floor division
+ * Int.pow(a, b); // Int (1000)
+ *
+ * // Utility functions
+ * Int.abs(asInt(-5)); // Int (5)
+ * Int.min(a, b); // Int (3)
+ * Int.max(a, b); // Int (10)
+ * Int.random(); // Random Int
+ * ```
  */
 export const Int = {
+  /**
+   * Type guard that checks if a value is an integer.
+   * @param value - The value to check
+   * @returns `true` if the value is an integer, `false` otherwise
+   */
   is,
 
+  /**
+   * Returns the absolute value of an integer.
+   * @param a - The integer to get the absolute value of
+   * @returns The absolute value as an Int
+   * @example
+   * ```typescript
+   * Int.abs(asInt(-5)); // Int (5)
+   * Int.abs(asInt(3)); // Int (3)
+   * ```
+   */
   abs,
 
+  /**
+   * Returns the minimum of two integers.
+   * @param a - First integer
+   * @param b - Second integer
+   * @returns The smaller value as an Int
+   */
   min: min_,
+
+  /**
+   * Returns the maximum of two integers.
+   * @param a - First integer
+   * @param b - Second integer
+   * @returns The larger value as an Int
+   */
   max: max_,
 
+  /**
+   * Generates a random integer.
+   * @returns A random Int value
+   */
   random,
 
-  /** @returns `a ** b` */
+  /**
+   * Raises an integer to a power.
+   * @param a - The base integer
+   * @param b - The exponent integer
+   * @returns `a ** b` as an Int
+   * @example
+   * ```typescript
+   * Int.pow(asInt(2), asInt(3)); // Int (8)
+   * ```
+   */
   pow,
 
-  /** @returns `a + b` */
+  /**
+   * Adds two integers.
+   * @param a - First integer
+   * @param b - Second integer
+   * @returns `a + b` as an Int
+   * @example
+   * ```typescript
+   * Int.add(asInt(5), asInt(3)); // Int (8)
+   * ```
+   */
   add,
 
-  /** @returns `a - b` */
+  /**
+   * Subtracts two integers.
+   * @param a - First integer
+   * @param b - Second integer
+   * @returns `a - b` as an Int
+   * @example
+   * ```typescript
+   * Int.sub(asInt(8), asInt(3)); // Int (5)
+   * ```
+   */
   sub,
 
-  /** @returns `a * b` */
+  /**
+   * Multiplies two integers.
+   * @param a - First integer
+   * @param b - Second integer
+   * @returns `a * b` as an Int
+   * @example
+   * ```typescript
+   * Int.mul(asInt(4), asInt(3)); // Int (12)
+   * ```
+   */
   mul,
 
-  /** @returns `⌊a / b⌋` */
+  /**
+   * Divides two integers using floor division.
+   * @param a - The dividend integer
+   * @param b - The divisor integer
+   * @returns `⌊a / b⌋` as an Int
+   * @example
+   * ```typescript
+   * Int.div(asInt(10), asInt(3)); // Int (3) - floor division
+   * Int.div(asInt(9), asInt(3)); // Int (3)
+   * ```
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof Int,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, 'int'>
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = -5;
-    const max = 5;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof Int,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, 'int'>
-  >('=');
-  expectType<
-    typeof Int,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, 'int'>
-  >('<=');
-}
+expectType<
+  typeof Int,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<ElementType, 'int'>
+>('<=');

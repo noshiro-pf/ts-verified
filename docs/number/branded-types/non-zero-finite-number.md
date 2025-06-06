@@ -10,9 +10,9 @@
 
 ### asNonZeroFiniteNumber()
 
-> `const` **asNonZeroFiniteNumber**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asNonZeroFiniteNumber**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
-Defined in: [src/number/branded-types/non-zero-finite-number.mts:82](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L82)
+Defined in: [src/number/branded-types/non-zero-finite-number.mts:83](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L83)
 
 Casts a number to a NonZeroFiniteNumber type.
 
@@ -53,7 +53,7 @@ const y = asNonZeroFiniteNumber(-3.2); // NonZeroFiniteNumber
 
 > `const` **isNonZeroFiniteNumber**: (`a`) => `a is NonZeroFiniteNumber` = `is`
 
-Defined in: [src/number/branded-types/non-zero-finite-number.mts:67](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L67)
+Defined in: [src/number/branded-types/non-zero-finite-number.mts:68](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L68)
 
 Checks if a number is a NonZeroFiniteNumber (a finite number that is not 0).
 
@@ -75,13 +75,21 @@ Checks if a number is a NonZeroFiniteNumber (a finite number that is not 0).
 
 > `const` **NonZeroFiniteNumber**: `object`
 
-Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L84)
+Defined in: [src/number/branded-types/non-zero-finite-number.mts:117](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-finite-number.mts#L117)
+
+Namespace providing type-safe arithmetic operations for non-zero finite numbers.
+
+All operations maintain the non-zero constraint while ensuring results remain finite
+(excluding NaN and Infinity). This type is useful for values that must never be zero,
+such as denominators, scaling factors, and ratios.
 
 #### Type declaration
 
 ##### abs()
 
 > **abs**: (`x`) => `ToNonNegative`\<`NonZeroFiniteNumber`\>
+
+Returns the absolute value of a non-zero finite number.
 
 ###### Parameters
 
@@ -93,9 +101,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `ToNonNegative`\<`NonZeroFiniteNumber`\>
 
+The absolute value as a NonZeroFiniteNumber.
+
 ##### add()
 
 > **add**: (`x`, `y`) => `NonZeroFiniteNumber`
+
+Adds two NonZeroFiniteNumber values.
 
 ###### Parameters
 
@@ -111,11 +123,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
-`a + b`
+`a + b` as a NonZeroFiniteNumber.
 
 ##### ceil()
 
 > **ceil**: (`x`) => `ToInt`\<`NonZeroFiniteNumber`\>
+
+Rounds up a NonZeroFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -123,13 +137,19 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
+The NonZeroFiniteNumber to round up.
+
 ###### Returns
 
 `ToInt`\<`NonZeroFiniteNumber`\>
 
+The ceiling value as a NonZeroInt.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `NonZeroFiniteNumber`
+
+Divides one NonZeroFiniteNumber by another.
 
 ###### Parameters
 
@@ -145,11 +165,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
-`a / b`
+`a / b` as a NonZeroFiniteNumber.
 
 ##### floor()
 
 > **floor**: (`x`) => `ToInt`\<`NonZeroFiniteNumber`\>
+
+Rounds down a NonZeroFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -157,13 +179,19 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
+The NonZeroFiniteNumber to round down.
+
 ###### Returns
 
 `ToInt`\<`NonZeroFiniteNumber`\>
 
+The floor value as a NonZeroInt.
+
 ##### is()
 
 > **is**: (`a`) => `a is NonZeroFiniteNumber`
+
+Type guard to check if a value is a NonZeroFiniteNumber.
 
 ###### Parameters
 
@@ -175,9 +203,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `a is NonZeroFiniteNumber`
 
+`true` if the value is a non-zero finite number, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `NonZeroFiniteNumber` = `max_`
+
+Returns the larger of two NonZeroFiniteNumber values.
 
 ###### Parameters
 
@@ -188,11 +220,15 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 ###### Returns
 
 `NonZeroFiniteNumber`
+
+The maximum value as a NonZeroFiniteNumber.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `NonZeroFiniteNumber` = `min_`
 
+Returns the smaller of two NonZeroFiniteNumber values.
+
 ###### Parameters
 
 ###### values
@@ -203,9 +239,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
+The minimum value as a NonZeroFiniteNumber.
+
 ##### mul()
 
 > **mul**: (`x`, `y`) => `NonZeroFiniteNumber`
+
+Multiplies two NonZeroFiniteNumber values.
 
 ###### Parameters
 
@@ -221,12 +261,14 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
-`a * b`
+`a * b` as a NonZeroFiniteNumber.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `NonZeroFiniteNumber`
 
+Raises a NonZeroFiniteNumber to the power of another NonZeroFiniteNumber.
+
 ###### Parameters
 
 ###### x
@@ -241,11 +283,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
-`a ** b`
+`a ** b` as a NonZeroFiniteNumber.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `NonZeroFiniteNumber`
+
+Generates a random NonZeroFiniteNumber value.
 
 ###### Parameters
 
@@ -261,9 +305,13 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
+A random non-zero finite number.
+
 ##### round()
 
 > **round**: (`x`) => `ToInt`\<`NonZeroFiniteNumber`\>
+
+Rounds a NonZeroFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -271,13 +319,19 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
+The NonZeroFiniteNumber to round.
+
 ###### Returns
 
 `ToInt`\<`NonZeroFiniteNumber`\>
 
+The rounded value as a NonZeroInt.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `NonZeroFiniteNumber`
+
+Subtracts one NonZeroFiniteNumber from another.
 
 ###### Parameters
 
@@ -293,4 +347,30 @@ Defined in: [src/number/branded-types/non-zero-finite-number.mts:84](https://git
 
 `NonZeroFiniteNumber`
 
-`a - b`
+`a - b` as a NonZeroFiniteNumber.
+
+#### Example
+
+```typescript
+const factor = asNonZeroFiniteNumber(2.5);
+const multiplier = asNonZeroFiniteNumber(-1.5);
+
+// Arithmetic operations that preserve non-zero constraint
+const result = NonZeroFiniteNumber.add(factor, multiplier); // NonZeroFiniteNumber (1.0)
+const difference = NonZeroFiniteNumber.sub(factor, multiplier); // NonZeroFiniteNumber (4.0)
+const product = NonZeroFiniteNumber.mul(factor, multiplier); // NonZeroFiniteNumber (-3.75)
+const quotient = NonZeroFiniteNumber.div(factor, multiplier); // NonZeroFiniteNumber (-1.666...)
+
+// Utility operations
+const absolute = NonZeroFiniteNumber.abs(multiplier); // NonZeroFiniteNumber (1.5)
+const minimum = NonZeroFiniteNumber.min(factor, multiplier); // NonZeroFiniteNumber (-1.5)
+const maximum = NonZeroFiniteNumber.max(factor, multiplier); // NonZeroFiniteNumber (2.5)
+
+// Rounding operations (return NonZeroInt)
+const rounded = NonZeroFiniteNumber.round(factor); // NonZeroInt (3)
+const floored = NonZeroFiniteNumber.floor(factor); // NonZeroInt (2)
+const ceiled = NonZeroFiniteNumber.ceil(factor); // NonZeroInt (3)
+
+// Random generation
+const randomValue = NonZeroFiniteNumber.random(); // NonZeroFiniteNumber (random non-zero value)
+```

@@ -1,4 +1,5 @@
 import { expectType } from '../expect-type.mjs';
+import { Optional } from '../functional/index.mjs';
 import { Arr } from './array-utils.mjs';
 
 describe('Arr', () => {
@@ -7,41 +8,50 @@ describe('Arr', () => {
       const xs = [1, 2, 3] as const;
       const head = Arr.head(xs);
 
-      expectType<typeof head, 1>('=');
+      expectType<typeof head, Optional.Some<1>>('=');
 
       test('case 1', () => {
-        expect(head).toBe(1);
+        expect(Optional.isSome(head)).toBe(true);
+        if (Optional.isSome(head)) {
+          expect(head.value).toBe(1);
+        }
       });
     }
     {
       const xs: MutableNonEmptyArray<number> = [1, 2, 3];
       const head = Arr.head(xs);
 
-      expectType<typeof head, number>('=');
+      expectType<typeof head, Optional.Some<number>>('=');
 
       test('case 2', () => {
-        expect(head).toBe(1);
+        expect(Optional.isSome(head)).toBe(true);
+        if (Optional.isSome(head)) {
+          expect(head.value).toBe(1);
+        }
       });
     }
     {
       const mut_xs: number[] = [1, 2, 3];
       const head = Arr.head(mut_xs);
 
-      expectType<typeof head, number | undefined>('=');
+      expectType<typeof head, Optional<number>>('=');
 
       test('case 3', () => {
-        expect(head).toBe(1);
+        expect(Optional.isSome(head)).toBe(true);
+        if (Optional.isSome(head)) {
+          expect(head.value).toBe(1);
+        }
       });
     }
     {
       const xs = [] as const;
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+
       const head = Arr.head(xs);
 
-      expectType<typeof head, undefined>('=');
+      expectType<typeof head, Optional.None>('=');
 
       test('case 4', () => {
-        expect(head).toBeUndefined();
+        expect(Optional.isNone(head)).toBe(true);
       });
     }
   });
@@ -51,41 +61,50 @@ describe('Arr', () => {
       const xs = [1, 2, 3] as const;
       const last = Arr.last(xs);
 
-      expectType<typeof last, 3>('=');
+      expectType<typeof last, Optional.Some<3>>('=');
 
       test('case 1', () => {
-        expect(last).toBe(3);
+        expect(Optional.isSome(last)).toBe(true);
+        if (Optional.isSome(last)) {
+          expect(last.value).toBe(3);
+        }
       });
     }
     {
       const xs: MutableNonEmptyArray<number> = [1, 2, 3];
       const last = Arr.last(xs);
 
-      expectType<typeof last, number>('=');
+      expectType<typeof last, Optional.Some<number>>('=');
 
       test('case 2', () => {
-        expect(last).toBe(3);
+        expect(Optional.isSome(last)).toBe(true);
+        if (Optional.isSome(last)) {
+          expect(last.value).toBe(3);
+        }
       });
     }
     {
       const mut_xs: number[] = [1, 2, 3];
       const last = Arr.last(mut_xs);
 
-      expectType<typeof last, number | undefined>('=');
+      expectType<typeof last, Optional<number>>('=');
 
       test('case 3', () => {
-        expect(last).toBe(3);
+        expect(Optional.isSome(last)).toBe(true);
+        if (Optional.isSome(last)) {
+          expect(last.value).toBe(3);
+        }
       });
     }
     {
       const xs = [] as const;
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+
       const last = Arr.last(xs);
 
-      expectType<typeof last, undefined>('=');
+      expectType<typeof last, Optional.None>('=');
 
       test('case 4', () => {
-        expect(last).toBeUndefined();
+        expect(Optional.isNone(last)).toBe(true);
       });
     }
   });

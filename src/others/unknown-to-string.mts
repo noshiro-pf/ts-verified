@@ -32,7 +32,7 @@ import { isNonNullish } from '../guard/index.mjs';
 export const unknownToString = (
   value: unknown,
   options?: Partial<Readonly<{ prettyPrintObject: boolean }>>,
-): Result<string, string> => {
+): Result<string, Error> => {
   switch (typeof value) {
     case 'string':
       return Result.ok(value);
@@ -56,7 +56,9 @@ export const unknownToString = (
         return Result.ok(stringified);
       } catch (error) {
         return Result.err(
-          error instanceof Error ? error.message : 'Failed to stringify object',
+          error instanceof Error
+            ? error
+            : new Error('Failed to stringify object'),
         );
       }
 

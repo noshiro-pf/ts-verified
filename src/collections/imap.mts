@@ -1,4 +1,5 @@
 import { Optional, Result } from '../functional/index.mjs';
+import { asUint32 } from '../number/index.mjs';
 import { tp } from '../others/index.mjs';
 import { unknownToString } from '../others/unknown-to-string.mjs';
 
@@ -10,7 +11,7 @@ import { unknownToString } from '../others/unknown-to-string.mjs';
  * @example
  * ```typescript
  * // This is a type alias describing an interface, so it's not directly instantiated.
- * // See IMap.new for an example of creating an IMap instance that conforms to this.
+ * // See IMap.create for an example of creating an IMap instance that conforms to this.
  *
  * // Example of how you might use a variable that implements this structure:
  * declare const myMap: IMap<string, number>; // IMap implements IMapInterface
@@ -27,7 +28,7 @@ type IMapInterface<K extends MapSetKeyType, V> = Readonly<{
   // Getting information
 
   /** The number of elements in the map. */
-  size: number;
+  size: SizeType.Arr;
 
   /**
    * Checks if a key exists in the map.
@@ -204,7 +205,7 @@ type IMapInterface<K extends MapSetKeyType, V> = Readonly<{
  * @template V The type of the values in the map.
  * @example
  * ```typescript
- * let map: IMap<string, number> = IMap.new<string, number>([["a", 1], ["b", 2]]);
+ * let map: IMap<string, number> = IMap.create<string, number>([["a", 1], ["b", 2]]);
  *
  * console.log(map.get("a").unwrapOr(-1)); // Output: 1
  * console.log(map.size); // Output: 2
@@ -220,7 +221,7 @@ type IMapInterface<K extends MapSetKeyType, V> = Readonly<{
  * // Key: b, Value: 2
  * // Key: c, Value: 3
  *
- * const numberMap: IMap<number, string> = IMap.new([[1, "one"], [2, "two"]]);
+ * const numberMap: IMap<number, string> = IMap.create([[1, "one"], [2, "two"]]);
  * console.log(numberMap.get(2).unwrapOr("not found")); // Output: "two"
  * ```
  */
@@ -230,7 +231,7 @@ export type IMap<K extends MapSetKeyType, V> = Iterable<readonly [K, V]> &
 /**
  * Provides utility functions for IMap.
  */
-export const IMap = {
+export namespace IMap {
   /**
    * Creates a new IMap instance.
    * @template K The type of the keys.
@@ -239,25 +240,25 @@ export const IMap = {
    * @returns A new IMap instance.
    * @example
    * ```typescript
-   * const mapFromStringPairs = IMap.new<string, number>([["one", 1], ["two", 2]]);
+   * const mapFromStringPairs = IMap.create<string, number>([["one", 1], ["two", 2]]);
    * console.log(mapFromStringPairs.get("one").unwrap()); // Output: 1
    *
-   * const mapFromNumberPairs = IMap.new<number, string>([[10, "ten"], [20, "twenty"]]);
+   * const mapFromNumberPairs = IMap.create<number, string>([[10, "ten"], [20, "twenty"]]);
    * console.log(mapFromNumberPairs.get(20).unwrap()); // Output: "twenty"
    *
    * // Can also be created from another Map or IMap
    * const existingJsMap = new Map([["a", 100], ["b", 200]]);
-   * const iMapFromJsMap = IMap.new(existingJsMap);
+   * const iMapFromJsMap = IMap.create(existingJsMap);
    * console.log(iMapFromJsMap.get("b").unwrap()); // Output: 200
    *
-   * const anotherIMap = IMap.new<string, boolean>([["active", true]]);
-   * const iMapFromIMap = IMap.new(anotherIMap);
+   * const anotherIMap = IMap.create<string, boolean>([["active", true]]);
+   * const iMapFromIMap = IMap.create(anotherIMap);
    * console.log(iMapFromIMap.get("active").unwrap()); // Output: true
    * ```
    */
-  new: <K extends MapSetKeyType, V>(
+  export const create = <K extends MapSetKeyType, V>(
     iterable: Iterable<readonly [K, V]>,
-  ): IMap<K, V> => new IMapClass<K, V>(iterable),
+  ): IMap<K, V> => new IMapClass<K, V>(iterable);
 
   /**
    * Checks if two IMap instances are equal.
@@ -269,25 +270,27 @@ export const IMap = {
    * @returns `true` if the maps are equal, `false` otherwise.
    * @example
    * ```typescript
-   * const map1 = IMap.new<string, number>([["a", 1], ["b", 2]]);
-   * const map2 = IMap.new<string, number>([["a", 1], ["b", 2]]);
-   * const map3 = IMap.new<string, number>([["a", 1], ["c", 3]]);
-   * const map4 = IMap.new<string, number>([["a", 1], ["b", 99]]);
-   * const map5 = IMap.new<string, number>([["b", 2], ["a", 1]]); // Order doesn't matter for equality
+   * const map1 = IMap.create<string, number>([["a", 1], ["b", 2]]);
+   * const map2 = IMap.create<string, number>([["a", 1], ["b", 2]]);
+   * const map3 = IMap.create<string, number>([["a", 1], ["c", 3]]);
+   * const map4 = IMap.create<string, number>([["a", 1], ["b", 99]]);
+   * const map5 = IMap.create<string, number>([["b", 2], ["a", 1]]); // Order doesn't matter for equality
    *
    * console.log(IMap.equal(map1, map2)); // Output: true
    * console.log(IMap.equal(map1, map3)); // Output: false (different keys/values)
    * console.log(IMap.equal(map1, map4)); // Output: false (different value for key "b")
    * console.log(IMap.equal(map1, map5)); // Output: true
    *
-   * const mapNum1 = IMap.new<number, string>([[1, "x"], [2, "y"]]);
-   * const mapNum2 = IMap.new<number, string>([[2, "y"], [1, "x"]]);
+   * const mapNum1 = IMap.create<number, string>([[1, "x"], [2, "y"]]);
+   * const mapNum2 = IMap.create<number, string>([[2, "y"], [1, "x"]]);
    * console.log(IMap.equal(mapNum1, mapNum2)); // Output: true
    * ```
    */
-  equal: <K extends MapSetKeyType, V>(a: IMap<K, V>, b: IMap<K, V>): boolean =>
-    a.size === b.size && a.every((v, k) => b.get(k) === v),
-};
+  export const equal = <K extends MapSetKeyType, V>(
+    a: IMap<K, V>,
+    b: IMap<K, V>,
+  ): boolean => a.size === b.size && a.every((v, k) => b.get(k) === v);
+}
 
 /**
  * Class implementation for IMap.
@@ -316,8 +319,8 @@ class IMapClass<K extends MapSetKeyType, V>
   }
 
   /** @inheritdoc */
-  get size(): number {
-    return this.#map.size;
+  get size(): SizeType.Arr {
+    return asUint32(this.#map.size);
   }
 
   /** @inheritdoc */
@@ -369,16 +372,18 @@ class IMapClass<K extends MapSetKeyType, V>
       return this;
     }
 
-    return IMap.new(Array.from(this.#map).filter(([k]) => !Object.is(k, key)));
+    return IMap.create(
+      Array.from(this.#map).filter(([k]) => !Object.is(k, key)),
+    );
   }
 
   /** @inheritdoc */
   set(key: K, value: V): IMap<K, V> {
     if (value === this.get(key)) return this; // has no changes
     if (!this.has(key)) {
-      return IMap.new([...this.#map, tp(key, value)]);
+      return IMap.create([...this.#map, tp(key, value)]);
     } else {
-      return IMap.new(
+      return IMap.create(
         Array.from(this.#map, ([k, v]) => tp(k, Object.is(k, key) ? value : v)),
       );
     }
@@ -398,7 +403,7 @@ class IMapClass<K extends MapSetKeyType, V>
       return this;
     }
 
-    return IMap.new(
+    return IMap.create(
       Array.from(this.#map, ([k, v]) =>
         tp(k, Object.is(k, key) ? updater(curr.value) : v),
       ),
@@ -447,24 +452,24 @@ class IMapClass<K extends MapSetKeyType, V>
       }
     }
 
-    return IMap.new(mut_result);
+    return IMap.create(mut_result);
   }
 
   /** @inheritdoc */
   map<V2>(mapFn: (value: V, key: K) => V2): IMap<K, V2> {
-    return IMap.new(this.toArray().map(([k, v]) => tp(k, mapFn(v, k))));
+    return IMap.create(this.toArray().map(([k, v]) => tp(k, mapFn(v, k))));
   }
 
   /** @inheritdoc */
   mapKeys<K2 extends MapSetKeyType>(mapFn: (key: K) => K2): IMap<K2, V> {
-    return IMap.new(this.toArray().map(([k, v]) => tp(mapFn(k), v)));
+    return IMap.create(this.toArray().map(([k, v]) => tp(mapFn(k), v)));
   }
 
   /** @inheritdoc */
   mapEntries<K2 extends MapSetKeyType, V2>(
     mapFn: (entry: readonly [K, V]) => readonly [K2, V2],
   ): IMap<K2, V2> {
-    return IMap.new(this.toArray().map(mapFn));
+    return IMap.create(this.toArray().map(mapFn));
   }
 
   /** @inheritdoc */

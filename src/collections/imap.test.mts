@@ -3,8 +3,8 @@ import { IMap } from './imap.mjs';
 
 describe('IMap[Symbol.iterator]', () => {
   test('case 1', () => {
-    const m0 = IMap.new(
-      IMap.new([
+    const m0 = IMap.create(
+      IMap.create([
         [1, 10],
         [2, 20],
         [3, 30],
@@ -12,7 +12,7 @@ describe('IMap[Symbol.iterator]', () => {
     );
 
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [2, 20],
         [3, 30],
@@ -23,7 +23,7 @@ describe('IMap[Symbol.iterator]', () => {
 
 describe('IMap.size', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [2, 20],
       [3, 30],
@@ -35,7 +35,7 @@ describe('IMap.size', () => {
 
 describe('IMap.has', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -47,7 +47,7 @@ describe('IMap.has', () => {
   });
 
   test('case 2', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -59,13 +59,13 @@ describe('IMap.has', () => {
   });
 
   test('case 3', () => {
-    const m0 = IMap.new<number, number>([]);
+    const m0 = IMap.create<number, number>([]);
 
     expect(m0.has(0)).toBe(false);
   });
 
   test('case 4', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -80,7 +80,7 @@ describe('IMap.has', () => {
 
 describe('IMap.get', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -92,7 +92,7 @@ describe('IMap.get', () => {
   });
 
   test('case 2', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -104,13 +104,13 @@ describe('IMap.get', () => {
   });
 
   test('case 3', () => {
-    const m0 = IMap.new<number, number>([]);
+    const m0 = IMap.create<number, number>([]);
 
     expect(m0.get(0)).toStrictEqual(Optional.none);
   });
 
   test('case 4', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -125,7 +125,7 @@ describe('IMap.get', () => {
 
 describe('IMap.set', () => {
   test('case 1', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -134,7 +134,7 @@ describe('IMap.set', () => {
     ]);
 
     expect(m0.set(9, 90)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -144,7 +144,7 @@ describe('IMap.set', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -155,7 +155,7 @@ describe('IMap.set', () => {
   });
 
   test('case 2', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -164,7 +164,7 @@ describe('IMap.set', () => {
     ]);
 
     expect(m0.set(3, 40)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 40],
         [5, 50],
@@ -173,7 +173,7 @@ describe('IMap.set', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -184,16 +184,16 @@ describe('IMap.set', () => {
   });
 
   test('case 3', () => {
-    const m0 = IMap.new<number, number>([]);
+    const m0 = IMap.create<number, number>([]);
 
-    expect(m0.set(1, 10)).toStrictEqual(IMap.new([[1, 10]]));
-    expect(m0).toStrictEqual(IMap.new<number, number>([]));
+    expect(m0.set(1, 10)).toStrictEqual(IMap.create([[1, 10]]));
+    expect(m0).toStrictEqual(IMap.create<number, number>([]));
   });
 });
 
 describe('IMap.update', () => {
   test('case 1', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -202,7 +202,7 @@ describe('IMap.update', () => {
     ]);
 
     expect(m0.update(9, (x) => 2 * x)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -211,7 +211,7 @@ describe('IMap.update', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -222,7 +222,7 @@ describe('IMap.update', () => {
   });
 
   test('case 2', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -231,7 +231,7 @@ describe('IMap.update', () => {
     ]);
 
     expect(m0.update(3, (x) => 2 * x)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 60],
         [5, 50],
@@ -240,7 +240,7 @@ describe('IMap.update', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -251,16 +251,16 @@ describe('IMap.update', () => {
   });
 
   test('case 3', () => {
-    const m0 = IMap.new<number, number>([]);
+    const m0 = IMap.create<number, number>([]);
 
-    expect(m0.update(1, (x) => 2 * x)).toStrictEqual(IMap.new([]));
-    expect(m0).toStrictEqual(IMap.new<number, number>([]));
+    expect(m0.update(1, (x) => 2 * x)).toStrictEqual(IMap.create([]));
+    expect(m0).toStrictEqual(IMap.create<number, number>([]));
   });
 });
 
 describe('IMap.delete', () => {
   test('case 1', () => {
-    const m0 = IMap.new<number, number>([
+    const m0 = IMap.create<number, number>([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -269,7 +269,7 @@ describe('IMap.delete', () => {
     ]);
 
     expect(m0.delete(10)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -278,7 +278,7 @@ describe('IMap.delete', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -289,7 +289,7 @@ describe('IMap.delete', () => {
   });
 
   test('case 2', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -298,7 +298,7 @@ describe('IMap.delete', () => {
     ]);
 
     expect(m0.delete(3)).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [5, 50],
         [6, 60],
@@ -306,7 +306,7 @@ describe('IMap.delete', () => {
       ]),
     );
     expect(m0).toStrictEqual(
-      IMap.new([
+      IMap.create([
         [1, 10],
         [3, 30],
         [5, 50],
@@ -317,16 +317,16 @@ describe('IMap.delete', () => {
   });
 
   test('case 3', () => {
-    const m0 = IMap.new<number, number>([]);
+    const m0 = IMap.create<number, number>([]);
 
-    expect(m0.delete(1)).toStrictEqual(IMap.new([]));
-    expect(m0).toStrictEqual(IMap.new<number, number>([]));
+    expect(m0.delete(1)).toStrictEqual(IMap.create([]));
+    expect(m0).toStrictEqual(IMap.create<number, number>([]));
   });
 });
 
 describe('IMap.forEach', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -345,7 +345,7 @@ describe('IMap.forEach', () => {
 
 describe('IMap.keys', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -362,7 +362,7 @@ describe('IMap.keys', () => {
 
 describe('IMap.values', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],
@@ -379,7 +379,7 @@ describe('IMap.values', () => {
 
 describe('IMap.entries', () => {
   test('case 1', () => {
-    const m0 = IMap.new([
+    const m0 = IMap.create([
       [1, 10],
       [3, 30],
       [5, 50],

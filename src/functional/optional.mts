@@ -89,8 +89,7 @@ export namespace Optional {
    * If the {@link Optional} is {@link Optional.Some}<S>, resolves to `never`.
    * @template O The {@link Optional.Base} type to narrow.
    */
-  export type NarrowToNone<O extends Base> =
-    O extends Some<unknown> ? never : O;
+  export type NarrowToNone<O extends Base> = O extends None ? O : never;
 
   /**
    * Creates an {@link Optional.Some} containing the given value.
@@ -107,7 +106,7 @@ export namespace Optional {
    * console.log(Optional.unwrap(someValue)); // 42
    * ```
    */
-  export const some = <const S,>(value: S): Some<S> => ({
+  export const some = <S,>(value: S): Some<S> => ({
     type: SomeTypeSymbol,
     value,
   });
@@ -132,7 +131,7 @@ export namespace Optional {
    * @param optional The {@link Optional} to check.
    * @returns `true` if the {@link Optional} is {@link Optional.Some}, `false` otherwise.
    */
-  export const isSome = <const O extends Base>(
+  export const isSome = <O extends Base>(
     optional: O,
   ): optional is NarrowToSome<O> => optional.type === SomeTypeSymbol;
 
@@ -143,7 +142,7 @@ export namespace Optional {
    * @param optional The {@link Optional} to check.
    * @returns `true` if the {@link Optional} is {@link Optional.None}, `false` otherwise.
    */
-  export const isNone = <const O extends Base>(
+  export const isNone = <O extends Base>(
     optional: O,
   ): optional is NarrowToNone<O> => optional.type === NoneTypeSymbol;
 
@@ -163,7 +162,7 @@ export namespace Optional {
    * // Optional.unwrapThrow(none); // throws Error
    * ```
    */
-  export const unwrapThrow = <const O extends Base>(optional: O): Unwrap<O> => {
+  export const unwrapThrow = <O extends Base>(optional: O): Unwrap<O> => {
     if (isSome(optional)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
       return optional.value as Unwrap<O>;
@@ -178,16 +177,16 @@ export namespace Optional {
    * @param optional The `Optional.Some` to unwrap.
    * @returns The contained value.
    */
-  export function unwrap<const O extends Some<unknown>>(optional: O): Unwrap<O>;
+  export function unwrap<O extends Some<unknown>>(optional: O): Unwrap<O>;
   /**
    * Unwraps an `Optional`, returning the contained value or `undefined` if it's `Optional.None`.
    * @template O The `Optional.Base` type to unwrap.
    * @param optional The `Optional` to unwrap.
    * @returns The contained value if `Optional.Some`, otherwise `undefined`.
    */
-  export function unwrap<const O extends Base>(
-    optional: O,
-  ): Unwrap<O> | undefined {
+  export function unwrap<O extends Base>(optional: O): Unwrap<O> | undefined;
+
+  export function unwrap<O extends Base>(optional: O): Unwrap<O> | undefined {
     return isNone(optional)
       ? undefined
       : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -201,15 +200,45 @@ export namespace Optional {
    * @param optional The `Optional` to unwrap.
    * @param defaultValue The value to return if `optional` is `Optional.None`.
    * @returns The contained value if `Optional.Some`, otherwise `defaultValue`.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const some = Optional.some(42);
+   * const value = Optional.unwrapOr(some, 0);
+   * console.log(value); // 42
+   *
+   * // Curried usage for pipe composition
+   * const unwrapWithDefault = Optional.unwrapOr(0);
+   * const value2 = pipe(Optional.none).map(unwrapWithDefault).value;
+   * console.log(value2); // 0
+   * ```
    */
-  export const unwrapOr = <const O extends Base, D>(
+  export function unwrapOr<O extends Base, D>(
     optional: O,
     defaultValue: D,
-  ): D | Unwrap<O> =>
-    isNone(optional)
-      ? defaultValue
-      : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        ((optional as NarrowToSome<O>).value as Unwrap<O>);
+  ): D | Unwrap<O>;
+
+  export function unwrapOr<S, D>(
+    defaultValue: D,
+  ): (optional: Optional<S>) => D | S;
+
+  export function unwrapOr<O extends Base, D>(
+    ...args:
+      | readonly [optional: O, defaultValue: D]
+      | readonly [defaultValue: D]
+  ): D | Unwrap<O> | ((optional: Optional<Unwrap<O>>) => D | Unwrap<O>) {
+    if (args.length === 2) {
+      const [optional, defaultValue] = args;
+      return isNone(optional)
+        ? defaultValue
+        : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          ((optional as NarrowToSome<O>).value as Unwrap<O>);
+    } else {
+      const [defaultValue] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isNone(optional) ? defaultValue : unwrap(optional);
+    }
+  }
 
   /**
    * Returns the `Optional` if it is `Some`, otherwise returns the alternative.
@@ -219,16 +248,41 @@ export namespace Optional {
    * @returns The first `Optional` if `Some`, otherwise the alternative.
    * @example
    * ```typescript
+   * // Regular usage
    * const primary = Optional.none;
    * const fallback = Optional.some("default");
    * const result = Optional.orElse(primary, fallback);
    * console.log(Optional.unwrap(result)); // "default"
+   *
+   * // Curried usage for pipe composition
+   * const fallbackTo = Optional.orElse(Optional.some("fallback"));
+   * const result2 = pipe(Optional.none).map(fallbackTo).value;
+   * console.log(Optional.unwrap(result2)); // "fallback"
    * ```
    */
-  export const orElse = <const O extends Base, const O2 extends Base>(
+  export function orElse<O extends Base, const O2 extends Base>(
     optional: O,
     alternative: O2,
-  ): O | O2 => (isNone(optional) ? alternative : optional);
+  ): O | O2;
+
+  export function orElse<S, S2>(
+    alternative: Optional<S2>,
+  ): (optional: Optional<S>) => Optional<S> | Optional<S2>;
+
+  export function orElse<O extends Base, const O2 extends Base>(
+    ...args:
+      | readonly [optional: O, alternative: O2]
+      | readonly [alternative: O2]
+  ): O | O2 | ((optional: Optional<Unwrap<O>>) => Optional<Unwrap<O>> | O2) {
+    if (args.length === 2) {
+      const [optional, alternative] = args;
+      return isNone(optional) ? alternative : optional;
+    } else {
+      const [alternative] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isNone(optional) ? alternative : optional;
+    }
+  }
 
   /**
    * Maps an {@link Optional}<S> to {@link Optional}<S2> by applying a function to a contained value.
@@ -255,14 +309,38 @@ export namespace Optional {
    *   s => s.length
    * );
    * console.log(Optional.unwrap(result)); // 5
+   *
+   * // Curried version for use with pipe
+   * const doubler = Optional.map((x: number) => x * 2);
+   * const result2 = pipe(Optional.some(5)).map(doubler).value;
+   * console.log(Optional.unwrap(result2)); // 10
    * ```
    */
-  export const map = <const O extends Base, S2>(
+  export function map<O extends Base, S2>(
     optional: O,
     mapFn: (value: Unwrap<O>) => S2,
-  ): Optional<S2> =>
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+  ): Optional<S2>;
+
+  export function map<S, S2>(
+    mapFn: (value: S) => S2,
+  ): (optional: Optional<S>) => Optional<S2>;
+
+  export function map<O extends Base, S2>(
+    ...args:
+      | readonly [optional: O, mapFn: (value: Unwrap<O>) => S2]
+      | readonly [mapFn: (value: Unwrap<O>) => S2]
+  ): Optional<S2> | ((optional: Optional<Unwrap<O>>) => Optional<S2>) {
+    if (args.length === 2) {
+      const [optional, mapFn] = args;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+    } else {
+      const [mapFn] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+    }
+  }
 
   /**
    * Applies a function that returns an `Optional` to the value in an `Optional.Some`.
@@ -275,6 +353,7 @@ export namespace Optional {
    * @returns The result of applying the function, or `Optional.None`.
    * @example
    * ```typescript
+   * // Regular usage
    * const parseNumber = (s: string): Optional<number> => {
    *   const n = Number(s);
    *   return isNaN(n) ? Optional.none : Optional.some(n);
@@ -283,14 +362,33 @@ export namespace Optional {
    * const result = Optional.flatMap(Optional.some("42"), parseNumber);
    * console.log(Optional.unwrap(result)); // 42
    *
-   * const invalid = Optional.flatMap(Optional.some("abc"), parseNumber);
-   * console.log(Optional.isNone(invalid)); // true
+   * // Curried usage for pipe composition
+   * const parser = Optional.flatMap(parseNumber);
+   * const result2 = pipe(Optional.some("42")).map(parser).value;
+   * console.log(Optional.unwrap(result2)); // 42
    * ```
    */
-  export const flatMap = <const O extends Base, S2>(
+  export function flatMap<O extends Base, S2>(
     optional: O,
     flatMapFn: (value: Unwrap<O>) => Optional<S2>,
-  ): Optional<S2> => (isSome(optional) ? flatMapFn(unwrap(optional)) : none);
+  ): Optional<S2>;
+  export function flatMap<S, S2>(
+    flatMapFn: (value: S) => Optional<S2>,
+  ): (optional: Optional<S>) => Optional<S2>;
+  export function flatMap<O extends Base, S2>(
+    ...args:
+      | readonly [optional: O, flatMapFn: (value: Unwrap<O>) => Optional<S2>]
+      | readonly [flatMapFn: (value: Unwrap<O>) => Optional<S2>]
+  ): Optional<S2> | ((optional: Optional<Unwrap<O>>) => Optional<S2>) {
+    if (args.length === 2) {
+      const [optional, flatMapFn] = args;
+      return isSome(optional) ? flatMapFn(unwrap(optional)) : none;
+    } else {
+      const [flatMapFn] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isSome(optional) ? flatMapFn(unwrap(optional)) : none;
+    }
+  }
 
   /**
    * Filters an `Optional` based on a predicate.
@@ -302,50 +400,99 @@ export namespace Optional {
    * @returns The filtered `Optional`.
    * @example
    * ```typescript
+   * // Regular usage
    * const someEven = Optional.some(4);
    * const filtered = Optional.filter(someEven, x => x % 2 === 0);
    * console.log(Optional.unwrap(filtered)); // 4
    *
-   * const someOdd = Optional.some(5);
-   * const filteredOdd = Optional.filter(someOdd, x => x % 2 === 0);
-   * console.log(Optional.isNone(filteredOdd)); // true
+   * // Curried usage for pipe composition
+   * const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+   * const result = pipe(Optional.some(4)).map(evenFilter).value;
+   * console.log(Optional.unwrap(result)); // 4
    * ```
    */
-  export const filter = <const O extends Base>(
+  export function filter<O extends Base>(
     optional: O,
     predicate: (value: Unwrap<O>) => boolean,
-  ): Optional<Unwrap<O>> =>
-    isSome(optional)
-      ? pipe(unwrap(optional)).map((value) =>
-          predicate(value) ? some(value) : none,
-        ).value
-      : none;
+  ): Optional<Unwrap<O>>;
+
+  export function filter<S>(
+    predicate: (value: S) => boolean,
+  ): (optional: Optional<S>) => Optional<S>;
+
+  export function filter<O extends Base>(
+    ...args:
+      | readonly [optional: O, predicate: (value: Unwrap<O>) => boolean]
+      | readonly [predicate: (value: Unwrap<O>) => boolean]
+  ):
+    | Optional<Unwrap<O>>
+    | ((optional: Optional<Unwrap<O>>) => Optional<Unwrap<O>>) {
+    if (args.length === 2) {
+      const [optional, predicate] = args;
+      return isSome(optional)
+        ? pipe(unwrap(optional)).map((value) =>
+            predicate(value) ? some(value) : none,
+          ).value
+        : none;
+    } else {
+      const [predicate] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isSome(optional)
+          ? pipe(unwrap(optional)).map((value) =>
+              predicate(value) ? some(value) : none,
+            ).value
+          : none;
+    }
+  }
 
   /**
-   * Returns a function that unwraps an `Optional`, returning the contained value.
-   * Throws an error with the provided message if the `Optional` is `Optional.None`.
+   * Unwraps an `Optional`, returning the contained value or throwing an error with the provided message.
    * @template O The `Optional.Base` type to unwrap.
+   * @param optional The `Optional` to unwrap.
    * @param message The error message to throw if the `Optional` is `Optional.None`.
-   * @returns A function that takes an `Optional` and returns its contained value or throws.
+   * @returns The contained value if `Optional.Some`.
+   * @throws Error with the provided message if the `Optional` is `Optional.None`.
    * @example
    * ```typescript
-   * const getValue = Optional.expectToBe<Optional<number>>("Value must exist");
+   * // Regular usage
    * const some = Optional.some(42);
-   * console.log(getValue(some)); // 42
+   * const value = Optional.expectToBe(some, "Value must exist");
+   * console.log(value); // 42
    *
-   * const none = Optional.none;
-   * // getValue(none); // throws Error: "Value must exist"
+   * // Curried usage for pipe composition
+   * const getValue = Optional.expectToBe("Value must exist");
+   * const value2 = pipe(Optional.some(42)).map(getValue).value;
+   * console.log(value2); // 42
    * ```
    */
-  export const expectToBe =
-    <const O extends Base>(message: string) =>
-    (optional: O): Unwrap<O> => {
+  export function expectToBe<O extends Base>(
+    optional: O,
+    message: string,
+  ): Unwrap<O>;
+
+  export function expectToBe<S>(message: string): (optional: Optional<S>) => S;
+
+  export function expectToBe<O extends Base>(
+    ...args:
+      | readonly [optional: O, message: string]
+      | readonly [message: string]
+  ): Unwrap<O> | ((optional: Optional<Unwrap<O>>) => Unwrap<O>) {
+    if (args.length === 2) {
+      const [optional, message] = args;
       if (isSome(optional)) {
         return unwrap(optional);
       }
-
       throw new Error(message);
-    };
+    } else {
+      const [message] = args;
+      return (optional: Optional<Unwrap<O>>): Unwrap<O> => {
+        if (isSome(optional)) {
+          return unwrap(optional);
+        }
+        throw new Error(message);
+      };
+    }
+  }
 
   /**
    * Combines two `Optional` values into a single `Optional` containing a tuple.
@@ -366,7 +513,7 @@ export namespace Optional {
    * console.log(Optional.isNone(withNone)); // true
    * ```
    */
-  export const zip = <A, B>(
+  export const zip = <A, const B>(
     optionalA: Optional<A>,
     optionalB: Optional<B>,
   ): Optional<readonly [A, B]> =>
@@ -408,7 +555,7 @@ export namespace Optional {
    * console.log(Optional.toNullable(none)); // null
    * ```
    */
-  export const toNullable = <const O extends Base>(
+  export const toNullable = <O extends Base>(
     optional: O,
   ): Unwrap<O> | undefined => (isSome(optional) ? unwrap(optional) : undefined);
 }

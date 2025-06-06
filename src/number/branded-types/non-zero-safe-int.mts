@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = NonZeroSafeInt;
-const typeName = 'NonZeroSafeInt';
+
 const typeNameInMessage = 'a non-zero safe integer';
 
 const {
@@ -18,7 +18,7 @@ const {
   div,
   randomNonZero: random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -54,77 +54,143 @@ export const isNonZeroSafeInt = is;
  * // asNonZeroSafeInt(1.5); // throws TypeError
  * ```
  */
-export const asNonZeroSafeInt = castTo;
+export const asNonZeroSafeInt = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for non-zero safe integers.
+ *
+ * All operations automatically clamp results to the non-zero safe integer range, excluding zero.
+ * This ensures that all arithmetic maintains both the non-zero constraint and IEEE 754 precision guarantees,
+ * preventing precision loss while ensuring results are never zero.
+ *
+ * @example
+ * ```typescript
+ * const a = asNonZeroSafeInt(9007199254740000);  // Near MAX_SAFE_INTEGER
+ * const b = asNonZeroSafeInt(-1000);
+ *
+ * // Arithmetic operations with non-zero safe range clamping
+ * const sum = NonZeroSafeInt.add(a, b);          // NonZeroSafeInt (9007199254739000)
+ * const diff = NonZeroSafeInt.sub(a, b);         // NonZeroSafeInt (clamped to MAX_SAFE_INTEGER)
+ * const product = NonZeroSafeInt.mul(a, b);      // NonZeroSafeInt (clamped to MIN_SAFE_INTEGER)
+ *
+ * // Utility operations
+ * const absolute = NonZeroSafeInt.abs(b);            // NonZeroSafeInt (1000)
+ * const minimum = NonZeroSafeInt.min(a, b);          // NonZeroSafeInt (-1000)
+ * const maximum = NonZeroSafeInt.max(a, b);          // NonZeroSafeInt (a)
+ *
+ * // Random generation
+ * const random = NonZeroSafeInt.random();            // NonZeroSafeInt (random non-zero safe integer)
+ * ```
+ */
 export const NonZeroSafeInt = {
+  /**
+   * Type guard to check if a value is a NonZeroSafeInt.
+   * @param value The value to check.
+   * @returns `true` if the value is a non-zero safe integer, `false` otherwise.
+   */
   is,
 
-  /** `Number.MIN_SAFE_INTEGER` */
+  /**
+   * The minimum safe integer value (-(2^53 - 1)).
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `Number.MAX_SAFE_INTEGER` */
+  /**
+   * The maximum safe integer value (2^53 - 1).
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the absolute value of a non-zero safe integer.
+   * @param a The NonZeroSafeInt value.
+   * @returns The absolute value as a NonZeroSafeInt, clamped to safe range.
+   */
   abs,
 
+  /**
+   * Returns the smaller of two NonZeroSafeInt values.
+   * @param a The first NonZeroSafeInt.
+   * @param b The second NonZeroSafeInt.
+   * @returns The minimum value as a NonZeroSafeInt.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two NonZeroSafeInt values.
+   * @param a The first NonZeroSafeInt.
+   * @param b The second NonZeroSafeInt.
+   * @returns The maximum value as a NonZeroSafeInt.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the non-zero safe integer range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [MIN_SAFE_INTEGER, MAX_SAFE_INTEGER] \ {0} as a NonZeroSafeInt.
+   */
   clamp,
 
+  /**
+   * Generates a random NonZeroSafeInt value within the valid range.
+   * @returns A random non-zero safe integer between MIN_SAFE_INTEGER and MAX_SAFE_INTEGER.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Raises a NonZeroSafeInt to the power of another NonZeroSafeInt.
+   * @param a The base NonZeroSafeInt.
+   * @param b The exponent NonZeroSafeInt.
+   * @returns `a ** b` clamped to non-zero safe integer range as a NonZeroSafeInt.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Adds two NonZeroSafeInt values.
+   * @param a The first NonZeroSafeInt.
+   * @param b The second NonZeroSafeInt.
+   * @returns `a + b` clamped to non-zero safe integer range as a NonZeroSafeInt.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Subtracts one NonZeroSafeInt from another.
+   * @param a The minuend NonZeroSafeInt.
+   * @param b The subtrahend NonZeroSafeInt.
+   * @returns `a - b` clamped to non-zero safe integer range as a NonZeroSafeInt.
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Multiplies two NonZeroSafeInt values.
+   * @param a The first NonZeroSafeInt.
+   * @param b The second NonZeroSafeInt.
+   * @returns `a * b` clamped to non-zero safe integer range as a NonZeroSafeInt.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]` */
+  /**
+   * Divides one NonZeroSafeInt by another using floor division.
+   * @param a The dividend NonZeroSafeInt.
+   * @param b The divisor NonZeroSafeInt.
+   * @returns `⌊a / b⌋` clamped to non-zero safe integer range as a NonZeroSafeInt.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '0', value: 0 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof NonZeroSafeInt,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = -5;
-    const max = 5;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-    expect(result).not.toBe(0);
-  });
-
-  expectType<
-    keyof typeof NonZeroSafeInt,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('=');
-
-  expectType<
-    typeof NonZeroSafeInt,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof NonZeroSafeInt,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('<=');

@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = PositiveInt16;
-const typeName = 'PositiveInt16';
+
 const typeNameInMessage = 'a positive integer in [1, 2^15)';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -51,75 +51,138 @@ export const isPositiveInt16 = is;
  * // asPositiveInt16(32768); // throws TypeError
  * ```
  */
-export const asPositiveInt16 = castTo;
+export const asPositiveInt16 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 16-bit positive integers.
+ *
+ * All operations automatically clamp results to the valid PositiveInt16 range [1, 32767].
+ * This ensures that all arithmetic maintains the 16-bit positive integer constraint,
+ * with results below 1 clamped to MIN_VALUE and overflow results clamped to MAX_VALUE.
+ *
+ * @example
+ * ```typescript
+ * const a = asPositiveInt16(30000);
+ * const b = asPositiveInt16(5000);
+ *
+ * // Arithmetic operations with automatic clamping
+ * const sum = PositiveInt16.add(a, b);       // PositiveInt16 (32767 - clamped to MAX_VALUE)
+ * const diff = PositiveInt16.sub(a, b);      // PositiveInt16 (25000)
+ * const reverseDiff = PositiveInt16.sub(b, a); // PositiveInt16 (1 - clamped to MIN_VALUE)
+ * const product = PositiveInt16.mul(a, b);   // PositiveInt16 (32767 - clamped due to overflow)
+ *
+ * // Range operations
+ * const clamped = PositiveInt16.clamp(0);        // PositiveInt16 (1)
+ * const minimum = PositiveInt16.min(a, b);       // PositiveInt16 (5000)
+ * const maximum = PositiveInt16.max(a, b);       // PositiveInt16 (30000)
+ *
+ * // Utility operations
+ * const random = PositiveInt16.random();         // PositiveInt16 (random value in [1, 32767])
+ * const power = PositiveInt16.pow(asPositiveInt16(2), asPositiveInt16(10)); // PositiveInt16 (1024)
+ * ```
+ */
 export const PositiveInt16 = {
+  /**
+   * Type guard to check if a value is a PositiveInt16.
+   * @param value The value to check.
+   * @returns `true` if the value is a 16-bit positive integer, `false` otherwise.
+   */
   is,
 
-  /** `1` */
+  /**
+   * The minimum value for a 16-bit positive integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^15 - 1` */
+  /**
+   * The maximum value for a 16-bit positive integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two PositiveInt16 values.
+   * @param a The first PositiveInt16.
+   * @param b The second PositiveInt16.
+   * @returns The minimum value as a PositiveInt16.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two PositiveInt16 values.
+   * @param a The first PositiveInt16.
+   * @param b The second PositiveInt16.
+   * @returns The maximum value as a PositiveInt16.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the PositiveInt16 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [1, 32767] as a PositiveInt16.
+   */
   clamp,
 
+  /**
+   * Generates a random PositiveInt16 value within the valid range.
+   * @returns A random PositiveInt16 between 1 and 32767.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[1, 2^15)` */
+  /**
+   * Raises a PositiveInt16 to the power of another PositiveInt16.
+   * @param a The base PositiveInt16.
+   * @param b The exponent PositiveInt16.
+   * @returns `a ** b` clamped to [1, 32767] as a PositiveInt16.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[1, 2^15)` */
+  /**
+   * Adds two PositiveInt16 values.
+   * @param a The first PositiveInt16.
+   * @param b The second PositiveInt16.
+   * @returns `a + b` clamped to [1, 32767] as a PositiveInt16.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[1, 2^15)` */
+  /**
+   * Subtracts one PositiveInt16 from another.
+   * @param a The minuend PositiveInt16.
+   * @param b The subtrahend PositiveInt16.
+   * @returns `a - b` clamped to [1, 32767] as a PositiveInt16 (minimum 1).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[1, 2^15)` */
+  /**
+   * Multiplies two PositiveInt16 values.
+   * @param a The first PositiveInt16.
+   * @param b The second PositiveInt16.
+   * @returns `a * b` clamped to [1, 32767] as a PositiveInt16.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[1, 2^15)` */
+  /**
+   * Divides one PositiveInt16 by another using floor division.
+   * @param a The dividend PositiveInt16.
+   * @param b The divisor PositiveInt16.
+   * @returns `⌊a / b⌋` clamped to [1, 32767] as a PositiveInt16.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '0', value: 0 },
-    { name: '-1', value: -1 },
-    { name: '32768', value: 32768 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof PositiveInt16,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 1;
-    const max = 10;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof PositiveInt16,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof PositiveInt16,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof PositiveInt16,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('<=');

@@ -10,11 +10,11 @@
 
 ### asInt8()
 
-> `const` **asInt8**: (`x`) => `Int8` = `castTo`
+> `const` **asInt8**: (`x`) => `Int8` = `castType`
 
-Defined in: [src/number/enum/int8.mts:129](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L129)
+Defined in: [src/number/enum/int8.mts:143](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L143)
 
-Converts a number to Int8, throwing an error if invalid.
+Casts a number to an Int8 type.
 
 Converts a number to Int8, throwing an error if invalid.
 
@@ -36,21 +36,48 @@ The number as Int8
 
 TypeError if x is not a valid Int8
 
+#### Param
+
+The value to cast.
+
+#### Returns
+
+The value as an Int8 type.
+
+#### Throws
+
+If the value is not a valid 8-bit signed integer.
+
+#### Example
+
+```typescript
+const x = asInt8(127); // Int8
+const y = asInt8(-128); // Int8
+// asInt8(128); // throws TypeError
+// asInt8(-129); // throws TypeError
+// asInt8(1.5); // throws TypeError
+```
+
 ---
 
 ### Int8
 
 > `const` **Int8**: `object`
 
-Defined in: [src/number/enum/int8.mts:134](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L134)
+Defined in: [src/number/enum/int8.mts:172](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L172)
 
-Utilities for working with 8-bit signed integers (range: -128 to 127).
+Namespace providing type-safe arithmetic operations for 8-bit signed integers.
+
+All operations automatically clamp results to the valid Int8 range [-128, 127].
+This ensures that all arithmetic maintains the 8-bit signed integer constraint.
 
 #### Type declaration
 
 ##### abs()
 
 > **abs**: \<`N`\>(`x`) => `AbsoluteValue`\<`N`\>
+
+Returns the absolute value of an Int8.
 
 Returns the absolute value of an Int8.
 
@@ -74,9 +101,19 @@ The Int8 value
 
 The absolute value
 
+###### Param
+
+The Int8 value.
+
+###### Returns
+
+The absolute value as an Int8, clamped to valid range.
+
 ##### add()
 
 > **add**: (`x`, `y`) => `Int8`
+
+Adds two Int8 values.
 
 Adds two Int8 values, clamped to Int8 range.
 
@@ -100,13 +137,23 @@ Second operand
 
 x + y clamped to [-128, 127]
 
+###### Param
+
+The first Int8.
+
+###### Param
+
+The second Int8.
+
 ###### Returns
 
-`a + b`, but clamped to `[-128, 127]`
+`a + b` clamped to [-128, 127] as an Int8.
 
 ##### clamp()
 
 > **clamp**: (`a`) => `Int8`
+
+Clamps a number to the Int8 range.
 
 Clamps a number to the Int8 range [-128, 127].
 
@@ -124,9 +171,19 @@ The number to clamp
 
 The clamped value as Int8
 
+###### Param
+
+The number to clamp.
+
+###### Returns
+
+The value clamped to [-128, 127] as an Int8.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `Int8`
+
+Divides one Int8 by another using floor division.
 
 Divides two Int8 values, clamped to Int8 range.
 
@@ -150,13 +207,23 @@ The divisor (cannot be 0)
 
 ⌊x / y⌋ clamped to [-128, 127]
 
+###### Param
+
+The dividend Int8.
+
+###### Param
+
+The divisor Int8 (cannot be 0).
+
 ###### Returns
 
-`⌊a / b⌋`, but clamped to `[-128, 127]`
+`⌊a / b⌋` clamped to [-128, 127] as an Int8.
 
 ##### is()
 
 > **is**: (`x`) => `x is Int8`
+
+Type guard to check if a value is an Int8.
 
 Checks if a number is a valid Int8 (integer in [-128, 127]).
 
@@ -174,9 +241,19 @@ The number to check
 
 True if x is a valid Int8
 
+###### Param
+
+The value to check.
+
+###### Returns
+
+`true` if the value is an 8-bit signed integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `Int8` = `max_`
+
+Returns the larger of the given Int8 values.
 
 Returns the maximum of the given Int8 values.
 
@@ -194,15 +271,25 @@ The Int8 values to compare
 
 The maximum value
 
+###### Param
+
+The Int8 values to compare.
+
+###### Returns
+
+The maximum value as an Int8.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `127`
+> `readonly` **MAX_VALUE**: `127`
 
-`127`
+The maximum value for an 8-bit signed integer.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `Int8` = `min_`
+
+Returns the smaller of the given Int8 values.
 
 Returns the minimum of the given Int8 values.
 
@@ -220,15 +307,25 @@ The Int8 values to compare
 
 The minimum value
 
+###### Param
+
+The Int8 values to compare.
+
+###### Returns
+
+The minimum value as an Int8.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `-128`
+> `readonly` **MIN_VALUE**: `-128`
 
-`-128`
+The minimum value for an 8-bit signed integer.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `Int8`
+
+Multiplies two Int8 values.
 
 Multiplies two Int8 values, clamped to Int8 range.
 
@@ -252,13 +349,23 @@ Second operand
 
 x \* y clamped to [-128, 127]
 
+###### Param
+
+The first Int8.
+
+###### Param
+
+The second Int8.
+
 ###### Returns
 
-`a * b`, but clamped to `[-128, 127]`
+`a * b` clamped to [-128, 127] as an Int8.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `Int8`
+
+Raises an Int8 to the power of another Int8.
 
 Raises x to the power of y, clamped to Int8 range.
 
@@ -282,13 +389,23 @@ The exponent
 
 x^y clamped to [-128, 127]
 
+###### Param
+
+The base Int8.
+
+###### Param
+
+The exponent Int8.
+
 ###### Returns
 
-`a ** b`, but clamped to `[-128, 127]`
+`a ** b` clamped to [-128, 127] as an Int8.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `Int8`
+
+Generates a random Int8 value within the specified range.
 
 Generates a random Int8 value within the specified range.
 
@@ -312,9 +429,23 @@ The maximum value (inclusive)
 
 A random Int8 between min and max
 
+###### Param
+
+The minimum value (inclusive).
+
+###### Param
+
+The maximum value (inclusive).
+
+###### Returns
+
+A random Int8 between min and max.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `Int8`
+
+Subtracts one Int8 from another.
 
 Subtracts two Int8 values, clamped to Int8 range.
 
@@ -338,9 +469,39 @@ Second operand
 
 x - y clamped to [-128, 127]
 
+###### Param
+
+The minuend Int8.
+
+###### Param
+
+The subtrahend Int8.
+
 ###### Returns
 
-`a - b`, but clamped to `[-128, 127]`
+`a - b` clamped to [-128, 127] as an Int8.
+
+#### Example
+
+```typescript
+const a = asInt8(100);
+const b = asInt8(50);
+
+// Arithmetic operations with automatic clamping
+const sum = Int8.add(a, b); // Int8 (127 - clamped to MAX_VALUE)
+const diff = Int8.sub(a, b); // Int8 (50)
+const product = Int8.mul(a, b); // Int8 (127 - clamped due to overflow)
+
+// Range operations
+const clamped = Int8.clamp(200); // Int8 (127)
+const minimum = Int8.min(a, b); // Int8 (50)
+const maximum = Int8.max(a, b); // Int8 (100)
+
+// Utility operations
+const absolute = Int8.abs(asInt8(-100)); // Int8 (100)
+const random = Int8.random(asInt8(-50), asInt8(50)); // Int8 (random value in [-50, 50])
+const power = Int8.pow(asInt8(2), asInt8(6)); // Int8 (64)
+```
 
 ---
 
@@ -348,9 +509,9 @@ x - y clamped to [-128, 127]
 
 > `const` **isInt8**: (`x`) => `x is Int8` = `is`
 
-Defined in: [src/number/enum/int8.mts:124](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L124)
+Defined in: [src/number/enum/int8.mts:127](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/enum/int8.mts#L127)
 
-Type guard function that checks if a number is a valid Int8.
+Checks if a number is an Int8 (8-bit signed integer in the range [-128, 127]).
 
 Checks if a number is a valid Int8 (integer in [-128, 127]).
 
@@ -367,3 +528,11 @@ The number to check
 `x is Int8`
 
 True if x is a valid Int8
+
+#### Param
+
+The value to check.
+
+#### Returns
+
+`true` if the value is an Int8, `false` otherwise.

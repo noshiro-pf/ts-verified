@@ -1,38 +1,32 @@
-[**Documentation**](../README.md)
+[**Documentation**](../../../README.md)
 
 ---
 
-[Documentation](../README.md) / json/json
+[Documentation](../../../README.md) / [json/json](../README.md) / Json
 
-# json/json
-
-## Variables
-
-### Json
-
-> `const` **Json**: `object`
-
-Defined in: [src/json/json.mts:201](https://github.com/noshiro-pf/ts-verified/blob/main/src/json/json.mts#L201)
+# Json
 
 A collection of JSON utility functions.
 
-#### Type declaration
+## Functions
 
-##### parse()
+### parse()
 
-> **parse**: (`text`, `reviver?`) => [`Result`](../functional/result/README.md#result)\<`JsonValue`, `string`\>
+> **parse**(`text`, `reviver?`): [`Result`](../../../functional/result/README.md#result)\<`JsonValue`, `string`\>
+
+Defined in: [src/json/json.mts:44](https://github.com/noshiro-pf/ts-verified/blob/main/src/json/json.mts#L44)
 
 Converts a JavaScript Object Notation (JSON) string into an object.
 
-###### Parameters
+#### Parameters
 
-###### text
+##### text
 
 `string`
 
 A valid JSON string.
 
-###### reviver?
+##### reviver?
 
 (`this`, `key`, `value`) => `unknown`
 
@@ -40,13 +34,13 @@ A function that transforms the results. This function is
 called for each member of the object. If a member contains nested objects,
 the nested objects are transformed before the parent object is.
 
-###### Returns
+#### Returns
 
-[`Result`](../functional/result/README.md#result)\<`JsonValue`, `string`\>
+[`Result`](../../../functional/result/README.md#result)\<`JsonValue`, `string`\>
 
 A `Result` containing the parsed `JsonValue` on success, or an error message string on failure.
 
-###### Examples
+#### Examples
 
 ```typescript
 const result = Json.parse('{"name": "John", "age": 30}');
@@ -74,40 +68,44 @@ const result = Json.parseWithReviver(
 );
 ```
 
-##### stringify()
+---
 
-> **stringify**: (`value`, `replacer?`, `space?`) => [`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+### stringify()
+
+> **stringify**(`value`, `replacer?`, `space?`): [`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
+
+Defined in: [src/json/json.mts:99](https://github.com/noshiro-pf/ts-verified/blob/main/src/json/json.mts#L99)
 
 Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
 
-###### Parameters
+#### Parameters
 
-###### value
+##### value
 
 `unknown`
 
 A JavaScript value, usually an object or array, to be converted.
 
-###### replacer?
+##### replacer?
 
 (`this`, `key`, `val`) => `unknown`
 
 A function that transforms the results.
 
-###### space?
+##### space?
 
 Adds indentation, white space, and line break characters to the
 return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
 
-`string` | `1` | `2` | `3` | `4` | `5` | `10` | `6` | `7` | `8` | `9`
+`string` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` | `10`
 
-###### Returns
+#### Returns
 
-[`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+[`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
 
 A `Result` containing the JSON string on success, or an error message string on failure.
 
-###### Example
+#### Example
 
 ```typescript
 const obj = { name: 'John', age: 30 };
@@ -135,64 +133,72 @@ if (Result.isErr(error)) {
 }
 ```
 
-##### stringifySelected()
+---
 
-> **stringifySelected**: (`value`, `propertiesToBeSelected?`, `space?`) => [`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+### stringifySelected()
+
+> **stringifySelected**(`value`, `propertiesToBeSelected?`, `space?`): [`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
+
+Defined in: [src/json/json.mts:125](https://github.com/noshiro-pf/ts-verified/blob/main/src/json/json.mts#L125)
 
 Converts a JavaScript value to a JavaScript Object Notation (JSON) string,
 including only the specified properties.
 
-###### Parameters
+#### Parameters
 
-###### value
+##### value
 
 `unknown`
 
 A JavaScript value, usually an object or array, to be converted.
 
-###### propertiesToBeSelected?
+##### propertiesToBeSelected?
 
 readonly (`string` \| `number`)[]
 
 An array of strings and numbers that acts as an approved list
 for selecting the object properties that will be stringified.
 
-###### space?
+##### space?
 
 Adds indentation, white space, and line break characters to the
 return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
 
-`string` | `1` | `2` | `3` | `4` | `5` | `10` | `6` | `7` | `8` | `9`
+`string` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` | `10`
 
-###### Returns
+#### Returns
 
-[`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+[`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
 
 A `Result` containing the JSON string on success, or an error message string on failure.
 
-##### stringifySortedKey()
+---
 
-> **stringifySortedKey**: (`value`, `space?`) => [`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+### stringifySortedKey()
+
+> **stringifySortedKey**(`value`, `space?`): [`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
+
+Defined in: [src/json/json.mts:150](https://github.com/noshiro-pf/ts-verified/blob/main/src/json/json.mts#L150)
 
 Converts a JavaScript record to a JSON string with keys sorted alphabetically at all levels.
 
-###### Parameters
+#### Parameters
 
-###### value
+##### value
 
 `UnknownRecord`
 
 An `UnknownRecord` to be converted.
 
-###### space?
+##### space?
 
 Adds indentation, white space, and line break characters to the
 return-value JSON text to make it easier to read. Can be a number (up to 10) or a string.
 
-`string` | `1` | `2` | `3` | `4` | `5` | `10` | `6` | `7` | `8` | `9`
+`string` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` | `10`
 
-###### Returns
+#### Returns
 
-[`Result`](../functional/result/README.md#result)\<`string`, `string`\>
+[`Result`](../../../functional/result/README.md#result)\<`string`, `string`\>
 
 A `Result` containing the JSON string with sorted keys on success, or an error message string on failure.

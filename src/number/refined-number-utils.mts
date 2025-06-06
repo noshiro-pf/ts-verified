@@ -9,7 +9,7 @@ export namespace TsVerifiedInternals {
    * Provides factory functions for creating type-safe numeric operations with compile-time constraints.
    */
   export namespace RefinedNumberUtils {
-    const castType =
+    const castTypeImpl =
       <BrandedType extends number>(
         is: (n: number) => n is BrandedType,
         typeNameInErrorMessage: string,
@@ -219,7 +219,7 @@ export namespace TsVerifiedInternals {
         max: ElementTypeWithSmallInt,
       ) => ElementType;
 
-      castTo: <N extends number>(x: N) => ElementType & N;
+      castType: <N extends number>(x: N) => ElementType & N;
 
       clamp: TypeEq<MAX_VALUE | MIN_VALUE, undefined> extends true
         ? undefined
@@ -252,17 +252,17 @@ export namespace TsVerifiedInternals {
         (nonZero === true ? a !== 0 : true) &&
         (isFnOrUndefined(MIN_VALUE, MAX_VALUE)?.(a) ?? true);
 
-      const castTo = castType<ElementType>(is, typeNameInMessage);
+      const castType = castTypeImpl<ElementType>(is, typeNameInMessage);
 
       const clamp: ((a: number) => ElementType) | undefined = pipe(
         clampFnOrUndefined(MIN_VALUE, MAX_VALUE),
       ).mapNullable(
         (cl) =>
           (x: number): ElementType =>
-            castTo(Math.round(cl(x))),
+            castType(Math.round(cl(x))),
       ).value;
 
-      const clampOrCastFn: (a: number) => ElementType = clamp ?? castTo;
+      const clampOrCastFn: (a: number) => ElementType = clamp ?? castType;
 
       const abs = (x: ElementTypeWithSmallInt): ToNonNegative<ElementType> =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -337,7 +337,7 @@ export namespace TsVerifiedInternals {
         div,
         random,
         randomNonZero,
-        castTo,
+        castType,
 
         clamp:
           // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -368,7 +368,7 @@ export namespace TsVerifiedInternals {
       random: (min: ElementType, max: ElementType) => ElementType;
       randomNonZero: (min: ElementType, max: ElementType) => ElementType;
 
-      castTo: <N extends number>(x: N) => ElementType & N;
+      castType: <N extends number>(x: N) => ElementType & N;
 
       clamp: TypeEq<MAX_VALUE | MIN_VALUE, undefined> extends true
         ? undefined
@@ -395,17 +395,17 @@ export namespace TsVerifiedInternals {
         (nonZero === true ? a !== 0 : true) &&
         (isFnOrUndefined(MIN_VALUE, MAX_VALUE)?.(a) ?? true);
 
-      const castTo = castType<ElementType>(is, typeNameInMessage);
+      const castType = castTypeImpl<ElementType>(is, typeNameInMessage);
 
       const clamp: ((a: number) => ElementType) | undefined = pipe(
         clampFnOrUndefined(MIN_VALUE, MAX_VALUE),
       ).mapNullable(
         (cl) =>
           (x: number): ElementType =>
-            castTo(cl(x)),
+            castType(cl(x)),
       ).value;
 
-      const clampOrCastFn: (a: number) => ElementType = clamp ?? castTo;
+      const clampOrCastFn: (a: number) => ElementType = clamp ?? castType;
 
       const abs = (x: ElementType): ToNonNegative<ElementType> =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -459,7 +459,7 @@ export namespace TsVerifiedInternals {
         div,
         random,
         randomNonZero,
-        castTo,
+        castType,
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
         clamp: clamp as TypeEq<MAX_VALUE | MIN_VALUE, undefined> extends true

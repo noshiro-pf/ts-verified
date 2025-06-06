@@ -88,8 +88,7 @@ describe('parse', () => {
     expect(() => Json.parse('{{{')).not.toThrow();
     expect(() => Json.parse('null null')).not.toThrow();
 
-    // @ts-expect-error undefined is not a valid JSON
-    expect(() => Json.parse(undefined)).not.toThrow();
+    expect(() => Json.parse(String(undefined))).not.toThrow();
   });
 });
 

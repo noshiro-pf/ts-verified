@@ -39,6 +39,26 @@ describe('NonZeroInt16', () => {
       expect(asNonZeroInt16(32767)).toBe(32767);
       expect(asNonZeroInt16(-32768)).toBe(-32768);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+      { name: '32768', value: 32768 },
+      { name: '-32769', value: -32769 },
+    ] as const)(
+      `asNonZeroInt16($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asNonZeroInt16(value)).toThrow(
+          new TypeError(
+            `Expected a non-zero integer in [-2^15, 2^15), got: ${value}`,
+          ),
+        );
+      },
+    );
   });
 
   describe('isNonZeroInt16', () => {
@@ -168,10 +188,8 @@ describe('NonZeroInt16', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<NonZeroInt16, number>('<=');
-      expectType<number, NonZeroInt16>('>=');
 
-      const _value = asNonZeroInt16(100);
-      expectType<typeof _value, NonZeroInt16>('<=');
+      expectTypeOf(asNonZeroInt16(100)).toExtend<NonZeroInt16>();
     });
   });
 });

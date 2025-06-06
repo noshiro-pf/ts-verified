@@ -19,7 +19,7 @@ describe('Arr', () => {
     test('unknown length', () => {
       const n: number = 3;
       const result = Arr.zeros(asUint32(n));
-      expectType<typeof result, readonly 0[]>('!=');
+      expectType<typeof result, readonly 0[]>('=');
       expect(result).toStrictEqual([0, 0, 0]);
     });
   });
@@ -47,20 +47,20 @@ describe('Arr', () => {
 
   describe('newArray', () => {
     test('fixed length with primitive value', () => {
-      const result = Arr.newArray(3, 'a');
+      const result = Arr.create(3, 'a');
       expectType<typeof result, readonly ['a', 'a', 'a']>('=');
       expect(result).toStrictEqual(['a', 'a', 'a']);
     });
 
     test('fixed length with null', () => {
-      const result = Arr.newArray(2, null);
+      const result = Arr.create(2, null);
       expectType<typeof result, readonly [null, null]>('=');
       expect(result).toStrictEqual([null, null]);
     });
 
     test('fixed length with object (shallow copy)', () => {
       const obj = { id: 1 };
-      const result = Arr.newArray(2, obj);
+      const result = Arr.create(2, obj);
       expectType<typeof result, readonly [{ id: number }, { id: number }]>(
         '~=',
       );
@@ -70,14 +70,14 @@ describe('Arr', () => {
     });
 
     test('fixed length (empty)', () => {
-      const result = Arr.newArray(0, 123);
+      const result = Arr.create(0, 123);
       expectType<typeof result, readonly []>('=');
       expect(result).toStrictEqual([]);
     });
 
     test('unknown length', () => {
       const n: number = 2;
-      const result = Arr.newArray(asUint32(n), true);
+      const result = Arr.create(asUint32(n), true);
       expectType<typeof result, readonly true[]>('=');
       expect(result).toStrictEqual([true, true]);
     });

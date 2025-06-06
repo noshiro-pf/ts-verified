@@ -1,5 +1,4 @@
 import { expectType } from '../expect-type.mjs';
-import { Result } from '../functional/index.mjs';
 import { asUint32 } from '../number/index.mjs';
 import { Arr } from './array-utils.mjs';
 
@@ -133,22 +132,14 @@ describe('Arr', () => {
       const arr = [1, 2, 3, 4, 5];
       const result = Arr.toFilled(arr, 0, 1, 4);
 
-      expect(Result.isOk(result)).toBe(true);
-      if (Result.isOk(result)) {
-        expect(result.value).toStrictEqual([1, 0, 0, 0, 5]);
-      }
+      expect(result).toStrictEqual([1, 0, 0, 0, 5]);
     });
 
-    test('should return error for non-integer start', () => {
+    test('A non-integer starting value should results in a type error.', () => {
       const arr = [1, 2, 3];
 
       // @ts-expect-error start must be an integer
-      const result = Arr.toFilled(arr, 0, 1.5, 3);
-
-      expect(Result.isErr(result)).toBe(true);
-      if (Result.isErr(result)) {
-        expect(result.value.type).toBe('InvalidArgument');
-      }
+      expect(Arr.toFilled(arr, 0, 1.5, 3)).toStrictEqual([1, 0, 0]);
     });
   });
 });

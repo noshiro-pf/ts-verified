@@ -10,7 +10,7 @@
 
 ### asNonZeroSafeInt()
 
-> `const` **asNonZeroSafeInt**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asNonZeroSafeInt**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
 Defined in: [src/number/branded-types/non-zero-safe-int.mts:57](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-safe-int.mts#L57)
 
@@ -75,13 +75,21 @@ Checks if a number is a NonZeroSafeInt (a non-zero safe integer in the range [MI
 
 > `const` **NonZeroSafeInt**: `object`
 
-Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-safe-int.mts#L59)
+Defined in: [src/number/branded-types/non-zero-safe-int.mts:85](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-zero-safe-int.mts#L85)
+
+Namespace providing type-safe arithmetic operations for non-zero safe integers.
+
+All operations automatically clamp results to the non-zero safe integer range, excluding zero.
+This ensures that all arithmetic maintains both the non-zero constraint and IEEE 754 precision guarantees,
+preventing precision loss while ensuring results are never zero.
 
 #### Type declaration
 
 ##### abs()
 
 > **abs**: (`x`) => `ToNonNegative`\<`NonZeroSafeInt`\>
+
+Returns the absolute value of a non-zero safe integer.
 
 ###### Parameters
 
@@ -93,9 +101,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `ToNonNegative`\<`NonZeroSafeInt`\>
 
+The absolute value as a NonZeroSafeInt, clamped to safe range.
+
 ##### add()
 
 > **add**: (`x`, `y`) => `NonZeroSafeInt`
+
+Adds two NonZeroSafeInt values.
 
 ###### Parameters
 
@@ -111,11 +123,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
-`a + b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]`
+`a + b` clamped to non-zero safe integer range as a NonZeroSafeInt.
 
 ##### clamp()
 
 > **clamp**: (`x`) => `NonZeroSafeInt`
+
+Clamps a number to the non-zero safe integer range.
 
 ###### Parameters
 
@@ -127,9 +141,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
+The value clamped to [MIN_SAFE_INTEGER, MAX_SAFE_INTEGER] \ {0} as a NonZeroSafeInt.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `NonZeroSafeInt`
+
+Divides one NonZeroSafeInt by another using floor division.
 
 ###### Parameters
 
@@ -145,11 +163,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
-`⌊a / b⌋`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]`
+`⌊a / b⌋` clamped to non-zero safe integer range as a NonZeroSafeInt.
 
 ##### is()
 
 > **is**: (`a`) => `a is NonZeroSafeInt`
+
+Type guard to check if a value is a NonZeroSafeInt.
 
 ###### Parameters
 
@@ -161,9 +181,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `a is NonZeroSafeInt`
 
+`true` if the value is a non-zero safe integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `NonZeroSafeInt` = `max_`
+
+Returns the larger of two NonZeroSafeInt values.
 
 ###### Parameters
 
@@ -175,16 +199,20 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
+The maximum value as a NonZeroSafeInt.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `SafeUint`
+> `readonly` **MAX_VALUE**: `SafeUint`
 
-`Number.MAX_SAFE_INTEGER`
+The maximum safe integer value (2^53 - 1).
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `NonZeroSafeInt` = `min_`
 
+Returns the smaller of two NonZeroSafeInt values.
+
 ###### Parameters
 
 ###### values
@@ -195,16 +223,20 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
+The minimum value as a NonZeroSafeInt.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `SafeInt`
+> `readonly` **MIN_VALUE**: `SafeInt`
 
-`Number.MIN_SAFE_INTEGER`
+The minimum safe integer value (-(2^53 - 1)).
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `NonZeroSafeInt`
 
+Multiplies two NonZeroSafeInt values.
+
 ###### Parameters
 
 ###### x
@@ -219,12 +251,14 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
-`a * b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]`
+`a * b` clamped to non-zero safe integer range as a NonZeroSafeInt.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `NonZeroSafeInt`
 
+Raises a NonZeroSafeInt to the power of another NonZeroSafeInt.
+
 ###### Parameters
 
 ###### x
@@ -239,11 +273,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
-`a ** b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]`
+`a ** b` clamped to non-zero safe integer range as a NonZeroSafeInt.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `NonZeroSafeInt`
+
+Generates a random NonZeroSafeInt value within the valid range.
 
 ###### Parameters
 
@@ -259,9 +295,13 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
+A random non-zero safe integer between MIN_SAFE_INTEGER and MAX_SAFE_INTEGER.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `NonZeroSafeInt`
+
+Subtracts one NonZeroSafeInt from another.
 
 ###### Parameters
 
@@ -277,4 +317,24 @@ Defined in: [src/number/branded-types/non-zero-safe-int.mts:59](https://github.c
 
 `NonZeroSafeInt`
 
-`a - b`, but clamped to `[MIN_SAFE_INTEGER, MAX_SAFE_INTEGER]`
+`a - b` clamped to non-zero safe integer range as a NonZeroSafeInt.
+
+#### Example
+
+```typescript
+const a = asNonZeroSafeInt(9007199254740000); // Near MAX_SAFE_INTEGER
+const b = asNonZeroSafeInt(-1000);
+
+// Arithmetic operations with non-zero safe range clamping
+const sum = NonZeroSafeInt.add(a, b); // NonZeroSafeInt (9007199254739000)
+const diff = NonZeroSafeInt.sub(a, b); // NonZeroSafeInt (clamped to MAX_SAFE_INTEGER)
+const product = NonZeroSafeInt.mul(a, b); // NonZeroSafeInt (clamped to MIN_SAFE_INTEGER)
+
+// Utility operations
+const absolute = NonZeroSafeInt.abs(b); // NonZeroSafeInt (1000)
+const minimum = NonZeroSafeInt.min(a, b); // NonZeroSafeInt (-1000)
+const maximum = NonZeroSafeInt.max(a, b); // NonZeroSafeInt (a)
+
+// Random generation
+const random = NonZeroSafeInt.random(); // NonZeroSafeInt (random non-zero safe integer)
+```

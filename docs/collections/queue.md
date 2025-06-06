@@ -10,14 +10,12 @@
 
 ### Queue\<T\>
 
-> **Queue**\<`T`\> = `Readonly`\<\{ `dequeue`: () => [`Optional`](../functional/optional/README.md#optional)\<`T`\>; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
+> **Queue**\<`T`\> = `Readonly`\<\{ `dequeue`: () => [`Optional`](../functional/optional/README.md#optional)\<`T`\>; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `SizeType.Arr`; \}\>
 
-Defined in: [src/collections/queue.mts:27](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L27)
+Defined in: [src/collections/queue.mts:28](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L28)
 
-Represents an interface for a queue, ideally FIFO (First-In, First-Out).
-Note: The default `createQueue` implementation currently exhibits LIFO (Last-In, First-Out) behavior.
-The examples illustrate usage based on the interface contract, but actual behavior
-with `createQueue` will be LIFO until its implementation is aligned.
+Represents an interface for a queue with FIFO (First-In, First-Out) behavior.
+Elements are added to the back of the queue and removed from the front.
 
 #### Type Parameters
 
@@ -39,9 +37,9 @@ myQueue.enqueue('world');
 
 console.log(myQueue.size); // Output: 2
 
-// With current LIFO implementation of createQueue:
+// FIFO behavior:
+console.log(myQueue.dequeue().unwrap()); // Output: "hello" (first in, first out)
 console.log(myQueue.dequeue().unwrap()); // Output: "world"
-console.log(myQueue.dequeue().unwrap()); // Output: "hello"
 
 console.log(myQueue.isEmpty); // Output: true
 ```
@@ -52,14 +50,19 @@ console.log(myQueue.isEmpty); // Output: true
 
 > **createQueue**\<`T`\>(`initialValues?`): [`Queue`](#queue)\<`T`\>
 
-Defined in: [src/collections/queue.mts:164](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L164)
+Defined in: [src/collections/queue.mts:223](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L223)
 
-Creates a new Queue instance.
-The `Queue<T>` type definition describes a FIFO (First-In, First-Out) contract.
-However, this `createQueue` function provides an implementation that currently
-behaves as a LIFO (Last-In, First-Out) stack due to its use of `unshift` for `enqueue`
-and `pop` for `dequeue`.
-The examples below demonstrate this current LIFO behavior.
+Creates a new Queue instance with FIFO (First-In, First-Out) behavior using a high-performance circular buffer.
+
+This implementation provides:
+
+- **O(1) enqueue operations** (amortized)
+- **O(1) dequeue operations** (always)
+- **Automatic resizing** when the buffer becomes full
+- **Memory efficient** with garbage collection of removed elements
+
+The circular buffer starts with an initial capacity of 8 elements and doubles in size when full.
+Elements are added to the back and removed from the front, maintaining the order in which they were added.
 
 #### Type Parameters
 
@@ -75,45 +78,46 @@ The type of elements in the queue.
 
 readonly `T`[]
 
-Optional initial values to populate the queue. The order of elements
-during dequeue will be the reverse of their order in `initialValues`
-if no other operations are performed, due to LIFO behavior.
+Optional initial values to populate the queue. Elements will
+be dequeued in the same order they appear in the array.
 
 #### Returns
 
 [`Queue`](#queue)\<`T`\>
 
-A new Queue instance.
+A new Queue instance with circular buffer implementation.
 
 #### Example
 
 ```typescript
 import { createQueue } from './queue'; // Adjust import path as needed
 
-// Example 1: Basic LIFO behavior
-const lifoQueue = createQueue<string>();
-lifoQueue.enqueue('first_in'); // Internal: ["first_in"]
-lifoQueue.enqueue('second_in'); // Internal: ["second_in", "first_in"]
-lifoQueue.enqueue('third_in'); // Internal: ["third_in", "second_in", "first_in"]
+// Example 1: Basic FIFO behavior with O(1) operations
+const queue = createQueue<string>();
+queue.enqueue('first_in'); // O(1)
+queue.enqueue('second_in'); // O(1)
+queue.enqueue('third_in'); // O(1)
 
-console.log(lifoQueue.dequeue().unwrap()); // Output: "third_in" (last one in)
-console.log(lifoQueue.dequeue().unwrap()); // Output: "second_in"
-console.log(lifoQueue.size); // Output: 1
-console.log(lifoQueue.dequeue().unwrap()); // Output: "first_in"
-console.log(lifoQueue.isEmpty); // Output: true
+console.log(queue.dequeue().unwrap()); // O(1) - Output: "first_in"
+console.log(queue.dequeue().unwrap()); // O(1) - Output: "second_in"
+console.log(queue.size); // O(1) - Output: 1
+console.log(queue.dequeue().unwrap()); // O(1) - Output: "third_in"
+console.log(queue.isEmpty); // O(1) - Output: true
 
-// Example 2: Queue with initial values
-// initialValues: [10, 20, 30]
-// Internal data after constructor: [10, 20, 30]
-const numQueue = createQueue<number>([10, 20, 30]);
-console.log(numQueue.size); // Output: 3
+// Example 2: High-performance queue operations
+const numQueue = createQueue<number>();
+for (let i = 0; i < 1000; i++) {
+    numQueue.enqueue(i); // Each operation is O(1) amortized
+}
 
-// Dequeue behavior with initial values (LIFO - pops from end)
-console.log(numQueue.dequeue().unwrap()); // Output: 30
-console.log(numQueue.dequeue().unwrap()); // Output: 20
+while (!numQueue.isEmpty) {
+    numQueue.dequeue(); // Each operation is O(1)
+}
 
-numQueue.enqueue(40); // Internal: [40, 10] (unshift to front, remaining [10])
-console.log(numQueue.dequeue().unwrap()); // Output: 10 (pop from end)
-console.log(numQueue.dequeue().unwrap()); // Output: 40 (pop from end)
-console.log(numQueue.isEmpty); // Output: true
+// Example 3: Queue with initial values
+const initialQueue = createQueue<number>([10, 20, 30]);
+console.log(initialQueue.size); // Output: 3
+console.log(initialQueue.dequeue().unwrap()); // Output: 10
+console.log(initialQueue.dequeue().unwrap()); // Output: 20
+console.log(initialQueue.dequeue().unwrap()); // Output: 30
 ```

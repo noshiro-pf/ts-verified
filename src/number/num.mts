@@ -170,22 +170,58 @@ export namespace Num {
   /**
    * Clamps a value within the given range. If the target value is invalid (not finite), returns the lower bound.
    *
-   * @example
-   *   clamp(0, 2)(2.3); // 2
-   *   clamp(0, 2)(-0.5); // 0
-   *   clamp(0, 2)(1.5); // 1.5
-   * @template N The type of the numbers (lowerBound, upperBound, target).
    * @param lowerBound The lower bound of the range.
    * @param upperBound The upper bound of the range.
-   * @returns A function that takes a target number and returns the clamped value.
+   * @param target The value to clamp.
+   * @returns The clamped value.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * Num.clamp(0, 10, 15); // 10
+   * Num.clamp(0, 10, -5); // 0
+   * Num.clamp(0, 10, 5); // 5
+   *
+   * // Curried usage for pipe composition
+   * const clampTo0_10 = Num.clamp(0, 10);
+   * const result = pipe(15).map(clampTo0_10).value; // 10
+   *
+   * // Traditional curried form (already supported)
+   * clamp(0, 2)(2.3); // 2
+   * clamp(0, 2)(-0.5); // 0
+   * clamp(0, 2)(1.5); // 1.5
+   * ```
    */
-  export const clamp =
-    (lowerBound: number, upperBound: number) =>
-    (target: number): number =>
-      !Number.isFinite(target)
-        ? lowerBound
-        : Math.max(lowerBound, Math.min(upperBound, target));
+  export function clamp(
+    target: number,
+    lowerBound: number,
+    upperBound: number,
+  ): number;
+  export function clamp(
+    lowerBound: number,
+    upperBound: number,
+  ): (target: number) => number;
+  export function clamp(
+    ...args:
+      | readonly [target: number, lowerBound: number, upperBound: number]
+      | readonly [lowerBound: number, upperBound: number]
+  ): number | ((target: number) => number) {
+    if (args.length === 3) {
+      return clampImpl(...args);
+    } else {
+      const [lowerBound, upperBound] = args;
+      return (target: number): number =>
+        clampImpl(target, lowerBound, upperBound);
+    }
+  }
 
+  const clampImpl = (
+    target: number,
+    lowerBound: number,
+    upperBound: number,
+  ): number =>
+    !Number.isFinite(target)
+      ? lowerBound
+      : Math.max(lowerBound, Math.min(upperBound, target));
   /**
    * Performs division of two numbers.
    * @param a The dividend.

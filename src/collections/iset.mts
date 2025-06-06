@@ -1,4 +1,5 @@
 import { Result } from '../functional/index.mjs';
+import { asUint32 } from '../number/index.mjs';
 import { unknownToString } from '../others/unknown-to-string.mjs';
 
 /**
@@ -9,7 +10,7 @@ type ISetInterface<K extends MapSetKeyType> = Readonly<{
   // Getting information
 
   /** The number of elements in the set. */
-  size: number;
+  size: SizeType.Arr;
 
   /** Checks if the set is empty. */
   isEmpty: boolean;
@@ -184,7 +185,7 @@ export type ISet<K extends MapSetKeyType> = Iterable<K> & ISetInterface<K>;
 /**
  * Provides utility functions for ISet.
  */
-export const ISet = {
+export namespace ISet {
   /**
    * Creates a new ISet instance.
    * @template K The type of the elements.
@@ -193,23 +194,24 @@ export const ISet = {
    * @example
    * ```typescript
    * // Create from array
-   * const set1 = ISet.new([1, 2, 3, 3]); // ISet with elements: 1, 2, 3
+   * const set1 = ISet.create([1, 2, 3, 3]); // ISet with elements: 1, 2, 3
    *
    * // Create from another Set
-   * const set2 = ISet.new(new Set(['a', 'b', 'c']));
+   * const set2 = ISet.create(new Set(['a', 'b', 'c']));
    *
    * // Create empty set
-   * const emptySet = ISet.new<string>([]);
+   * const emptySet = ISet.create<string>([]);
    *
    * // Chain operations
-   * const result = ISet.new([1, 2, 3])
+   * const result = ISet.create([1, 2, 3])
    *   .add(4)
    *   .delete(2)
    *   .filter(x => x > 1); // ISet with elements: 3, 4
    * ```
    */
-  new: <K extends MapSetKeyType>(iterable: Iterable<K>): ISet<K> =>
-    new ISetClass<K>(iterable),
+  export const create = <K extends MapSetKeyType>(
+    iterable: Iterable<K>,
+  ): ISet<K> => new ISetClass<K>(iterable);
 
   /**
    * Checks if two ISet instances are equal.
@@ -220,19 +222,18 @@ export const ISet = {
    * @returns `true` if the sets are equal, `false` otherwise.
    * @example
    * ```typescript
-   * const set1 = ISet.new([1, 2, 3]);
-   * const set2 = ISet.new([3, 2, 1]);
-   * const set3 = ISet.new([1, 2, 3, 4]);
+   * const set1 = ISet.create([1, 2, 3]);
+   * const set2 = ISet.create([3, 2, 1]);
+   * const set3 = ISet.create([1, 2, 3, 4]);
    *
    * ISet.equal(set1, set2); // true (same elements, different order)
    * ISet.equal(set1, set3); // false (different sizes)
    * ```
    */
-  equal: <K extends MapSetKeyType>(a: ISet<K>, b: ISet<K>): boolean => {
-    if (a.size !== b.size) return false;
-
-    return a.every((e) => b.has(e));
-  },
+  export const equal = <K extends MapSetKeyType>(
+    a: ISet<K>,
+    b: ISet<K>,
+  ): boolean => a.size === b.size && a.every((e) => b.has(e));
 
   /**
    * Computes the difference between two ISet instances.
@@ -242,21 +243,21 @@ export const ISet = {
    * @returns An object containing sets of added and deleted elements.
    * @example
    * ```typescript
-   * const oldSet = ISet.new([1, 2, 3]);
-   * const newSet = ISet.new([2, 3, 4, 5]);
+   * const oldSet = ISet.create([1, 2, 3]);
+   * const newSet = ISet.create([2, 3, 4, 5]);
    *
    * const diff = ISet.diff(oldSet, newSet);
    * // diff.deleted contains: 1
    * // diff.added contains: 4, 5
    * ```
    */
-  diff: <K extends MapSetKeyType>(
+  export const diff = <K extends MapSetKeyType>(
     oldSet: ISet<K>,
     newSet: ISet<K>,
   ): ReadonlyRecord<'added' | 'deleted', ISet<K>> => ({
     deleted: oldSet.subtract(newSet),
     added: newSet.subtract(oldSet),
-  }),
+  });
 
   /**
    * Computes the intersection of two ISet instances.
@@ -266,15 +267,17 @@ export const ISet = {
    * @returns A new ISet instance representing the intersection.
    * @example
    * ```typescript
-   * const set1 = ISet.new([1, 2, 3, 4]);
-   * const set2 = ISet.new([3, 4, 5, 6]);
+   * const set1 = ISet.create([1, 2, 3, 4]);
+   * const set2 = ISet.create([3, 4, 5, 6]);
    *
    * const intersection = ISet.intersection(set1, set2);
    * // intersection contains: 3, 4
    * ```
    */
-  intersection: <K extends MapSetKeyType>(a: ISet<K>, b: ISet<K>): ISet<K> =>
-    a.intersect(b),
+  export const intersection = <K extends MapSetKeyType>(
+    a: ISet<K>,
+    b: ISet<K>,
+  ): ISet<K> => a.intersect(b);
 
   /**
    * Computes the union of two ISet instances.
@@ -285,18 +288,18 @@ export const ISet = {
    * @returns A new ISet instance representing the union.
    * @example
    * ```typescript
-   * const set1 = ISet.new([1, 2, 3]);
-   * const set2 = ISet.new([3, 4, 5]);
+   * const set1 = ISet.create([1, 2, 3]);
+   * const set2 = ISet.create([3, 4, 5]);
    *
    * const union = ISet.union(set1, set2);
    * // union contains: 1, 2, 3, 4, 5
    * ```
    */
-  union: <K1 extends MapSetKeyType, K2 extends MapSetKeyType>(
+  export const union = <K1 extends MapSetKeyType, K2 extends MapSetKeyType>(
     a: ISet<K1>,
     b: ISet<K2>,
-  ): ISet<K1 | K2> => a.union(b),
-} as const;
+  ): ISet<K1 | K2> => a.union(b);
+}
 
 /**
  * Class implementation for ISet.
@@ -319,8 +322,8 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
   }
 
   /** @inheritdoc */
-  get size(): number {
-    return this.#set.size;
+  get size(): SizeType.Arr {
+    return asUint32(this.#set.size);
   }
 
   /** @inheritdoc */
@@ -362,7 +365,7 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
   add(key: K): ISet<K> {
     if (this.has(key)) return this;
 
-    return ISet.new([...this.#set, key]);
+    return ISet.create([...this.#set, key]);
   }
 
   /** @inheritdoc */
@@ -377,7 +380,7 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
       return this;
     }
 
-    return ISet.new(Array.from(this.#set).filter((k) => !Object.is(k, key)));
+    return ISet.create(Array.from(this.#set).filter((k) => !Object.is(k, key)));
   }
 
   /** @inheritdoc */
@@ -400,12 +403,12 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
       }
     }
 
-    return ISet.new(mut_result);
+    return ISet.create(mut_result);
   }
 
   /** @inheritdoc */
   map<K2 extends MapSetKeyType>(mapFn: (key: K) => K2): ISet<K2> {
-    return ISet.new(this.toArray().map(mapFn));
+    return ISet.create(this.toArray().map(mapFn));
   }
 
   /** @inheritdoc */
@@ -416,12 +419,12 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
 
   /** @inheritdoc */
   filter(predicate: (key: K) => boolean): ISet<K> {
-    return ISet.new(this.toArray().filter(predicate));
+    return ISet.create(this.toArray().filter(predicate));
   }
 
   /** @inheritdoc */
   filterNot(predicate: (key: K) => boolean): ISet<K> {
-    return ISet.new(this.toArray().filter((e) => !predicate(e)));
+    return ISet.create(this.toArray().filter((e) => !predicate(e)));
   }
 
   /** @inheritdoc */
@@ -444,17 +447,17 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
 
   /** @inheritdoc */
   subtract(set: ISet<K>): ISet<K> {
-    return ISet.new(this.toArray().filter((k) => !set.has(k)));
+    return ISet.create(this.toArray().filter((k) => !set.has(k)));
   }
 
   /** @inheritdoc */
   intersect(set: ISet<K>): ISet<K> {
-    return ISet.new(this.toArray().filter((k) => set.has(k)));
+    return ISet.create(this.toArray().filter((k) => set.has(k)));
   }
 
   /** @inheritdoc */
   union<K2 extends MapSetKeyType>(set: ISet<K2>): ISet<K | K2> {
-    return ISet.new([...this, ...set]);
+    return ISet.create([...this, ...set]);
   }
 
   /**

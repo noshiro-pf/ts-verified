@@ -34,6 +34,18 @@ describe('Int32', () => {
       expect(asInt32(2147483647)).toBe(2147483647);
       expect(asInt32(-2147483648)).toBe(-2147483648);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+    ] as const)(`asInt32($name) should throw a TypeError`, ({ value }) => {
+      expect(() => asInt32(value)).toThrow(
+        new TypeError(`Expected an integer in [-2^31, 2^31), got: ${value}`),
+      );
+    });
   });
 
   describe('isInt32', () => {
@@ -151,10 +163,8 @@ describe('Int32', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<Int32, number>('<=');
-      expectType<number, Int32>('>=');
 
-      const _value = asInt32(1000000);
-      expectType<typeof _value, Int32>('<=');
+      expectTypeOf(asInt32(1000000)).toExtend<Int32>();
     });
   });
 });

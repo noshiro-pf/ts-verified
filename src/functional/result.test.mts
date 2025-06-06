@@ -108,6 +108,39 @@ describe('Result', () => {
       }
       expectType<typeof mapped, Result<number, string>>('<=');
     });
+
+    test('should support curried form', () => {
+      const doubler = Result.map((x: number) => x * 2);
+
+      const okResult = Result.ok(5);
+      const mapped = doubler(okResult);
+
+      expect(Result.isOk(mapped)).toBe(true);
+      if (Result.isOk(mapped)) {
+        expect(mapped.value).toBe(10);
+      }
+
+      const errResult: Result<number, string> = Result.err('error');
+      const mappedErr = doubler(errResult);
+      expect(Result.isErr(mappedErr)).toBe(true);
+      if (Result.isErr(mappedErr)) {
+        expect(mappedErr.value).toBe('error');
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const doubler = Result.map((x: number) => x * 2);
+      const toStringFn = Result.map((x: number) => x.toString());
+
+      const result = pipe(Result.ok(5)).map(doubler).map(toStringFn).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe('10');
+      }
+    });
   });
 
   describe('mapErr', () => {
@@ -129,6 +162,40 @@ describe('Result', () => {
         expect(mapped.value).toBe(42);
       }
       expectType<typeof mapped, Result<number, string>>('~=');
+    });
+
+    test('should support curried form', () => {
+      const errorUppercase = Result.mapErr((e: string) => e.toUpperCase());
+
+      const errResult: Result<number, string> = Result.err('error');
+      const mapped = errorUppercase(errResult);
+      expect(Result.isErr(mapped)).toBe(true);
+      if (Result.isErr(mapped)) {
+        expect(mapped.value).toBe('ERROR');
+      }
+
+      const okResult: Result<number, string> = Result.ok(42);
+      const mappedOk = errorUppercase(okResult);
+      expect(Result.isOk(mappedOk)).toBe(true);
+      if (Result.isOk(mappedOk)) {
+        expect(mappedOk.value).toBe(42);
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const errorUppercase = Result.mapErr((e: string) => e.toUpperCase());
+      const errorPrefix = Result.mapErr((e: string) => `ERROR: ${e}`);
+
+      const result = pipe(Result.err('failed'))
+        .map(errorUppercase)
+        .map(errorPrefix).value;
+
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        expect(result.value).toBe('ERROR: FAILED');
+      }
     });
   });
 
@@ -159,6 +226,32 @@ describe('Result', () => {
       const value = Result.unwrapOkOr(result, 0);
       expect(value).toBe(0);
       expectType<typeof value, number>('<=');
+    });
+
+    test('should support curried form', () => {
+      const unwrapWithDefault = Result.unwrapOkOr(42);
+
+      const okResult = Result.ok(100);
+      const successValue = unwrapWithDefault(okResult);
+      expect(successValue).toBe(100);
+
+      const errResult: Result<number, string> = Result.err('failed');
+      const defaultValue = unwrapWithDefault(errResult);
+      expect(defaultValue).toBe(42);
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const unwrapWithDefault = Result.unwrapOkOr(0);
+
+      const successResult = pipe(Result.ok(200)).map(unwrapWithDefault).value;
+      expect(successResult).toBe(200);
+
+      const errorResult = pipe(Result.err('computation failed')).map(
+        unwrapWithDefault,
+      ).value;
+      expect(errorResult).toBe(0);
     });
   });
 
@@ -206,6 +299,50 @@ describe('Result', () => {
         expect(folded.value).toBe(5); // length of 'error'
       }
       expectType<typeof folded, Result<number, number>>('=');
+    });
+
+    test('should support curried form', () => {
+      const folder = Result.fold(
+        (x: number) => x * 2,
+        (e: string) => e.length,
+      );
+
+      const okResult = Result.ok(42);
+      const foldedOk = folder(okResult);
+      expect(Result.isOk(foldedOk)).toBe(true);
+      if (Result.isOk(foldedOk)) {
+        expect(foldedOk.value).toBe(84);
+      }
+
+      const errResult: Result<number, string> = Result.err('error');
+      const foldedErr = folder(errResult);
+      expect(Result.isErr(foldedErr)).toBe(true);
+      if (Result.isErr(foldedErr)) {
+        expect(foldedErr.value).toBe(5);
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const folder = Result.fold(
+        (x: number) => x * 2,
+        () => 0,
+      );
+
+      const result = pipe(Result.ok(21)).map(folder).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(42);
+      }
+
+      const errorResult = pipe(Result.err('error')).map(folder).value;
+
+      expect(Result.isErr(errorResult)).toBe(true);
+      if (Result.isErr(errorResult)) {
+        expect(errorResult.value).toBe(0);
+      }
     });
   });
 
@@ -272,6 +409,55 @@ describe('Result', () => {
       );
       expect(Result.unwrapOk(result)).toBe(60);
     });
+
+    test('should support curried form', () => {
+      const divide = (a: number, b: number): Result<number, string> =>
+        b === 0 ? Result.err('Division by zero') : Result.ok(a / b);
+
+      const divideBy2 = Result.flatMap((x: number) => divide(x, 2));
+
+      const okResult = Result.ok(10);
+      const result = divideBy2(okResult);
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(5);
+      }
+
+      const divideByZero = Result.flatMap((x: number) => divide(x, 0));
+      const errorResult = divideByZero(Result.ok(10));
+      expect(Result.isErr(errorResult)).toBe(true);
+      if (Result.isErr(errorResult)) {
+        expect(errorResult.value).toBe('Division by zero');
+      }
+
+      const initialError = divideBy2(Result.err('initial error'));
+      expect(Result.isErr(initialError)).toBe(true);
+      if (Result.isErr(initialError)) {
+        expect(initialError.value).toBe('initial error');
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const parseNumber = (s: string): Result<number, string> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Result.err('Not a number') : Result.ok(n);
+      };
+
+      const doubleIfPositive = (n: number): Result<number, string> =>
+        n > 0 ? Result.ok(n * 2) : Result.err('Not positive');
+
+      const parser = Result.flatMap(parseNumber);
+      const doubler = Result.flatMap(doubleIfPositive);
+
+      const result = pipe(Result.ok('42')).map(parser).map(doubler).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(84);
+      }
+    });
   });
 
   describe('swap', () => {
@@ -323,6 +509,87 @@ describe('Result', () => {
       expect(() =>
         Result.unwrapErrThrow(result, (obj) => `Object(id=${obj.id})`),
       ).toThrow('Expected Err but got Ok: Object(id=1)');
+    });
+  });
+
+  describe('unwrapErrOr', () => {
+    test('should return error value for Err result', () => {
+      const result = Result.err('error message');
+      const value = Result.unwrapErrOr(result, 'default');
+      expect(value).toBe('error message');
+    });
+
+    test('should return default value for Ok result', () => {
+      const result = Result.ok(42);
+      const value = Result.unwrapErrOr(result, 'default');
+      expect(value).toBe('default');
+    });
+
+    test('should support curried form', () => {
+      const unwrapErrorWithDefault = Result.unwrapErrOr('unknown error');
+
+      const errResult: Result<number, string> = Result.err('failed');
+      const errorValue = unwrapErrorWithDefault(errResult);
+      expect(errorValue).toBe('failed');
+
+      const okResult: Result<number, string> = Result.ok(42);
+      const defaultValue = unwrapErrorWithDefault(okResult);
+      expect(defaultValue).toBe('unknown error');
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const unwrapErrorWithDefault = Result.unwrapErrOr('unknown error');
+
+      const errorResult = pipe(Result.err('network failure')).map(
+        unwrapErrorWithDefault,
+      ).value;
+      expect(errorResult).toBe('network failure');
+
+      const okResult = pipe(Result.ok('success')).map(
+        unwrapErrorWithDefault,
+      ).value;
+      expect(okResult).toBe('unknown error');
+    });
+  });
+
+  describe('expectToBe', () => {
+    test('should return value for Ok result', () => {
+      const result = Result.ok(42);
+      const value = Result.expectToBe(result, 'Expected valid number');
+      expect(value).toBe(42);
+    });
+
+    test('should throw custom error for Err result', () => {
+      const result = Result.err('failed');
+      expect(() => Result.expectToBe(result, 'Operation must succeed')).toThrow(
+        'Operation must succeed',
+      );
+    });
+
+    test('should support curried form', () => {
+      const mustBeOk = Result.expectToBe('Expected successful result');
+
+      const okResult = Result.ok('success');
+      const value = mustBeOk(okResult);
+      expect(value).toBe('success');
+
+      const errResult: Result<string, string> = Result.err('failed');
+      expect(() => mustBeOk(errResult)).toThrow('Expected successful result');
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const mustBeOk = Result.expectToBe('Validation failed');
+
+      const successResult = pipe(Result.ok(100)).map(mustBeOk).value;
+      expect(successResult).toBe(100);
+
+      expect(
+        () => pipe(Result.err('validation error')).map(mustBeOk).value,
+      ).toThrow('Validation failed');
     });
   });
 

@@ -210,15 +210,44 @@ export namespace Result {
    * @param result The `Result` to unwrap.
    * @param defaultValue The value to return if `result` is `Result.Err`.
    * @returns The success value if `Result.Ok`, otherwise `defaultValue`.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const result = Result.ok(42);
+   * const value = Result.unwrapOkOr(result, 0);
+   * console.log(value); // 42
+   *
+   * // Curried usage for pipe composition
+   * const unwrapWithDefault = Result.unwrapOkOr(0);
+   * const value2 = pipe(Result.err("error")).map(unwrapWithDefault).value;
+   * console.log(value2); // 0
+   * ```
    */
-  export const unwrapOkOr = <const R extends Base, D>(
+  export function unwrapOkOr<const R extends Base, D>(
     result: R,
     defaultValue: D,
-  ): D | UnwrapOk<R> =>
-    isErr(result)
-      ? defaultValue
-      : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result.value as UnwrapOk<R>);
+  ): D | UnwrapOk<R>;
+  export function unwrapOkOr<S, D>(
+    defaultValue: D,
+  ): <E>(result: Result<S, E>) => D | S;
+  export function unwrapOkOr<const R extends Base, D>(
+    ...args: readonly [result: R, defaultValue: D] | readonly [defaultValue: D]
+  ):
+    | D
+    | UnwrapOk<R>
+    | (<E>(result: Result<UnwrapOk<R>, E>) => D | UnwrapOk<R>) {
+    if (args.length === 2) {
+      const [result, defaultValue] = args;
+      return isErr(result)
+        ? defaultValue
+        : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          (result.value as UnwrapOk<R>);
+    } else {
+      const [defaultValue] = args;
+      return <E,>(result: Result<UnwrapOk<R>, E>) =>
+        isErr(result) ? defaultValue : result.value;
+    }
+  }
 
   /**
    * Unwraps a `Result`, returning the error value.
@@ -266,15 +295,44 @@ export namespace Result {
    * @param result The `Result` to unwrap.
    * @param defaultValue The value to return if `result` is `Result.Ok`.
    * @returns The error value if `Result.Err`, otherwise `defaultValue`.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const result = Result.err("failed");
+   * const error = Result.unwrapErrOr(result, "default");
+   * console.log(error); // "failed"
+   *
+   * // Curried usage for pipe composition
+   * const unwrapErrorWithDefault = Result.unwrapErrOr("unknown error");
+   * const error2 = pipe(Result.ok(42)).map(unwrapErrorWithDefault).value;
+   * console.log(error2); // "unknown error"
+   * ```
    */
-  export const unwrapErrOr = <const R extends Base, D>(
+  export function unwrapErrOr<const R extends Base, D>(
     result: R,
     defaultValue: D,
-  ): D | UnwrapErr<R> =>
-    isErr(result)
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result.value as UnwrapErr<R>)
-      : defaultValue;
+  ): D | UnwrapErr<R>;
+  export function unwrapErrOr<E, D>(
+    defaultValue: D,
+  ): <S>(result: Result<S, E>) => D | E;
+  export function unwrapErrOr<const R extends Base, D>(
+    ...args: readonly [result: R, defaultValue: D] | readonly [defaultValue: D]
+  ):
+    | D
+    | UnwrapErr<R>
+    | (<S>(result: Result<S, UnwrapErr<R>>) => D | UnwrapErr<R>) {
+    if (args.length === 2) {
+      const [result, defaultValue] = args;
+      return isErr(result)
+        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          (result.value as UnwrapErr<R>)
+        : defaultValue;
+    } else {
+      const [defaultValue] = args;
+      return <S,>(result: Result<S, UnwrapErr<R>>) =>
+        isErr(result) ? result.value : defaultValue;
+    }
+  }
 
   /**
    * Maps a `Result<S, E>` to `Result<S2, E>` by applying a function to the success value.
@@ -284,20 +342,50 @@ export namespace Result {
    * @param result The `Result` to map.
    * @param mapFn The function to apply to the success value if present.
    * @returns A new `Result<S2, UnwrapErr<R>>`.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const result = Result.ok(5);
+   * const mapped = Result.map(result, x => x * 2);
+   * console.log(Result.unwrap(mapped)); // 10
+   *
+   * // Curried version for use with pipe
+   * const doubler = Result.map((x: number) => x * 2);
+   * const result2 = pipe(Result.ok(5)).map(doubler).value;
+   * console.log(Result.unwrap(result2)); // 10
+   * ```
    */
-  export const map = <const R extends Base, S2>(
+  export function map<const R extends Base, S2>(
     result: R,
     mapFn: (value: UnwrapOk<R>) => S2,
-  ): Result<S2, UnwrapErr<R>> =>
-    isErr(result)
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result as Err<UnwrapErr<R>>)
-      : ok(
-          mapFn(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            result.value as UnwrapOk<R>,
-          ),
-        );
+  ): Result<S2, UnwrapErr<R>>;
+  export function map<S, S2>(
+    mapFn: (value: S) => S2,
+  ): <E>(result: Result<S, E>) => Result<S2, E>;
+  export function map<const R extends Base, S2>(
+    ...args:
+      | readonly [result: R, mapFn: (value: UnwrapOk<R>) => S2]
+      | readonly [mapFn: (value: UnwrapOk<R>) => S2]
+  ):
+    | Result<S2, UnwrapErr<R>>
+    | (<E>(result: Result<UnwrapOk<R>, E>) => Result<S2, E>) {
+    if (args.length === 2) {
+      const [result, mapFn] = args;
+      return isErr(result)
+        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          (result as Err<UnwrapErr<R>>)
+        : ok(
+            mapFn(
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+              result.value as UnwrapOk<R>,
+            ),
+          );
+    } else {
+      const [mapFn] = args;
+      return <E,>(result: Result<UnwrapOk<R>, E>) =>
+        isErr(result) ? result : ok(mapFn(result.value));
+    }
+  }
 
   /**
    * Maps a `Result<S, E>` to `Result<S, E2>` by applying a function to the error value.
@@ -307,20 +395,50 @@ export namespace Result {
    * @param result The `Result` to map.
    * @param mapFn The function to apply to the error value if present.
    * @returns A new `Result<UnwrapOk<R>, E2>`.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const result = Result.err("error");
+   * const mapped = Result.mapErr(result, e => e.toUpperCase());
+   * console.log(Result.unwrapErr(mapped)); // "ERROR"
+   *
+   * // Curried usage for pipe composition
+   * const errorUppercase = Result.mapErr((e: string) => e.toUpperCase());
+   * const result2 = pipe(Result.err("error")).map(errorUppercase).value;
+   * console.log(Result.unwrapErr(result2)); // "ERROR"
+   * ```
    */
-  export const mapErr = <const R extends Base, E2>(
+  export function mapErr<const R extends Base, E2>(
     result: R,
     mapFn: (error: UnwrapErr<R>) => E2,
-  ): Result<UnwrapOk<R>, E2> =>
-    isOk(result)
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result as Ok<UnwrapOk<R>>)
-      : err(
-          mapFn(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            result.value as UnwrapErr<R>,
-          ),
-        );
+  ): Result<UnwrapOk<R>, E2>;
+  export function mapErr<E, E2>(
+    mapFn: (error: E) => E2,
+  ): <S>(result: Result<S, E>) => Result<S, E2>;
+  export function mapErr<const R extends Base, E2>(
+    ...args:
+      | readonly [result: R, mapFn: (error: UnwrapErr<R>) => E2]
+      | readonly [mapFn: (error: UnwrapErr<R>) => E2]
+  ):
+    | Result<UnwrapOk<R>, E2>
+    | (<S>(result: Result<S, UnwrapErr<R>>) => Result<S, E2>) {
+    if (args.length === 2) {
+      const [result, mapFn] = args;
+      return isOk(result)
+        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          (result as Ok<UnwrapOk<R>>)
+        : err(
+            mapFn(
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+              result.value as UnwrapErr<R>,
+            ),
+          );
+    } else {
+      const [mapFn] = args;
+      return <S,>(result: Result<S, UnwrapErr<R>>) =>
+        isOk(result) ? result : err(mapFn(result.value));
+    }
+  }
 
   /**
    * Applies one of two functions depending on whether the `Result` is `Ok` or `Err`.
@@ -331,25 +449,63 @@ export namespace Result {
    * @param mapFn The function to apply if `result` is `Ok`.
    * @param mapErrFn The function to apply if `result` is `Err`.
    * @returns A new `Result<S2, E2>` based on the applied function.
+   * @example
+   * ```typescript
+   * // Regular usage
+   * const result = Result.ok(42);
+   * const folded = Result.fold(result, x => x * 2, () => 0);
+   * console.log(Result.unwrapOk(folded)); // 84
+   *
+   * // Curried usage for pipe composition
+   * const folder = Result.fold((x: number) => x * 2, () => 0);
+   * const result2 = pipe(Result.ok(42)).map(folder).value;
+   * console.log(Result.unwrapOk(result2)); // 84
+   * ```
    */
-  export const fold = <const R extends Base, S2, E2>(
+  export function fold<const R extends Base, S2, E2>(
     result: R,
     mapFn: (value: UnwrapOk<R>) => S2,
     mapErrFn: (error: UnwrapErr<R>) => E2,
-  ): Result<S2, E2> =>
-    isOk(result)
-      ? ok(
-          mapFn(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            result.value as UnwrapOk<R>,
-          ),
-        )
-      : err(
-          mapErrFn(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            result.value as UnwrapErr<R>,
-          ),
-        );
+  ): Result<S2, E2>;
+  export function fold<S, E, S2, E2>(
+    mapFn: (value: S) => S2,
+    mapErrFn: (error: E) => E2,
+  ): (result: Result<S, E>) => Result<S2, E2>;
+  export function fold<const R extends Base, S2, E2>(
+    ...args:
+      | readonly [
+          result: R,
+          mapFn: (value: UnwrapOk<R>) => S2,
+          mapErrFn: (error: UnwrapErr<R>) => E2,
+        ]
+      | readonly [
+          mapFn: (value: UnwrapOk<R>) => S2,
+          mapErrFn: (error: UnwrapErr<R>) => E2,
+        ]
+  ):
+    | Result<S2, E2>
+    | ((result: Result<UnwrapOk<R>, UnwrapErr<R>>) => Result<S2, E2>) {
+    if (args.length === 3) {
+      const [result, mapFn, mapErrFn] = args;
+      return isOk(result)
+        ? ok(
+            mapFn(
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+              result.value as UnwrapOk<R>,
+            ),
+          )
+        : err(
+            mapErrFn(
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+              result.value as UnwrapErr<R>,
+            ),
+          );
+    } else {
+      const [mapFn, mapErrFn] = args;
+      return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
+        isOk(result) ? ok(mapFn(result.value)) : err(mapErrFn(result.value));
+    }
+  }
 
   /**
    * Applies a function that returns a `Result` to the success value of a `Result`.
@@ -363,53 +519,96 @@ export namespace Result {
    * @returns The result of applying the function, or the original `Err`.
    * @example
    * ```typescript
+   * // Regular usage
    * const divide = (a: number, b: number): Result<number, string> =>
    *   b === 0 ? Result.err("Division by zero") : Result.ok(a / b);
    *
    * const result = Result.flatMap(Result.ok(10), x => divide(x, 2));
    * console.log(Result.unwrapOk(result)); // 5
    *
-   * const error = Result.flatMap(Result.ok(10), x => divide(x, 0));
-   * console.log(Result.unwrapErr(error)); // "Division by zero"
+   * // Curried usage for pipe composition
+   * const divideBy2 = Result.flatMap((x: number) => divide(x, 2));
+   * const result2 = pipe(Result.ok(10)).map(divideBy2).value;
+   * console.log(Result.unwrapOk(result2)); // 5
    * ```
    */
-  export const flatMap = <const R extends Base, S2, E2>(
+  export function flatMap<const R extends Base, const S2, const E2>(
     result: R,
     flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>,
-  ): Result<S2, E2 | UnwrapErr<R>> =>
-    isErr(result)
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result as Err<UnwrapErr<R>>)
-      : flatMapFn(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          result.value as UnwrapOk<R>,
-        );
+  ): Result<S2, E2 | UnwrapErr<R>>;
+  export function flatMap<const S, const S2, const E2>(
+    flatMapFn: (value: S) => Result<S2, E2>,
+  ): <const E>(result: Result<S, E>) => Result<S2, E | E2>;
+  export function flatMap<const R extends Base, const S2, const E2>(
+    ...args:
+      | readonly [result: R, flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>]
+      | readonly [flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>]
+  ):
+    | Result<S2, E2 | UnwrapErr<R>>
+    | (<E>(result: Result<UnwrapOk<R>, E>) => Result<S2, E | E2>) {
+    if (args.length === 2) {
+      const [result, flatMapFn] = args;
+      return isErr(result)
+        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          (result as Err<UnwrapErr<R>>)
+        : flatMapFn(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+            result.value as UnwrapOk<R>,
+          );
+    } else {
+      const [flatMapFn] = args;
+      return <E,>(result: Result<UnwrapOk<R>, E>) =>
+        isErr(result) ? result : flatMapFn(result.value);
+    }
+  }
 
   /**
-   * Returns a function that unwraps a `Result`, returning the success value.
-   * Throws an error with the provided message if the `Result` is `Result.Err`.
+   * Unwraps a `Result`, returning the success value or throwing an error with the provided message.
    * @template R The `Result.Base` type to unwrap.
+   * @param result The `Result` to unwrap.
    * @param message The error message to throw if the `Result` is `Result.Err`.
-   * @returns A function that takes a `Result` and returns its success value or throws.
+   * @returns The success value if `Result.Ok`.
+   * @throws Error with the provided message if the `Result` is `Result.Err`.
    * @example
    * ```typescript
-   * const mustBeOk = Result.expectToBe<Result<number, string>>("Operation must succeed");
-   * const ok = Result.ok(42);
-   * console.log(mustBeOk(ok)); // 42
+   * // Regular usage
+   * const result = Result.ok(42);
+   * const value = Result.expectToBe(result, "Operation must succeed");
+   * console.log(value); // 42
    *
-   * const err = Result.err("failed");
-   * // mustBeOk(err); // throws Error: "Operation must succeed"
+   * // Curried usage for pipe composition
+   * const mustBeOk = Result.expectToBe("Operation must succeed");
+   * const value2 = pipe(Result.ok(42)).map(mustBeOk).value;
+   * console.log(value2); // 42
    * ```
    */
-  export const expectToBe =
-    <const R extends Base>(message: string) =>
-    (result: R): UnwrapOk<R> => {
+  export function expectToBe<const R extends Base>(
+    result: R,
+    message: string,
+  ): UnwrapOk<R>;
+  export function expectToBe<S>(
+    message: string,
+  ): <E>(result: Result<S, E>) => S;
+  export function expectToBe<const R extends Base>(
+    ...args: readonly [result: R, message: string] | readonly [message: string]
+  ): UnwrapOk<R> | (<E>(result: Result<UnwrapOk<R>, E>) => UnwrapOk<R>) {
+    if (args.length === 2) {
+      const [result, message] = args;
       if (isErr(result)) {
         throw new Error(message);
       }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
       return result.value as UnwrapOk<R>;
-    };
+    } else {
+      const [message] = args;
+      return <E,>(result: Result<UnwrapOk<R>, E>): UnwrapOk<R> => {
+        if (isErr(result)) {
+          throw new Error(message);
+        }
+        return result.value;
+      };
+    }
+  }
 
   /**
    * @internal

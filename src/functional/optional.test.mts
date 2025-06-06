@@ -122,6 +122,36 @@ describe('Optional', () => {
 
       expectType<typeof _mapped, Optional<string>>('=');
     });
+
+    test('should support curried form', () => {
+      const doubler = Optional.map((x: number) => x * 2);
+
+      const some = Optional.some(5);
+      const mapped = doubler(some);
+
+      expect(Optional.isSome(mapped)).toBe(true);
+      if (Optional.isSome(mapped)) {
+        expect(Optional.unwrap(mapped)).toBe(10);
+      }
+
+      const none = Optional.none;
+      const mappedNone = doubler(none);
+      expect(Optional.isNone(mappedNone)).toBe(true);
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const doubler = Optional.map((x: number) => x * 2);
+      const toStringFn = Optional.map((x: number) => x.toString());
+
+      const result = pipe(Optional.some(5)).map(doubler).map(toStringFn).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe('10');
+      }
+    });
   });
 
   describe('unwrap', () => {
@@ -273,12 +303,53 @@ describe('Optional', () => {
         (n: number): Optional<number> =>
           divisor === 0 ? Optional.none : Optional.some(n / divisor);
 
-      const result = Optional.flatMap(
-        Optional.flatMap(Optional.some('100'), parseNumber),
-        divideBy(2),
-      );
+      const intermediate = Optional.flatMap(Optional.some('100'), parseNumber);
+      const result = Optional.flatMap(intermediate, divideBy(2));
       if (Optional.isSome(result)) {
         expect(Optional.unwrap(result)).toBe(50);
+      }
+    });
+
+    test('should support curried form', () => {
+      const parseNumber = (s: string): Optional<number> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Optional.none : Optional.some(n);
+      };
+
+      const parser = Optional.flatMap(parseNumber);
+
+      const result = parser(Optional.some('42'));
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(42);
+      }
+
+      const invalid = parser(Optional.some('abc'));
+      expect(Optional.isNone(invalid)).toBe(true);
+
+      const noneResult = parser(Optional.none);
+      expect(Optional.isNone(noneResult)).toBe(true);
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const parseNumber = (s: string): Optional<number> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Optional.none : Optional.some(n);
+      };
+
+      const doubleIfPositive = (n: number): Optional<number> =>
+        n > 0 ? Optional.some(n * 2) : Optional.none;
+
+      const parser = Optional.flatMap(parseNumber);
+      const doubler = Optional.flatMap(doubleIfPositive);
+
+      const result = pipe(Optional.some('42')).map(parser).map(doubler).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(84);
       }
     });
   });
@@ -300,6 +371,44 @@ describe('Optional', () => {
 
     test('should return None if input is None', () => {
       const filtered = Optional.filter(Optional.none, (_: never) => true);
+      expect(Optional.isNone(filtered)).toBe(true);
+    });
+
+    test('should support curried form', () => {
+      const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+
+      const someEven = Optional.some(4);
+      const filtered = evenFilter(someEven);
+      expect(Optional.isSome(filtered)).toBe(true);
+      if (Optional.isSome(filtered)) {
+        expect(Optional.unwrap(filtered)).toBe(4);
+      }
+
+      const someOdd = Optional.some(5);
+      const filteredOdd = evenFilter(someOdd);
+      expect(Optional.isNone(filteredOdd)).toBe(true);
+
+      const noneResult = evenFilter(Optional.none);
+      expect(Optional.isNone(noneResult)).toBe(true);
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+      const positiveFilter = Optional.filter((x: number) => x > 0);
+
+      const result = pipe(Optional.some(4))
+        .map(evenFilter)
+        .map(positiveFilter).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(4);
+      }
+
+      const filtered = pipe(Optional.some(3)).map(evenFilter).value;
+
       expect(Optional.isNone(filtered)).toBe(true);
     });
   });

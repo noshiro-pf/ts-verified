@@ -95,7 +95,7 @@ const parse = (
 const stringify = (
   value: unknown,
   replacer?: (this: unknown, key: string, val: unknown) => unknown,
-  space?: UintRange<1, 11> | string,
+  space?: UintRangeInclusive<1, 10> | string,
 ): Result<string, string> => {
   try {
     return Result.ok(JSON.stringify(value, replacer, space));
@@ -121,7 +121,7 @@ const stringify = (
 const stringifySelected = (
   value: unknown,
   propertiesToBeSelected?: readonly (number | string)[],
-  space?: UintRange<1, 11> | string,
+  space?: UintRangeInclusive<1, 10> | string,
 ): Result<string, string> => {
   try {
     return Result.ok(
@@ -145,7 +145,7 @@ const stringifySelected = (
  */
 const stringifySortedKey = (
   value: UnknownRecord,
-  space?: UintRange<1, 11> | string,
+  space?: UintRangeInclusive<1, 10> | string,
 ): Result<string, string> => {
   const allKeys = pipe(keysDeep(value))
     .map((keys) => Arr.uniq(keys))

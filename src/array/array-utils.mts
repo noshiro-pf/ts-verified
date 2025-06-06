@@ -3,7 +3,31 @@ import { expectType } from '../expect-type.mjs';
 import { Optional, pipe, Result } from '../functional/index.mjs';
 import { range as rangeIterator } from '../iterator/index.mjs';
 import { asUint32, Num, Uint32 } from '../number/index.mjs';
-import { tp } from '../others/index.mjs';
+import { castMutable, tp, unknownToString } from '../others/index.mjs';
+
+/**
+ * Type guard that checks if a value is an array, excluding types that cannot be arrays.
+ * This function refines the type by filtering out non-array types from unions.
+ * @template T The input type that may or may not be an array.
+ * @param value The value to check.
+ * @returns `true` if the value is an array, `false` otherwise.
+ * @example
+ * ```ts
+ * function processValue(value: string | number[] | null) {
+ *   if (Arr.isArray(value)) {
+ *     // value is now typed as number[]
+ *     console.log(value.length);
+ *   }
+ * }
+ *
+ * Arr.isArray([1, 2, 3]); // true
+ * Arr.isArray("hello"); // false
+ * Arr.isArray(null); // false
+ * ```
+ */
+const isArray = <T,>(
+  value: T,
+): value is T extends readonly unknown[] ? T : never => Array.isArray(value);
 
 /**
  * Checks if an array is empty.
@@ -727,17 +751,10 @@ const toFilled = <T,>(
   value: T,
   start?: SizeType.ArgArr,
   end?: SizeType.ArgArr,
-): Result<readonly T[], { readonly type: 'InvalidArgument' }> => {
-  if (start !== undefined && !Number.isInteger(start)) {
-    return Result.err({ type: 'InvalidArgument' } as const);
-  }
-  if (end !== undefined && !Number.isInteger(end)) {
-    return Result.err({ type: 'InvalidArgument' } as const);
-  }
-
-  const cp = [...array];
+): readonly T[] => {
+  const cp = castMutable(copy(array));
   cp.fill(value, start, end);
-  return Result.ok(cp);
+  return cp;
 };
 
 /**
@@ -1194,7 +1211,11 @@ const join = <T,>(
     return Result.ok(result);
   } catch (error) {
     return Result.err(
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error
+        ? error
+        : pipe(unknownToString(error))
+            .map(Result.unwrapOkOr('Failed to join array'))
+            .map((e) => new Error(e)).value,
     );
   }
 };
@@ -1659,6 +1680,9 @@ const sortedNumSetDifference = <T extends number>(
 export const Arr = {
   length: size,
   size,
+
+  // type guard
+  isArray,
 
   // validation
   isEmpty,

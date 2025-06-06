@@ -255,14 +255,36 @@ export namespace Optional {
    *   s => s.length
    * );
    * console.log(Optional.unwrap(result)); // 5
+   *
+   * // Curried version for use with pipe
+   * const doubler = Optional.map((x: number) => x * 2);
+   * const result2 = pipe(Optional.some(5)).map(doubler).value;
+   * console.log(Optional.unwrap(result2)); // 10
    * ```
    */
-  export const map = <const O extends Base, S2>(
+  export function map<const O extends Base, S2>(
     optional: O,
     mapFn: (value: Unwrap<O>) => S2,
-  ): Optional<S2> =>
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+  ): Optional<S2>;
+  export function map<S, S2>(
+    mapFn: (value: S) => S2,
+  ): (optional: Optional<S>) => Optional<S2>;
+  export function map<const O extends Base, S2>(
+    ...args:
+      | readonly [optional: O, mapFn: (value: Unwrap<O>) => S2]
+      | readonly [mapFn: (value: Unwrap<O>) => S2]
+  ): Optional<S2> | ((optional: Optional<Unwrap<O>>) => Optional<S2>) {
+    if (args.length === 2) {
+      const [optional, mapFn] = args;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+    } else {
+      const [mapFn] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        isSome(optional) ? some(mapFn(unwrap(optional)!)) : none;
+    }
+  }
 
   /**
    * Applies a function that returns an `Optional` to the value in an `Optional.Some`.
@@ -275,6 +297,7 @@ export namespace Optional {
    * @returns The result of applying the function, or `Optional.None`.
    * @example
    * ```typescript
+   * // Regular usage
    * const parseNumber = (s: string): Optional<number> => {
    *   const n = Number(s);
    *   return isNaN(n) ? Optional.none : Optional.some(n);
@@ -283,14 +306,33 @@ export namespace Optional {
    * const result = Optional.flatMap(Optional.some("42"), parseNumber);
    * console.log(Optional.unwrap(result)); // 42
    *
-   * const invalid = Optional.flatMap(Optional.some("abc"), parseNumber);
-   * console.log(Optional.isNone(invalid)); // true
+   * // Curried usage for pipe composition
+   * const parser = Optional.flatMap(parseNumber);
+   * const result2 = pipe(Optional.some("42")).map(parser).value;
+   * console.log(Optional.unwrap(result2)); // 42
    * ```
    */
-  export const flatMap = <const O extends Base, S2>(
+  export function flatMap<const O extends Base, S2>(
     optional: O,
     flatMapFn: (value: Unwrap<O>) => Optional<S2>,
-  ): Optional<S2> => (isSome(optional) ? flatMapFn(unwrap(optional)) : none);
+  ): Optional<S2>;
+  export function flatMap<S, S2>(
+    flatMapFn: (value: S) => Optional<S2>,
+  ): (optional: Optional<S>) => Optional<S2>;
+  export function flatMap<const O extends Base, S2>(
+    ...args:
+      | readonly [optional: O, flatMapFn: (value: Unwrap<O>) => Optional<S2>]
+      | readonly [flatMapFn: (value: Unwrap<O>) => Optional<S2>]
+  ): Optional<S2> | ((optional: Optional<Unwrap<O>>) => Optional<S2>) {
+    if (args.length === 2) {
+      const [optional, flatMapFn] = args;
+      return isSome(optional) ? flatMapFn(unwrap(optional)) : none;
+    } else {
+      const [flatMapFn] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isSome(optional) ? flatMapFn(unwrap(optional)) : none;
+    }
+  }
 
   /**
    * Filters an `Optional` based on a predicate.
@@ -302,24 +344,48 @@ export namespace Optional {
    * @returns The filtered `Optional`.
    * @example
    * ```typescript
+   * // Regular usage
    * const someEven = Optional.some(4);
    * const filtered = Optional.filter(someEven, x => x % 2 === 0);
    * console.log(Optional.unwrap(filtered)); // 4
    *
-   * const someOdd = Optional.some(5);
-   * const filteredOdd = Optional.filter(someOdd, x => x % 2 === 0);
-   * console.log(Optional.isNone(filteredOdd)); // true
+   * // Curried usage for pipe composition
+   * const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+   * const result = pipe(Optional.some(4)).map(evenFilter).value;
+   * console.log(Optional.unwrap(result)); // 4
    * ```
    */
-  export const filter = <const O extends Base>(
+  export function filter<const O extends Base>(
     optional: O,
     predicate: (value: Unwrap<O>) => boolean,
-  ): Optional<Unwrap<O>> =>
-    isSome(optional)
-      ? pipe(unwrap(optional)).map((value) =>
-          predicate(value) ? some(value) : none,
-        ).value
-      : none;
+  ): Optional<Unwrap<O>>;
+  export function filter<S>(
+    predicate: (value: S) => boolean,
+  ): (optional: Optional<S>) => Optional<S>;
+  export function filter<const O extends Base>(
+    ...args:
+      | readonly [optional: O, predicate: (value: Unwrap<O>) => boolean]
+      | readonly [predicate: (value: Unwrap<O>) => boolean]
+  ):
+    | Optional<Unwrap<O>>
+    | ((optional: Optional<Unwrap<O>>) => Optional<Unwrap<O>>) {
+    if (args.length === 2) {
+      const [optional, predicate] = args;
+      return isSome(optional)
+        ? pipe(unwrap(optional)).map((value) =>
+            predicate(value) ? some(value) : none,
+          ).value
+        : none;
+    } else {
+      const [predicate] = args;
+      return (optional: Optional<Unwrap<O>>) =>
+        isSome(optional)
+          ? pipe(unwrap(optional)).map((value) =>
+              predicate(value) ? some(value) : none,
+            ).value
+          : none;
+    }
+  }
 
   /**
    * Returns a function that unwraps an `Optional`, returning the contained value.

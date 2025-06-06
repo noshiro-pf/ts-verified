@@ -23,7 +23,28 @@
  * const finalResult = mapNullable(result, x => x.toString());
  * ```
  */
-export const mapNullable = <A, B>(
+// export const mapNullable = <const A, const B>(
+//   value: A | null | undefined,
+//   fn: (v: A) => B,
+// ): B | undefined => (value == null ? undefined : fn(value));
+
+export function mapNullable<const A, const B>(
   value: A | null | undefined,
-  fn: (v: A) => B,
-): B | undefined => (value == null ? undefined : fn(value));
+  mapFn: (v: A) => B,
+): B | undefined;
+export function mapNullable<const A, const B>(
+  mapFn: (v: A) => B,
+): (value: A | null | undefined) => B | undefined;
+export function mapNullable<const A, const B>(
+  ...args:
+    | readonly [value: A | null | undefined, mapFn: (v: A) => B]
+    | readonly [mapFn: (v: A) => B]
+): (B | undefined) | ((value: A | null | undefined) => B | undefined) {
+  if (args.length === 2) {
+    const [value, mapFn] = args;
+    return value == null ? undefined : mapFn(value);
+  } else {
+    const [mapFn] = args;
+    return (value) => (value == null ? undefined : mapFn(value));
+  }
+}

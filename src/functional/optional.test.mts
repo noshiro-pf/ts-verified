@@ -220,6 +220,34 @@ describe('Optional', () => {
       const _unwrapped3 = Optional.unwrapOr(none, 'default');
       expectType<typeof _unwrapped3, string>('<=');
     });
+
+    test('should support curried form', () => {
+      const unwrapWithDefault = Optional.unwrapOr(42);
+
+      const someValue = Optional.some(100);
+      const result = unwrapWithDefault(someValue);
+      expect(result).toBe(100);
+
+      const noneValue = Optional.none;
+      const defaultResult = unwrapWithDefault(noneValue);
+      expect(defaultResult).toBe(42);
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const unwrapWithDefault = Optional.unwrapOr('default');
+
+      const someResult = pipe(Optional.some('hello'))
+        .map(unwrapWithDefault)
+        .value;
+      expect(someResult).toBe('hello');
+
+      const noneResult = pipe(Optional.none)
+        .map(unwrapWithDefault)
+        .value;
+      expect(noneResult).toBe('default');
+    });
   });
 
   describe('expectToBe', () => {
@@ -244,6 +272,32 @@ describe('Optional', () => {
 
       expect(expectValidId(id1)).toBe('user-123');
       expect(() => expectValidId(id2)).toThrow('ID is required');
+    });
+
+    test('should support curried form', () => {
+      const getValue = Optional.expectToBe('Value must exist');
+
+      const someValue = Optional.some('important data');
+      const result = getValue(someValue);
+      expect(result).toBe('important data');
+
+      const noneValue = Optional.none;
+      expect(() => getValue(noneValue)).toThrow('Value must exist');
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const expectUser = Optional.expectToBe('User not found');
+
+      const someResult = pipe(Optional.some({ name: 'Alice', age: 30 }))
+        .map(expectUser)
+        .value;
+      expect(someResult).toStrictEqual({ name: 'Alice', age: 30 });
+
+      expect(() =>
+        pipe(Optional.none).map(expectUser).value,
+      ).toThrow('User not found');
     });
   });
 
@@ -435,6 +489,46 @@ describe('Optional', () => {
     test('should return None if both are None', () => {
       const result = Optional.orElse(Optional.none, Optional.none);
       expect(Optional.isNone(result)).toBe(true);
+    });
+
+    test('should support curried form', () => {
+      const fallbackTo = Optional.orElse(Optional.some('fallback'));
+
+      const someValue = Optional.some('primary');
+      const result = fallbackTo(someValue);
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe('primary');
+      }
+
+      const noneValue = Optional.none;
+      const fallbackResult = fallbackTo(noneValue);
+      expect(Optional.isSome(fallbackResult)).toBe(true);
+      if (Optional.isSome(fallbackResult)) {
+        expect(Optional.unwrap(fallbackResult)).toBe('fallback');
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const fallbackTo = Optional.orElse(Optional.some('backup'));
+
+      const someResult = pipe(Optional.some('original'))
+        .map(fallbackTo)
+        .value;
+      expect(Optional.isSome(someResult)).toBe(true);
+      if (Optional.isSome(someResult)) {
+        expect(Optional.unwrap(someResult)).toBe('original');
+      }
+
+      const noneResult = pipe(Optional.none)
+        .map(fallbackTo)
+        .value;
+      expect(Optional.isSome(noneResult)).toBe(true);
+      if (Optional.isSome(noneResult)) {
+        expect(Optional.unwrap(noneResult)).toBe('backup');
+      }
     });
   });
 

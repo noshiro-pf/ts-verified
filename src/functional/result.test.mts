@@ -614,6 +614,46 @@ describe('Result', () => {
       const result = Result.orElse(primary, fallback);
       expect(Result.unwrapErr(result)).toBe('error2');
     });
+
+    test('should support curried form', () => {
+      const fallbackTo = Result.orElse(Result.ok('fallback'));
+
+      const okResult = Result.ok('primary');
+      const result = fallbackTo(okResult);
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe('primary');
+      }
+
+      const errResult: Result<string, string> = Result.err('failed');
+      const fallbackResult = fallbackTo(errResult);
+      expect(Result.isOk(fallbackResult)).toBe(true);
+      if (Result.isOk(fallbackResult)) {
+        expect(fallbackResult.value).toBe('fallback');
+      }
+    });
+
+    test('should work with pipe when curried', async () => {
+      const { pipe } = await import('./pipe.mjs');
+
+      const fallbackTo = Result.orElse(Result.ok('backup'));
+
+      const okResult = pipe(Result.ok('original'))
+        .map(fallbackTo)
+        .value;
+      expect(Result.isOk(okResult)).toBe(true);
+      if (Result.isOk(okResult)) {
+        expect(okResult.value).toBe('original');
+      }
+
+      const errResult = pipe(Result.err('network error'))
+        .map(fallbackTo)
+        .value;
+      expect(Result.isOk(errResult)).toBe(true);
+      if (Result.isOk(errResult)) {
+        expect(errResult.value).toBe('backup');
+      }
+    });
   });
 
   describe('zip', () => {

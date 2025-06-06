@@ -696,16 +696,39 @@ export namespace Result {
    * @returns The first `Result` if `Ok`, otherwise the alternative.
    * @example
    * ```typescript
+   * // Regular usage
    * const primary = Result.err("error");
    * const fallback = Result.ok("default");
    * const result = Result.orElse(primary, fallback);
    * console.log(Result.unwrapOk(result)); // "default"
+   *
+   * // Curried usage for pipe composition
+   * const fallbackTo = Result.orElse(Result.ok("fallback"));
+   * const result2 = pipe(Result.err("error")).map(fallbackTo).value;
+   * console.log(Result.unwrapOk(result2)); // "fallback"
    * ```
    */
-  export const orElse = <const R extends Base, const R2 extends Base>(
+  export function orElse<const R extends Base, const R2 extends Base>(
     result: R,
     alternative: R2,
-  ): NarrowToOk<R> | R2 => (isOk(result) ? result : alternative);
+  ): NarrowToOk<R> | R2;
+  export function orElse<S, E, S2, E2>(
+    alternative: Result<S2, E2>,
+  ): (result: Result<S, E>) => Result<S, E> | Result<S2, E2>;
+  export function orElse<const R extends Base, const R2 extends Base>(
+    ...args:
+      | readonly [result: R, alternative: R2]
+      | readonly [alternative: R2]
+  ): NarrowToOk<R> | R2 | ((result: Result<UnwrapOk<R>, UnwrapErr<R>>) => Result<UnwrapOk<R>, UnwrapErr<R>> | R2) {
+    if (args.length === 2) {
+      const [result, alternative] = args;
+      return isOk(result) ? result : alternative;
+    } else {
+      const [alternative] = args;
+      return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
+        isOk(result) ? result : alternative;
+    }
+  }
 
   /**
    * Combines two `Result` values into a single `Result` containing a tuple.

@@ -6,6 +6,7 @@
     "contravariance",
     "foldl",
     "foldr",
+    "funcs",
     "iset",
     "LEQC",
     "NAND",

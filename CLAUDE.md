@@ -21,6 +21,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint` - ESLint checking
 - `npm run fmt` - Prettier formatting
 
+## important-instruction-reminders
+
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
+
 ## Architecture Overview
 
 **ts-verified** is a TypeScript utility library providing type-safe functional programming utilities. Key architectural principles:

@@ -29,8 +29,6 @@ yarn add ts-verified
 pnpm add ts-verified
 ```
 
-**Important**: This library uses advanced TypeScript features, including branded types for enhanced type safety. Some functions require specific branded types as parameters (such as `Uint32` in `newArray`). The examples below use the small literal numeric values specifically allowed in each function for brevity, but in actual use you should use the provided type conversion functions (such as `asUint32`) or cast to the appropriate branded type, for example `as Uint32`.
-
 ## Usage Examples
 
 Here are some examples of how to use utilities from `ts-verified`:
@@ -85,7 +83,7 @@ const round2 = Num.round(2);
 console.log(round2(3.14159)); // 3.14
 
 console.log(Num.roundAt(3.14159, 3)); // 3.142
-console.log(Num.roundToInt(3.7)); // 4
+console.log(Num.roundToInt(3.7) satisfies Int); // 4
 
 // Type guards
 declare const value: number;
@@ -102,23 +100,44 @@ The `Arr` object provides a rich set of functions for array manipulation.
 ```typescript
 import { Arr } from 'ts-verified';
 
-const numbers = [1, 2, 3, 4, 5];
+const numbers = [1, 2, 3, 4, 5, 2, 3] as const;
+const people = [
+    { name: 'Alice', age: 30 },
+    { name: 'Bob', age: 25 },
+    { name: 'Charlie', age: 35 },
+] as const;
 
 // Reduction
-const sum = Arr.reduce(numbers, (acc, n) => acc + n, 0);
-console.log(sum); // 15
+const sum = Arr.sum(numbers);
+console.log(sum); // 20
 
 // Array creation
 const zeros = Arr.zeros(5); // [0, 0, 0, 0, 0]
 const range = Arr.range(1, 4); // [1, 2, 3]
+
+// Type-safe length checking
+if (Arr.isArrayAtLeastLength(numbers, 3)) {
+    // numbers is now guaranteed to have at least 3 elements
+    console.log(numbers[2]); // Safe access to index 2
+}
+
+// Take first n elements
+const firstThree = Arr.take(numbers, 3); // [1, 2, 3]
+
+// Find maximum by property
+const oldestPerson = Arr.maxBy(people, (person) => person.age);
+console.log(oldestPerson?.name); // 'Charlie'
+
+// Remove duplicates
+const unique = Arr.uniq(numbers); // [1, 2, 3, 4, 5]
 ```
 
-### 4. Functional Programming with `Optional` and `Result`
+### 4. Functional Programming with `Optional`, `Result`, `pipe`, and `match`
 
 Handle nullable values and error-prone operations safely.
 
 ```typescript
-import { Optional, Result, pipe } from 'ts-verified';
+import { Optional, Result, pipe, match } from 'ts-verified';
 
 // Optional for nullable values
 const maybeValue = Optional.some(42);
@@ -136,10 +155,37 @@ if (Result.isOk(mapped)) {
     console.log(mapped.value); // 84
 }
 
-// Combine with pipe for fluent API
-const result = pipe(Optional.some(10))
-    .mapOptional((x) => x * 2)
-    .mapOptional((x) => x + 1).value; // Optional.some(21)
+// Advanced pipe usage
+const processNumber = (input: number) =>
+    pipe(input)
+        .map((x) => x * 2) // Regular transformation
+        .map((x) => x + 10) // Chain transformations
+        .map((x) => (x > 50 ? Optional.some(x) : Optional.none)) // Convert to Optional
+        .mapOptional((x) => x / 2).value; // Continue with Optional chain and get final Optional<number>
+
+console.log(processNumber(30)); // Optional.some(35)
+console.log(processNumber(10)); // Optional.none
+
+// Pattern matching with match
+type Status = 'loading' | 'success' | 'error';
+
+const handleStatus = (status: Status, data?: string) =>
+    match(status, {
+        loading: 'Please wait...',
+        success: `Data: ${data ?? 'No data'}`,
+        error: 'An error occurred',
+    });
+
+console.log(handleStatus('loading')); // 'Please wait...'
+console.log(handleStatus('success', 'Hello')); // 'Data: Hello'
+console.log(handleStatus('error')); // 'An error occurred'
+
+// Pattern matching with Result
+const processResult = (result: Result<number, string>) =>
+    Result.isOk(result) ? `Success: ${result.value}` : `Error: ${result.value}`;
+
+console.log(processResult(Result.ok(42))); // 'Success: 42'
+console.log(processResult(Result.err('Failed'))); // 'Error: Failed'
 ```
 
 ### 5. Immutable Collections: `IMap` and `ISet`
@@ -147,24 +193,42 @@ const result = pipe(Optional.some(10))
 Type-safe, immutable data structures.
 
 ```typescript
-import { IMap, ISet } from 'ts-verified';
+import { IMap, ISet, pipe } from 'ts-verified';
 
-// IMap usage
-let myMap = IMap.new<string, number>([]);
-myMap = myMap.set('one', 1);
-myMap = myMap.set('two', 2);
+// IMap usage - immutable operations
+const originalMap = IMap.new<string, number>([]);
+const mapWithOne = originalMap.set('one', 1);
+const mapWithTwo = mapWithOne.set('two', 2);
 
-console.log(myMap.get('one')); // Optional.some(1)
-console.log(myMap.has('three')); // false
+// Original map is unchanged
+console.log(originalMap.size); // 0
+console.log(mapWithTwo.get('one')); // Optional.some(1)
+console.log(mapWithTwo.has('three')); // false
+
+// Using pipe for fluent updates
+const updatedMap = pipe(IMap.new<string, number>([]))
+    .map((map) => map.set('one', 1))
+    .map((map) => map.set('two', 2))
+    .map((map) => map.set('three', 3)).value;
+
+console.log(updatedMap.size); // 3
+
+// Efficient batch updates with withMutations
+const largeMap = IMap.new<string, number>([]).withMutations([
+    { type: 'set', key: 'key1', value: 1 },
+    { type: 'set', key: 'key2', value: 2 },
+    { type: 'set', key: 'key3', value: 3 },
+]);
+
+console.log(largeMap.size); // 3
 
 // ISet usage
-let mySet = ISet.new<number>([]);
-mySet = mySet.add(1);
-mySet = mySet.add(2);
-mySet = mySet.add(1); // Duplicate ignored
+const originalSet = ISet.new<number>([]);
+const setWithItems = originalSet.add(1).add(2).add(1); // Duplicate ignored
 
-console.log(mySet.has(1)); // true
-console.log(mySet.size); // 2
+console.log(originalSet.size); // 0 (unchanged)
+console.log(setWithItems.has(1)); // true
+console.log(setWithItems.size); // 2
 ```
 
 ### 6. Type Guards
@@ -191,6 +255,70 @@ if (isNonNullObject(value)) {
 }
 ```
 
+### 7. Iteration with `range`
+
+Generate ranges for iteration and array creation.
+
+```typescript
+import { range } from 'ts-verified';
+
+// Traditional for loop using range
+for (const i of range(0, 5)) {
+    console.log(i); // 0, 1, 2, 3, 4
+}
+
+// Create arrays from ranges
+const numbers = Array.from(range(1, 4)); // [1, 2, 3]
+const squares = Array.from(range(1, 6), (x) => x * x); // [1, 4, 9, 16, 25]
+
+// Step ranges
+for (const i of range(0, 10, 2)) {
+    console.log(i); // 0, 2, 4, 6, 8
+}
+```
+
+### 8. Mutability Utilities with `castMutable`
+
+Safely work with readonly types when interfacing with mutable APIs.
+
+```tsx
+import { Autocomplete } from '@mui/material';
+import { castMutable } from 'ts-verified';
+
+const readonlyOptions: readonly string[] = ['Option 1', 'Option 2', 'Option 3'];
+
+const SomeComponent: React.FC = () => {
+    // Component implementation
+    return (
+        <Autocomplete
+            // Use castMutable to safely pass readonly array to mutable API. This is safer than casting with `as`, as it simply changes type `readonly T[]` to `T[]`.
+            options={castMutable(readonlyOptions)}
+            // ...
+        />
+    );
+};
+
+// Immer.js example - draft properties need mutable types
+import { produce } from 'immer';
+
+type State = Readonly<{
+    items: readonly string[];
+}>;
+
+const initialState: State = {
+    items: ['item1', 'item2'],
+} as const;
+
+const newItems: readonly string[] = ['newItem1', 'newItem2'];
+
+const updatedState = produce(initialState, (draft) => {
+    // draft.items expects mutable array, but newItems is readonly
+    draft.items = castMutable(newItems); // Safe cast for assignment
+});
+
+console.log(updatedState.items); // ['newItem1', 'newItem2']
+```
+
 ## Modules Overview
 
 - **`array`**: Utilities for working with arrays and tuples, including creation, transformation, and type-safe operations.
@@ -212,10 +340,54 @@ if (isNonNullObject(value)) {
 - **Zero Runtime Dependencies**: The library has no external runtime dependencies, keeping your bundle size minimal.
 - **Comprehensive Testing**: All utilities are thoroughly tested with both runtime and compile-time tests.
 
+**Important Notes:**
+
+- This library **only supports ESM (ES Modules)**. CommonJS is not supported.
+- This library uses advanced TypeScript features, including branded types for enhanced type safety. Some functions require specific branded types as parameters (such as `Uint32` in `newArray`). The examples above use the small literal numeric values specifically allowed in each function for brevity, but in actual use you should use the provided type conversion functions (such as `asUint32`) or cast to the appropriate branded type, for example `as Uint32`.
+
+## Removing `expectType` in Production
+
+Since `expectType` is only used for compile-time type checking, you should remove these calls in production builds for better performance.
+
+### Rollup Configuration
+
+```javascript
+import rollupPluginStrip from '@rollup/plugin-strip';
+
+export default {
+    // ... other config
+    plugins: [
+        // ... other plugins
+        rollupPluginStrip({
+            functions: ['expectType'],
+            include: '**/*.(mts|ts|mjs|js)',
+        }),
+    ],
+};
+```
+
+### Vite Configuration
+
+```javascript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+    // ... other config
+    build: {
+        terserOptions: {
+            compress: {
+                // 'expectType' という名前の関数呼び出しをビルド時に除去する
+                pure_funcs: ['expectType'],
+            },
+        },
+    },
+});
+```
+
 ## Contributing
 
-Contributions are welcome! Please refer to the contribution guidelines (TODO: create CONTRIBUTING.md).
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines on how to contribute to this project.
 
 ## License
 
-This project is licensed under the (TODO: Choose a License, e.g., MIT License).
+This project is licensed under the [Apache License 2.0](./LICENSE).

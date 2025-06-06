@@ -155,10 +155,20 @@ export function match<
   const Case extends string,
   const R extends UnknownRecord,
   const D,
->(target: Case, cases: R, defaultValue?: D): ValueOf<R> | D {
-  if (!keyIsIn(target, cases)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return defaultValue!;
+>(
+  ...args:
+    | readonly [target: Case, cases: R]
+    | readonly [target: Case, cases: R, defaultValue: D]
+): ValueOf<R> | D {
+  if (args.length === 3) {
+    const [target, cases, defaultValue] = args;
+    if (keyIsIn(target, cases)) {
+      return cases[target];
+    } else {
+      return defaultValue;
+    }
+  } else {
+    const [target, cases] = args;
+    return cases[target];
   }
-  return cases[target];
 }

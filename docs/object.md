@@ -10,4 +10,4 @@
 
 ### Obj
 
-Re-exports [Obj](object/object.md#obj)
+Re-exports [Obj](object/object/namespaces/Obj.md)

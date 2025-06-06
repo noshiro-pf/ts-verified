@@ -39,6 +39,26 @@ describe('NonZeroInt32', () => {
       expect(asNonZeroInt32(2147483647)).toBe(2147483647);
       expect(asNonZeroInt32(-2147483648)).toBe(-2147483648);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+      { name: '2147483648', value: 2147483648 },
+      { name: '-2147483649', value: -2147483649 },
+    ] as const)(
+      `asNonZeroInt32($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asNonZeroInt32(value)).toThrow(
+          new TypeError(
+            `Expected a non-zero integer in [-2^31, 2^31), got: ${value}`,
+          ),
+        );
+      },
+    );
   });
 
   describe('isNonZeroInt32', () => {
@@ -170,10 +190,8 @@ describe('NonZeroInt32', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<NonZeroInt32, number>('<=');
-      expectType<number, NonZeroInt32>('>=');
 
-      const _value = asNonZeroInt32(1000000);
-      expectType<typeof _value, NonZeroInt32>('<=');
+      expectTypeOf(asNonZeroInt32(1000000)).toExtend<NonZeroInt32>();
     });
   });
 });

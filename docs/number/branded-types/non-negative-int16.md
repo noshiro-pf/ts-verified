@@ -10,7 +10,7 @@
 
 ### asNonNegativeInt16()
 
-> `const` **asNonNegativeInt16**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asNonNegativeInt16**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
 Defined in: [src/number/branded-types/non-negative-int16.mts:53](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-negative-int16.mts#L53)
 
@@ -75,13 +75,21 @@ Checks if a number is a NonNegativeInt16 (16-bit non-negative signed integer in 
 
 > `const` **NonNegativeInt16**: `object`
 
-Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-negative-int16.mts#L55)
+Defined in: [src/number/branded-types/non-negative-int16.mts:83](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/non-negative-int16.mts#L83)
+
+Namespace providing type-safe arithmetic operations for 16-bit non-negative integers.
+
+All operations automatically clamp results to the valid NonNegativeInt16 range [0, 32767].
+This ensures that all arithmetic maintains the 16-bit non-negative integer constraint,
+with negative results clamped to 0 and overflow results clamped to MAX_VALUE.
 
 #### Type declaration
 
 ##### add()
 
 > **add**: (`x`, `y`) => `NonNegativeInt16`
+
+Adds two NonNegativeInt16 values.
 
 ###### Parameters
 
@@ -97,11 +105,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
-`a + b`, but clamped to `[0, 2^15)`
+`a + b` clamped to [0, 32767] as a NonNegativeInt16.
 
 ##### clamp()
 
 > **clamp**: (`x`) => `NonNegativeInt16`
+
+Clamps a number to the NonNegativeInt16 range.
 
 ###### Parameters
 
@@ -113,9 +123,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
+The value clamped to [0, 32767] as a NonNegativeInt16.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `NonNegativeInt16`
+
+Divides one NonNegativeInt16 by another using floor division.
 
 ###### Parameters
 
@@ -131,11 +145,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
-`⌊a / b⌋`, but clamped to `[0, 2^15)`
+`⌊a / b⌋` clamped to [0, 32767] as a NonNegativeInt16.
 
 ##### is()
 
 > **is**: (`a`) => `a is NonNegativeInt16`
+
+Type guard to check if a value is a NonNegativeInt16.
 
 ###### Parameters
 
@@ -147,9 +163,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `a is NonNegativeInt16`
 
+`true` if the value is a 16-bit non-negative integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `NonNegativeInt16` = `max_`
+
+Returns the larger of two NonNegativeInt16 values.
 
 ###### Parameters
 
@@ -161,16 +181,20 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
+The maximum value as a NonNegativeInt16.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `number`
+> `readonly` **MAX_VALUE**: `number`
 
-`2^15 - 1`
+The maximum value for a 16-bit non-negative integer.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `NonNegativeInt16` = `min_`
 
+Returns the smaller of two NonNegativeInt16 values.
+
 ###### Parameters
 
 ###### values
@@ -181,16 +205,20 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
+The minimum value as a NonNegativeInt16.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `0`
+> `readonly` **MIN_VALUE**: `0`
 
-`0`
+The minimum value for a 16-bit non-negative integer.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `NonNegativeInt16`
 
+Multiplies two NonNegativeInt16 values.
+
 ###### Parameters
 
 ###### x
@@ -205,12 +233,14 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
-`a * b`, but clamped to `[0, 2^15)`
+`a * b` clamped to [0, 32767] as a NonNegativeInt16.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `NonNegativeInt16`
 
+Raises a NonNegativeInt16 to the power of another NonNegativeInt16.
+
 ###### Parameters
 
 ###### x
@@ -225,11 +255,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
-`a ** b`, but clamped to `[0, 2^15)`
+`a ** b` clamped to [0, 32767] as a NonNegativeInt16.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `NonNegativeInt16`
+
+Generates a random NonNegativeInt16 value within the valid range.
 
 ###### Parameters
 
@@ -245,9 +277,13 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
+A random NonNegativeInt16 between 0 and 32767.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `NonNegativeInt16`
+
+Subtracts one NonNegativeInt16 from another.
 
 ###### Parameters
 
@@ -263,4 +299,29 @@ Defined in: [src/number/branded-types/non-negative-int16.mts:55](https://github.
 
 `NonNegativeInt16`
 
-`a - b`, but clamped to `[0, 2^15)`
+`a - b` clamped to [0, 32767] as a NonNegativeInt16 (minimum 0).
+
+#### Example
+
+```typescript
+const a = asNonNegativeInt16(30000);
+const b = asNonNegativeInt16(5000);
+
+// Arithmetic operations with automatic clamping
+const sum = NonNegativeInt16.add(a, b); // NonNegativeInt16 (32767 - clamped to MAX_VALUE)
+const diff = NonNegativeInt16.sub(a, b); // NonNegativeInt16 (25000)
+const reverseDiff = NonNegativeInt16.sub(b, a); // NonNegativeInt16 (0 - clamped to MIN_VALUE)
+const product = NonNegativeInt16.mul(a, b); // NonNegativeInt16 (32767 - clamped due to overflow)
+
+// Range operations
+const clamped = NonNegativeInt16.clamp(-100); // NonNegativeInt16 (0)
+const minimum = NonNegativeInt16.min(a, b); // NonNegativeInt16 (5000)
+const maximum = NonNegativeInt16.max(a, b); // NonNegativeInt16 (30000)
+
+// Utility operations
+const random = NonNegativeInt16.random(); // NonNegativeInt16 (random value in [0, 32767])
+const power = NonNegativeInt16.pow(
+    asNonNegativeInt16(2),
+    asNonNegativeInt16(10),
+); // NonNegativeInt16 (1024)
+```

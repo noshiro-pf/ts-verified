@@ -4,17 +4,23 @@
 
 # Documentation
 
+## Documents
+
+- [collections](documents/collections.md)
+- [functional](documents/functional.md)
+
 ## Modules
 
 - [array](array.md)
-- [array/array-utils](array/array-utils.md)
-- [array/tuple-utils](array/tuple-utils.md)
+- [array/array-utils](array/array-utils/README.md)
+- [array/tuple-utils](array/tuple-utils/README.md)
 - [collections](collections.md)
-- [collections/imap](collections/imap.md)
-- [collections/imap-mapped](collections/imap-mapped.md)
-- [collections/iset](collections/iset.md)
-- [collections/iset-mapped](collections/iset-mapped.md)
+- [collections/imap](collections/imap/README.md)
+- [collections/imap-mapped](collections/imap-mapped/README.md)
+- [collections/iset](collections/iset/README.md)
+- [collections/iset-mapped](collections/iset-mapped/README.md)
 - [collections/queue](collections/queue.md)
+- [collections/stack](collections/stack.md)
 - [expect-type](expect-type.md)
 - [functional](functional.md)
 - [functional/match](functional/match.md)
@@ -32,7 +38,7 @@
 - [iterator](iterator.md)
 - [iterator/range](iterator/range.md)
 - [json](json.md)
-- [json/json](json/json.md)
+- [json/json](json/json/README.md)
 - [number](number.md)
 - [number/branded-types](number/branded-types.md)
 - [number/branded-types/finite-number](number/branded-types/finite-number.md)
@@ -67,7 +73,7 @@
 - [number/num](number/num/README.md)
 - [number/refined-number-utils](number/refined-number-utils.md)
 - [object](object.md)
-- [object/object](object/object.md)
+- [object/object](object/object/README.md)
 - [others](others.md)
 - [others/cast-mutable](others/cast-mutable.md)
 - [others/cast-readonly](others/cast-readonly.md)

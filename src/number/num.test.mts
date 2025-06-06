@@ -1,4 +1,5 @@
 import { expectType } from '../expect-type.mjs';
+import { pipe } from '../functional/index.mjs';
 import { Num } from './num.mjs';
 
 const testClamp = (
@@ -17,6 +18,49 @@ describe('Num', () => {
     testClamp([0, 2], -0.5, 0);
     testClamp([0, 2], 1.5, 1.5);
     testClamp([0, 2], Number.NaN, 0);
+
+    test('should support regular usage with three parameters', () => {
+      expectTypeOf(Num.clamp(15, 0, 10)).toEqualTypeOf<number>();
+      expect(Num.clamp(15, 0, 10)).toBe(10);
+      expect(Num.clamp(-5, 0, 10)).toBe(0);
+      expect(Num.clamp(5, 0, 10)).toBe(5);
+      expect(Num.clamp(Number.NaN, 0, 10)).toBe(0);
+    });
+
+    test('should work with pipe when curried', () => {
+      const clampTo0_10 = Num.clamp(0, 10);
+
+      const result1 = pipe(15).map(clampTo0_10).value;
+      expect(result1).toBe(10);
+
+      const result2 = pipe(-5).map(clampTo0_10).value;
+      expect(result2).toBe(0);
+
+      const result3 = pipe(7.5).map(clampTo0_10).value;
+      expect(result3).toBe(7.5);
+    });
+
+    test('should handle edge cases in curried form', () => {
+      const clampTo5_15 = Num.clamp(5, 15);
+
+      expectType<typeof clampTo5_15, (target: number) => number>('=');
+
+      // Invalid (non-finite) values return the lower bound
+      expect(clampTo5_15(Number.POSITIVE_INFINITY)).toBe(5);
+      expect(clampTo5_15(Number.NEGATIVE_INFINITY)).toBe(5);
+      expect(clampTo5_15(Number.NaN)).toBe(5);
+    });
+
+    test('should work with negative ranges', () => {
+      expect(Num.clamp(-15, -10, -5)).toBe(-10);
+      expect(Num.clamp(-7, -10, -5)).toBe(-7);
+      expect(Num.clamp(0, -10, -5)).toBe(-5);
+
+      const clampNegative = Num.clamp(-10, -5);
+      expect(clampNegative(-15)).toBe(-10);
+      expect(clampNegative(-7)).toBe(-7);
+      expect(clampNegative(0)).toBe(-5);
+    });
   });
 
   describe('isUintInRangeInclusive', () => {
@@ -94,7 +138,7 @@ describe('Num', () => {
     test('type guard for non-zero numbers', () => {
       const x: number = 5;
       if (Num.isNonZero(x)) {
-        expectType<typeof x, NonZeroNumber & number>('<=');
+        expectType<typeof x, NonZeroNumber>('=');
       }
       expect(Num.isNonZero(5)).toBe(true);
       expect(Num.isNonZero(-3)).toBe(true);

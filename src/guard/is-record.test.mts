@@ -22,7 +22,8 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('<=');
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    expectType<typeof obj, {}>('=');
     expectType<typeof res, boolean>('=');
 
     if (res) {
@@ -37,7 +38,7 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('!=');
+    expectType<typeof obj, readonly never[]>('=');
     expectType<typeof res, boolean>('=');
 
     expect(res).toBe(false);
@@ -48,7 +49,7 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('!=');
+    expectType<typeof obj, null>('=');
     expectType<typeof res, boolean>('=');
 
     expect(res).toBe(false);
@@ -59,7 +60,7 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('!=');
+    expectType<typeof obj, undefined>('=');
     expectType<typeof res, boolean>('=');
 
     expect(res).toBe(false);
@@ -70,7 +71,7 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('!=');
+    expectType<typeof obj, 3>('=');
     expectType<typeof res, boolean>('=');
 
     expect(res).toBe(false);
@@ -81,7 +82,7 @@ describe('isRecord', () => {
     const unk: unknown = obj;
     const res = isRecord(unk);
 
-    expectType<typeof obj, UnknownRecord>('!=');
+    expectType<typeof obj, 'str'>('=');
     expectType<typeof res, boolean>('=');
 
     expect(res).toBe(false);

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import { expectType } from '../expect-type.mjs';
 import { Optional } from './optional.mjs';
+import { pipe } from './pipe.mjs';
 
 describe('Optional', () => {
   describe('isOptional', () => {
@@ -44,8 +45,9 @@ describe('Optional', () => {
     });
 
     test('should preserve const types', () => {
-      const _someConst = Optional.some('test' as const);
-      expectType<typeof _someConst, Optional.Some<'test'>>('=');
+      expectTypeOf(Optional.some('test' as const)).toEqualTypeOf<
+        Optional.Some<'test'>
+      >();
     });
   });
 
@@ -75,7 +77,7 @@ describe('Optional', () => {
     });
 
     test('should act as type guards', () => {
-      const optional: Optional<number> = Optional.some(42);
+      const optional = Optional.some(42) as Optional<number>;
 
       if (Optional.isSome(optional)) {
         expectType<typeof optional, Optional.Some<number>>('=');
@@ -118,9 +120,37 @@ describe('Optional', () => {
 
     test('should preserve types correctly', () => {
       const some = Optional.some(42);
-      const _mapped = Optional.map(some, (x) => x.toString());
+      expectTypeOf(Optional.map(some, (x) => x.toString())).toEqualTypeOf<
+        Optional<string>
+      >();
+    });
 
-      expectType<typeof _mapped, Optional<string>>('=');
+    test('should support curried form', () => {
+      const doubler = Optional.map((x: number) => x * 2);
+
+      const some = Optional.some(5);
+      const mapped = doubler(some);
+
+      expect(Optional.isSome(mapped)).toBe(true);
+      if (Optional.isSome(mapped)) {
+        expect(Optional.unwrap(mapped)).toBe(10);
+      }
+
+      const none = Optional.none;
+      const mappedNone = doubler(none);
+      expect(Optional.isNone(mappedNone)).toBe(true);
+    });
+
+    test('should work with pipe when curried', () => {
+      const doubler = Optional.map((x: number) => x * 2);
+      const toStringFn = Optional.map((x: number) => x.toString());
+
+      const result = pipe(Optional.some(5)).map(doubler).map(toStringFn).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe('10');
+      }
     });
   });
 
@@ -137,12 +167,10 @@ describe('Optional', () => {
 
     test('should have correct return types', () => {
       const someNumber = Optional.some(42);
-      const _unwrapped = Optional.unwrap(someNumber);
-      expectType<typeof _unwrapped, number | undefined>('<=');
+      expectTypeOf(Optional.unwrap(someNumber)).toExtend<number | undefined>();
 
       const none = Optional.none;
-      const _unwrappedNone = Optional.unwrapOr(none, undefined);
-      expectType<typeof _unwrappedNone, undefined>('>=');
+      expectTypeOf(Optional.unwrapOr(none, undefined)).toExtend<undefined>();
     });
   });
 
@@ -160,8 +188,7 @@ describe('Optional', () => {
 
     test('should have correct return types', () => {
       const someNumber = Optional.some(42);
-      const _unwrapped = Optional.unwrapThrow(someNumber);
-      expectType<typeof _unwrapped, number>('<=');
+      expectTypeOf(Optional.unwrapThrow(someNumber)).toExtend<number>();
     });
   });
 
@@ -180,40 +207,84 @@ describe('Optional', () => {
 
     test('should have correct return types', () => {
       const someNumber = Optional.some(42);
-      const _unwrapped1 = Optional.unwrapOr(someNumber, 0);
-      expectType<typeof _unwrapped1, number>('<=');
+      expectTypeOf(Optional.unwrapOr(someNumber, 0)).toExtend<number>();
 
-      const _unwrapped2 = Optional.unwrapOr(someNumber, 'default');
-      expectType<typeof _unwrapped2, number | string>('<=');
+      expectTypeOf(Optional.unwrapOr(someNumber, 'default')).toExtend<
+        number | string
+      >();
 
       const none = Optional.none;
-      const _unwrapped3 = Optional.unwrapOr(none, 'default');
-      expectType<typeof _unwrapped3, string>('<=');
+      expectTypeOf(Optional.unwrapOr(none, 'default')).toExtend<string>();
+    });
+
+    test('should support curried form', () => {
+      const unwrapWithDefault = Optional.unwrapOr(42);
+
+      const someValue = Optional.some(100);
+      const result = unwrapWithDefault(someValue);
+      expect(result).toBe(100);
+
+      const noneValue = Optional.none;
+      const defaultResult = unwrapWithDefault(noneValue);
+      expect(defaultResult).toBe(42);
+    });
+
+    test('should work with pipe when curried', () => {
+      const unwrapWithDefault = Optional.unwrapOr('default');
+
+      const someResult = pipe(Optional.some('hello')).map(
+        unwrapWithDefault,
+      ).value;
+      expect(someResult).toBe('hello');
+
+      const noneResult = pipe(Optional.none).map(unwrapWithDefault).value;
+      expect(noneResult).toBe('default');
     });
   });
 
   describe('expectToBe', () => {
     test('should return the value for Some', () => {
-      const expectNumber =
-        Optional.expectToBe<Optional<number>>('Expected a number');
+      const expectNumber = Optional.expectToBe<number>('Expected a number');
       expect(expectNumber(Optional.some(42))).toBe(42);
     });
 
     test('should throw with custom message for None', () => {
-      const expectNumber =
-        Optional.expectToBe<Optional<number>>('Expected a number');
+      const expectNumber = Optional.expectToBe<number>('Expected a number');
       expect(() => expectNumber(Optional.none)).toThrow('Expected a number');
     });
 
     test('should be curried', () => {
-      const expectValidId =
-        Optional.expectToBe<Optional<string>>('ID is required');
+      const expectValidId = Optional.expectToBe<string>('ID is required');
 
       const id1 = Optional.some('user-123');
       const id2 = Optional.none;
 
       expect(expectValidId(id1)).toBe('user-123');
       expect(() => expectValidId(id2)).toThrow('ID is required');
+    });
+
+    test('should support curried form', () => {
+      const getValue = Optional.expectToBe('Value must exist');
+
+      const someValue = Optional.some('important data');
+      const result = getValue(someValue);
+      expect(result).toBe('important data');
+
+      const noneValue = Optional.none;
+      expect(() => getValue(noneValue)).toThrow('Value must exist');
+    });
+
+    test('should work with pipe when curried', () => {
+      const expectUser = Optional.expectToBe('User not found');
+
+      const someResult = pipe(Optional.some({ name: 'Alice', age: 30 })).map(
+        expectUser,
+      ).value;
+      expect(someResult).toStrictEqual({ name: 'Alice', age: 30 });
+
+      expect(() => pipe(Optional.none).map(expectUser).value).toThrow(
+        'User not found',
+      );
     });
   });
 
@@ -273,12 +344,51 @@ describe('Optional', () => {
         (n: number): Optional<number> =>
           divisor === 0 ? Optional.none : Optional.some(n / divisor);
 
-      const result = Optional.flatMap(
-        Optional.flatMap(Optional.some('100'), parseNumber),
-        divideBy(2),
-      );
+      const intermediate = Optional.flatMap(Optional.some('100'), parseNumber);
+      const result = Optional.flatMap(intermediate, divideBy(2));
       if (Optional.isSome(result)) {
         expect(Optional.unwrap(result)).toBe(50);
+      }
+    });
+
+    test('should support curried form', () => {
+      const parseNumber = (s: string): Optional<number> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Optional.none : Optional.some(n);
+      };
+
+      const parser = Optional.flatMap(parseNumber);
+
+      const result = parser(Optional.some('42'));
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(42);
+      }
+
+      const invalid = parser(Optional.some('abc'));
+      expect(Optional.isNone(invalid)).toBe(true);
+
+      const noneResult = parser(Optional.none);
+      expect(Optional.isNone(noneResult)).toBe(true);
+    });
+
+    test('should work with pipe when curried', () => {
+      const parseNumber = (s: string): Optional<number> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Optional.none : Optional.some(n);
+      };
+
+      const doubleIfPositive = (n: number): Optional<number> =>
+        n > 0 ? Optional.some(n * 2) : Optional.none;
+
+      const parser = Optional.flatMap(parseNumber);
+      const doubler = Optional.flatMap(doubleIfPositive);
+
+      const result = pipe(Optional.some('42')).map(parser).map(doubler).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(84);
       }
     });
   });
@@ -300,6 +410,42 @@ describe('Optional', () => {
 
     test('should return None if input is None', () => {
       const filtered = Optional.filter(Optional.none, (_: never) => true);
+      expect(Optional.isNone(filtered)).toBe(true);
+    });
+
+    test('should support curried form', () => {
+      const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+
+      const someEven = Optional.some(4);
+      const filtered = evenFilter(someEven);
+      expect(Optional.isSome(filtered)).toBe(true);
+      if (Optional.isSome(filtered)) {
+        expect(Optional.unwrap(filtered)).toBe(4);
+      }
+
+      const someOdd = Optional.some(5);
+      const filteredOdd = evenFilter(someOdd);
+      expect(Optional.isNone(filteredOdd)).toBe(true);
+
+      const noneResult = evenFilter(Optional.none);
+      expect(Optional.isNone(noneResult)).toBe(true);
+    });
+
+    test('should work with pipe when curried', () => {
+      const evenFilter = Optional.filter((x: number) => x % 2 === 0);
+      const positiveFilter = Optional.filter((x: number) => x > 0);
+
+      const result = pipe(Optional.some(4))
+        .map(evenFilter)
+        .map(positiveFilter).value;
+
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe(4);
+      }
+
+      const filtered = pipe(Optional.some(3)).map(evenFilter).value;
+
       expect(Optional.isNone(filtered)).toBe(true);
     });
   });
@@ -326,6 +472,40 @@ describe('Optional', () => {
     test('should return None if both are None', () => {
       const result = Optional.orElse(Optional.none, Optional.none);
       expect(Optional.isNone(result)).toBe(true);
+    });
+
+    test('should support curried form', () => {
+      const fallbackTo = Optional.orElse(Optional.some('fallback'));
+
+      const someValue = Optional.some('primary');
+      const result = fallbackTo(someValue);
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(Optional.unwrap(result)).toBe('primary');
+      }
+
+      const noneValue = Optional.none;
+      const fallbackResult = fallbackTo(noneValue);
+      expect(Optional.isSome(fallbackResult)).toBe(true);
+      if (Optional.isSome(fallbackResult)) {
+        expect(Optional.unwrap(fallbackResult)).toBe('fallback');
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const fallbackTo = Optional.orElse(Optional.some('backup'));
+
+      const someResult = pipe(Optional.some('original')).map(fallbackTo).value;
+      expect(Optional.isSome(someResult)).toBe(true);
+      if (Optional.isSome(someResult)) {
+        expect(Optional.unwrap(someResult)).toBe('original');
+      }
+
+      const noneResult = pipe(Optional.none).map(fallbackTo).value;
+      expect(Optional.isSome(noneResult)).toBe(true);
+      if (Optional.isSome(noneResult)) {
+        expect(Optional.unwrap(noneResult)).toBe('backup');
+      }
     });
   });
 
@@ -389,8 +569,7 @@ describe('Optional', () => {
 
     test('should work with union types', () => {
       const value: string | null = 'test';
-      const _optional = Optional.fromNullable(value);
-      expectType<typeof _optional, Optional<string>>('>=');
+      expectTypeOf(Optional.fromNullable(value)).toExtend<Optional<string>>();
     });
   });
 
@@ -407,8 +586,7 @@ describe('Optional', () => {
 
     test('should have correct return type', () => {
       const some = Optional.some(42);
-      const _value = Optional.toNullable(some);
-      expectType<typeof _value, number | undefined>('<=');
+      expectTypeOf(Optional.toNullable(some)).toExtend<number | undefined>();
     });
   });
 

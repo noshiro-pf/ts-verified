@@ -16,7 +16,7 @@
 
 > **Optional**\<`S`\> = `None_` \| `Some_`\<`S`\>
 
-Defined in: [src/functional/optional.mts:35](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L35)
+Defined in: [src/functional/optional.mts:36](https://github.com/noshiro-pf/ts-verified/blob/main/src/functional/optional.mts#L36)
 
 Represents an optional value that can either be 'Some' (containing a value) or 'None' (empty).
 

@@ -10,9 +10,9 @@
 
 ### asPositiveFiniteNumber()
 
-> `const` **asPositiveFiniteNumber**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asPositiveFiniteNumber**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
-Defined in: [src/number/branded-types/positive-finite-number.mts:87](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L87)
+Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L89)
 
 Casts a number to a PositiveFiniteNumber type.
 
@@ -53,7 +53,7 @@ const y = asPositiveFiniteNumber(0.001); // PositiveFiniteNumber
 
 > `const` **isPositiveFiniteNumber**: (`a`) => `a is PositiveFiniteNumber` = `is`
 
-Defined in: [src/number/branded-types/positive-finite-number.mts:72](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L72)
+Defined in: [src/number/branded-types/positive-finite-number.mts:74](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L74)
 
 Checks if a number is a PositiveFiniteNumber (a finite number > 0).
 
@@ -75,13 +75,22 @@ Checks if a number is a PositiveFiniteNumber (a finite number > 0).
 
 > `const` **PositiveFiniteNumber**: `object`
 
-Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L89)
+Defined in: [src/number/branded-types/positive-finite-number.mts:125](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-finite-number.mts#L125)
+
+Namespace providing type-safe arithmetic operations for positive finite numbers.
+
+All operations maintain the positive constraint by clamping non-positive results to MIN_VALUE,
+while ensuring results remain finite (excluding NaN and Infinity). This type is useful
+for representing quantities that must always be positive, such as probabilities, magnitudes,
+and physical measurements.
 
 #### Type declaration
 
 ##### add()
 
 > **add**: (`x`, `y`) => `PositiveFiniteNumber`
+
+Adds two PositiveFiniteNumber values.
 
 ###### Parameters
 
@@ -97,11 +106,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
-`a + b`, but greater than 0
+`a + b` clamped to (0, +∞) as a PositiveFiniteNumber.
 
 ##### ceil()
 
 > **ceil**: (`x`) => `ToInt`\<`PositiveFiniteNumber`\>
+
+Rounds up a PositiveFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -109,13 +120,19 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+The PositiveFiniteNumber to round up.
+
 ###### Returns
 
 `ToInt`\<`PositiveFiniteNumber`\>
 
+The ceiling value as a PositiveInt (always >= 1).
+
 ##### clamp()
 
 > **clamp**: (`x`) => `PositiveFiniteNumber`
+
+Clamps a number to the positive finite range.
 
 ###### Parameters
 
@@ -127,9 +144,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+The value clamped to (0, +∞) as a PositiveFiniteNumber.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `PositiveFiniteNumber`
+
+Divides one PositiveFiniteNumber by another.
 
 ###### Parameters
 
@@ -145,11 +166,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
-`a / b`, but greater than 0
+`a / b` clamped to (0, +∞) as a PositiveFiniteNumber.
 
 ##### floor()
 
 > **floor**: (`x`) => `RemoveNonZeroBrandKey`\<`ToInt`\<`PositiveFiniteNumber`\>\>
+
+Rounds down a PositiveFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -157,13 +180,19 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+The PositiveFiniteNumber to round down.
+
 ###### Returns
 
 `RemoveNonZeroBrandKey`\<`ToInt`\<`PositiveFiniteNumber`\>\>
 
+The floor value as a Uint (can be 0).
+
 ##### is()
 
 > **is**: (`a`) => `a is PositiveFiniteNumber`
+
+Type guard to check if a value is a PositiveFiniteNumber.
 
 ###### Parameters
 
@@ -175,9 +204,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `a is PositiveFiniteNumber`
 
+`true` if the value is a positive finite number, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `PositiveFiniteNumber` = `max_`
+
+Returns the larger of two PositiveFiniteNumber values.
 
 ###### Parameters
 
@@ -188,11 +221,15 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 ###### Returns
 
 `PositiveFiniteNumber`
+
+The maximum value as a PositiveFiniteNumber.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `PositiveFiniteNumber` = `min_`
 
+Returns the smaller of two PositiveFiniteNumber values.
+
 ###### Parameters
 
 ###### values
@@ -203,16 +240,20 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+The minimum value as a PositiveFiniteNumber.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `number`
+> `readonly` **MIN_VALUE**: `number`
 
-`Number.MIN_VALUE`
+The minimum value for a positive finite number.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `PositiveFiniteNumber`
 
+Multiplies two PositiveFiniteNumber values.
+
 ###### Parameters
 
 ###### x
@@ -227,12 +268,14 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
-`a * b`, but greater than 0
+`a * b` clamped to (0, +∞) as a PositiveFiniteNumber.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `PositiveFiniteNumber`
 
+Raises a PositiveFiniteNumber to the power of another PositiveFiniteNumber.
+
 ###### Parameters
 
 ###### x
@@ -247,11 +290,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
-`a ** b`, but greater than 0
+`a ** b` clamped to (0, +∞) as a PositiveFiniteNumber.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `PositiveFiniteNumber`
+
+Generates a random PositiveFiniteNumber value.
 
 ###### Parameters
 
@@ -267,9 +312,13 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+A random positive finite number.
+
 ##### round()
 
 > **round**: (`x`) => `RemoveNonZeroBrandKey`\<`ToInt`\<`PositiveFiniteNumber`\>\>
+
+Rounds a PositiveFiniteNumber to the nearest integer.
 
 ###### Parameters
 
@@ -277,13 +326,19 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
+The PositiveFiniteNumber to round.
+
 ###### Returns
 
 `RemoveNonZeroBrandKey`\<`ToInt`\<`PositiveFiniteNumber`\>\>
 
+The rounded value as a Uint (can be 0 if x < 0.5).
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `PositiveFiniteNumber`
+
+Subtracts one PositiveFiniteNumber from another.
 
 ###### Parameters
 
@@ -299,4 +354,31 @@ Defined in: [src/number/branded-types/positive-finite-number.mts:89](https://git
 
 `PositiveFiniteNumber`
 
-`a - b`, but greater than 0
+`a - b` clamped to (0, +∞) as a PositiveFiniteNumber (minimum MIN_VALUE).
+
+#### Example
+
+```typescript
+const probability = asPositiveFiniteNumber(0.75);
+const rate = asPositiveFiniteNumber(1.25);
+
+// Arithmetic operations with positive clamping
+const combined = PositiveFiniteNumber.add(probability, rate); // PositiveFiniteNumber (2.0)
+const difference = PositiveFiniteNumber.sub(rate, probability); // PositiveFiniteNumber (0.5)
+const scaled = PositiveFiniteNumber.mul(probability, rate); // PositiveFiniteNumber (0.9375)
+const ratio = PositiveFiniteNumber.div(rate, probability); // PositiveFiniteNumber (1.666...)
+
+// Range operations
+const clamped = PositiveFiniteNumber.clamp(-10.5); // PositiveFiniteNumber (MIN_VALUE)
+const minimum = PositiveFiniteNumber.min(probability, rate); // PositiveFiniteNumber (0.75)
+const maximum = PositiveFiniteNumber.max(probability, rate); // PositiveFiniteNumber (1.25)
+
+// Rounding operations (different return types based on operation)
+const ceiled = PositiveFiniteNumber.ceil(probability); // PositiveInt (1)
+const floored = PositiveFiniteNumber.floor(rate); // Uint (1)
+const rounded = PositiveFiniteNumber.round(rate); // Uint (1)
+
+// Utility operations
+const random = PositiveFiniteNumber.random(); // PositiveFiniteNumber (random positive value)
+const power = PositiveFiniteNumber.pow(rate, probability); // PositiveFiniteNumber (1.18...)
+```

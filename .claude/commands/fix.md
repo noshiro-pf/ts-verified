@@ -1,4 +1,4 @@
-Verify these command and fix errors:
+Verify these commands and fix errors:
 
 - [ ] `npm i`
 - [ ] `npm run tsc` - Type checking

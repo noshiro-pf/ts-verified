@@ -27,6 +27,18 @@ describe('Int', () => {
       expect(asInt(-10)).toBe(-10);
       expect(asInt(0)).toBe(0);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+    ] as const)(`asInt($name) should throw a TypeError`, ({ value }) => {
+      expect(() => asInt(value)).toThrow(
+        new TypeError(`Expected an integer, got: ${value}`),
+      );
+    });
   });
 
   describe('isInt', () => {
@@ -121,10 +133,8 @@ describe('Int', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<Int, number>('<=');
-      expectType<number, Int>('>=');
 
-      const _value = asInt(5);
-      expectType<typeof _value, Int>('<=');
+      expectTypeOf(asInt(5)).toExtend<Int>();
     });
   });
 });

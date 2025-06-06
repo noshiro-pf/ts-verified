@@ -45,6 +45,26 @@ describe('NonZeroUint32', () => {
       expect(asNonZeroUint32(1)).toBe(1);
       expect(asNonZeroUint32(4294967295)).toBe(4294967295);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+      { name: '-1', value: -1 },
+      { name: '4294967296', value: 4294967296 },
+    ] as const)(
+      `asNonZeroUint32($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asNonZeroUint32(value)).toThrow(
+          new TypeError(
+            `Expected a non-zero integer in [1, 2^32), got: ${value}`,
+          ),
+        );
+      },
+    );
   });
 
   describe('isNonZeroUint32', () => {
@@ -172,10 +192,8 @@ describe('NonZeroUint32', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<NonZeroUint32, number>('<=');
-      expectType<number, NonZeroUint32>('>=');
 
-      const _value = asNonZeroUint32(1000000);
-      expectType<typeof _value, NonZeroUint32>('<=');
+      expectTypeOf(asNonZeroUint32(1000000)).toExtend<NonZeroUint32>();
     });
   });
 });

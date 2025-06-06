@@ -10,7 +10,7 @@
 
 ### asSafeUint()
 
-> `const` **asSafeUint**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asSafeUint**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
 Defined in: [src/number/branded-types/safe-uint.mts:54](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/safe-uint.mts#L54)
 
@@ -75,13 +75,21 @@ Checks if a number is a SafeUint.
 
 > `const` **SafeUint**: `object`
 
-Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/safe-uint.mts#L56)
+Defined in: [src/number/branded-types/safe-uint.mts:83](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/safe-uint.mts#L83)
+
+Namespace providing type-safe arithmetic operations for safe unsigned integers.
+
+All operations automatically clamp results to the safe unsigned integer range [0, MAX_SAFE_INTEGER].
+This ensures that all arithmetic maintains both the non-negative constraint and IEEE 754 precision guarantees,
+preventing precision loss while ensuring results are never negative.
 
 #### Type declaration
 
 ##### add()
 
 > **add**: (`x`, `y`) => `SafeUint`
+
+Adds two SafeUint values.
 
 ###### Parameters
 
@@ -97,11 +105,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
-`a + b`, but clamped to `[0, MAX_SAFE_INTEGER]`
+`a + b` clamped to [0, MAX_SAFE_INTEGER] as a SafeUint.
 
 ##### clamp()
 
 > **clamp**: (`x`) => `SafeUint`
+
+Clamps a number to the safe unsigned integer range.
 
 ###### Parameters
 
@@ -113,9 +123,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
+The value clamped to [0, MAX_SAFE_INTEGER] as a SafeUint.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `SafeUint`
+
+Divides one SafeUint by another using floor division.
 
 ###### Parameters
 
@@ -131,11 +145,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
-`⌊a / b⌋`, but clamped to `[0, MAX_SAFE_INTEGER]`
+`⌊a / b⌋` clamped to [0, MAX_SAFE_INTEGER] as a SafeUint.
 
 ##### is()
 
 > **is**: (`a`) => `a is SafeUint`
+
+Type guard to check if a value is a SafeUint.
 
 ###### Parameters
 
@@ -147,9 +163,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `a is SafeUint`
 
+`true` if the value is a non-negative safe integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `SafeUint` = `max_`
+
+Returns the larger of two SafeUint values.
 
 ###### Parameters
 
@@ -161,16 +181,20 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
+The maximum value as a SafeUint.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `SafeUint`
+> `readonly` **MAX_VALUE**: `SafeUint`
 
-`Number.MAX_SAFE_INTEGER`
+The maximum safe integer value (2^53 - 1).
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `SafeUint` = `min_`
 
+Returns the smaller of two SafeUint values.
+
 ###### Parameters
 
 ###### values
@@ -181,16 +205,20 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
+The minimum value as a SafeUint.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `0`
+> `readonly` **MIN_VALUE**: `0`
 
-`0`
+The minimum value for a safe unsigned integer.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `SafeUint`
 
+Multiplies two SafeUint values.
+
 ###### Parameters
 
 ###### x
@@ -205,12 +233,14 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
-`a * b`, but clamped to `[0, MAX_SAFE_INTEGER]`
+`a * b` clamped to [0, MAX_SAFE_INTEGER] as a SafeUint.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `SafeUint`
 
+Raises a SafeUint to the power of another SafeUint.
+
 ###### Parameters
 
 ###### x
@@ -225,11 +255,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
-`a ** b`, but clamped to `[0, MAX_SAFE_INTEGER]`
+`a ** b` clamped to [0, MAX_SAFE_INTEGER] as a SafeUint.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `SafeUint`
+
+Generates a random SafeUint value within the valid range.
 
 ###### Parameters
 
@@ -245,9 +277,13 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
+A random SafeUint between 0 and MAX_SAFE_INTEGER.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `SafeUint`
+
+Subtracts one SafeUint from another.
 
 ###### Parameters
 
@@ -263,4 +299,25 @@ Defined in: [src/number/branded-types/safe-uint.mts:56](https://github.com/noshi
 
 `SafeUint`
 
-`a - b`, but clamped to `[0, MAX_SAFE_INTEGER]`
+`a - b` clamped to [0, MAX_SAFE_INTEGER] as a SafeUint (minimum 0).
+
+#### Example
+
+```typescript
+const a = asSafeUint(9007199254740000); // Near MAX_SAFE_INTEGER
+const b = asSafeUint(1000);
+
+// Arithmetic operations with safe unsigned range clamping
+const sum = SafeUint.add(a, b); // SafeUint (clamped to MAX_SAFE_INTEGER)
+const diff = SafeUint.sub(b, a); // SafeUint (0 - clamped to MIN_VALUE)
+const product = SafeUint.mul(a, b); // SafeUint (clamped to MAX_SAFE_INTEGER)
+
+// Range operations
+const clamped = SafeUint.clamp(-100); // SafeUint (0)
+const minimum = SafeUint.min(a, b); // SafeUint (1000)
+const maximum = SafeUint.max(a, b); // SafeUint (a)
+
+// Utility operations
+const random = SafeUint.random(); // SafeUint (random safe unsigned integer)
+const power = SafeUint.pow(asSafeUint(2), asSafeUint(20)); // SafeUint (1048576)
+```

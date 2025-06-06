@@ -6,7 +6,7 @@ describe('Array.every', () => {
   if (xs.every((x): x is 1 => x === 1)) {
     expectType<typeof xs, readonly [1, 2, 3] & readonly 1[]>('=');
   } else {
-    expectType<typeof xs, readonly [1, 2, 3] & readonly 1[]>('!=');
+    expectType<typeof xs, readonly [1, 2, 3]>('=');
   }
 
   test('case 1', () => {

@@ -10,7 +10,7 @@
 
 ### asPositiveInt32()
 
-> `const` **asPositiveInt32**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castTo`
+> `const` **asPositiveInt32**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
 Defined in: [src/number/branded-types/positive-int32.mts:54](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int32.mts#L54)
 
@@ -76,13 +76,21 @@ Checks if a number is a PositiveInt32 (32-bit positive signed integer in the ran
 
 > `const` **PositiveInt32**: `object`
 
-Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int32.mts#L56)
+Defined in: [src/number/branded-types/positive-int32.mts:84](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int32.mts#L84)
+
+Namespace providing type-safe arithmetic operations for 32-bit positive integers.
+
+All operations automatically clamp results to the valid PositiveInt32 range [1, 2147483647].
+This ensures that all arithmetic maintains the 32-bit positive integer constraint,
+with results below 1 clamped to MIN_VALUE and overflow results clamped to MAX_VALUE.
 
 #### Type declaration
 
 ##### add()
 
 > **add**: (`x`, `y`) => `PositiveInt32`
+
+Adds two PositiveInt32 values.
 
 ###### Parameters
 
@@ -98,11 +106,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
-`a + b`, but clamped to `[1, 2^31)`
+`a + b` clamped to [1, 2147483647] as a PositiveInt32.
 
 ##### clamp()
 
 > **clamp**: (`x`) => `PositiveInt32`
+
+Clamps a number to the PositiveInt32 range.
 
 ###### Parameters
 
@@ -114,9 +124,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
+The value clamped to [1, 2147483647] as a PositiveInt32.
+
 ##### div()
 
 > **div**: (`x`, `y`) => `PositiveInt32`
+
+Divides one PositiveInt32 by another using floor division.
 
 ###### Parameters
 
@@ -132,11 +146,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
-`⌊a / b⌋`, but clamped to `[1, 2^31)`
+`⌊a / b⌋` clamped to [1, 2147483647] as a PositiveInt32.
 
 ##### is()
 
 > **is**: (`a`) => `a is PositiveInt32`
+
+Type guard to check if a value is a PositiveInt32.
 
 ###### Parameters
 
@@ -148,9 +164,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `a is PositiveInt32`
 
+`true` if the value is a 32-bit positive integer, `false` otherwise.
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `PositiveInt32` = `max_`
+
+Returns the larger of two PositiveInt32 values.
 
 ###### Parameters
 
@@ -162,16 +182,20 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
+The maximum value as a PositiveInt32.
+
 ##### MAX_VALUE
 
-> **MAX_VALUE**: `number`
+> `readonly` **MAX_VALUE**: `number`
 
-`2^31 - 1`
+The maximum value for a 32-bit positive integer.
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `PositiveInt32` = `min_`
 
+Returns the smaller of two PositiveInt32 values.
+
 ###### Parameters
 
 ###### values
@@ -182,16 +206,20 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
+The minimum value as a PositiveInt32.
+
 ##### MIN_VALUE
 
-> **MIN_VALUE**: `1`
+> `readonly` **MIN_VALUE**: `1`
 
-`1`
+The minimum value for a 32-bit positive integer.
 
 ##### mul()
 
 > **mul**: (`x`, `y`) => `PositiveInt32`
 
+Multiplies two PositiveInt32 values.
+
 ###### Parameters
 
 ###### x
@@ -206,12 +234,14 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
-`a * b`, but clamped to `[1, 2^31)`
+`a * b` clamped to [1, 2147483647] as a PositiveInt32.
 
 ##### pow()
 
 > **pow**: (`x`, `y`) => `PositiveInt32`
 
+Raises a PositiveInt32 to the power of another PositiveInt32.
+
 ###### Parameters
 
 ###### x
@@ -226,11 +256,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
-`a ** b`, but clamped to `[1, 2^31)`
+`a ** b` clamped to [1, 2147483647] as a PositiveInt32.
 
 ##### random()
 
 > **random**: (`min`, `max`) => `PositiveInt32`
+
+Generates a random PositiveInt32 value within the valid range.
 
 ###### Parameters
 
@@ -246,9 +278,13 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
+A random PositiveInt32 between 1 and 2147483647.
+
 ##### sub()
 
 > **sub**: (`x`, `y`) => `PositiveInt32`
+
+Subtracts one PositiveInt32 from another.
 
 ###### Parameters
 
@@ -264,4 +300,26 @@ Defined in: [src/number/branded-types/positive-int32.mts:56](https://github.com/
 
 `PositiveInt32`
 
-`a - b`, but clamped to `[1, 2^31)`
+`a - b` clamped to [1, 2147483647] as a PositiveInt32 (minimum 1).
+
+#### Example
+
+```typescript
+const a = asPositiveInt32(2000000000);
+const b = asPositiveInt32(500000000);
+
+// Arithmetic operations with automatic clamping and positive constraint
+const sum = PositiveInt32.add(a, b); // PositiveInt32 (2147483647 - clamped to MAX_VALUE)
+const diff = PositiveInt32.sub(a, b); // PositiveInt32 (1500000000)
+const reverseDiff = PositiveInt32.sub(b, a); // PositiveInt32 (1 - clamped to MIN_VALUE)
+const product = PositiveInt32.mul(a, b); // PositiveInt32 (2147483647 - clamped due to overflow)
+
+// Range operations (maintaining positive constraint)
+const clamped = PositiveInt32.clamp(-1000); // PositiveInt32 (1)
+const minimum = PositiveInt32.min(a, b); // PositiveInt32 (500000000)
+const maximum = PositiveInt32.max(a, b); // PositiveInt32 (2000000000)
+
+// Utility operations
+const random = PositiveInt32.random(); // PositiveInt32 (random value in [1, 2147483647])
+const power = PositiveInt32.pow(asPositiveInt32(2), asPositiveInt32(20)); // PositiveInt32 (1048576)
+```

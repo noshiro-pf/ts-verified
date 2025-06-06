@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = PositiveUint32;
-const typeName = 'PositiveUint32';
+
 const typeNameInMessage = 'a positive integer in [1, 2^32)';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -51,75 +51,138 @@ export const isPositiveUint32 = is;
  * // asPositiveUint32(4294967296); // throws TypeError
  * ```
  */
-export const asPositiveUint32 = castTo;
+export const asPositiveUint32 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 32-bit positive unsigned integers.
+ *
+ * All operations automatically clamp results to the valid PositiveUint32 range [1, 4294967295].
+ * This ensures that all arithmetic maintains the 32-bit positive unsigned integer constraint,
+ * with results below 1 clamped to MIN_VALUE and overflow results clamped to MAX_VALUE.
+ *
+ * @example
+ * ```typescript
+ * const a = asPositiveUint32(4000000000);
+ * const b = asPositiveUint32(1000000000);
+ *
+ * // Arithmetic operations with automatic clamping and positive constraint
+ * const sum = PositiveUint32.add(a, b);       // PositiveUint32 (4294967295 - clamped to MAX_VALUE)
+ * const diff = PositiveUint32.sub(a, b);      // PositiveUint32 (3000000000)
+ * const reverseDiff = PositiveUint32.sub(b, a); // PositiveUint32 (1 - clamped to MIN_VALUE)
+ * const product = PositiveUint32.mul(a, b);   // PositiveUint32 (4294967295 - clamped due to overflow)
+ *
+ * // Range operations (maintaining positive constraint)
+ * const clamped = PositiveUint32.clamp(-100);     // PositiveUint32 (1)
+ * const minimum = PositiveUint32.min(a, b);       // PositiveUint32 (1000000000)
+ * const maximum = PositiveUint32.max(a, b);       // PositiveUint32 (4000000000)
+ *
+ * // Utility operations
+ * const random = PositiveUint32.random();         // PositiveUint32 (random value in [1, 4294967295])
+ * const power = PositiveUint32.pow(asPositiveUint32(2), asPositiveUint32(20)); // PositiveUint32 (1048576)
+ * ```
+ */
 export const PositiveUint32 = {
+  /**
+   * Type guard to check if a value is a PositiveUint32.
+   * @param value The value to check.
+   * @returns `true` if the value is a 32-bit positive unsigned integer, `false` otherwise.
+   */
   is,
 
-  /** `1` */
+  /**
+   * The minimum value for a 32-bit positive unsigned integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^32 - 1` */
+  /**
+   * The maximum value for a 32-bit positive unsigned integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two PositiveUint32 values.
+   * @param a The first PositiveUint32.
+   * @param b The second PositiveUint32.
+   * @returns The minimum value as a PositiveUint32.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two PositiveUint32 values.
+   * @param a The first PositiveUint32.
+   * @param b The second PositiveUint32.
+   * @returns The maximum value as a PositiveUint32.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the PositiveUint32 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [1, 4294967295] as a PositiveUint32.
+   */
   clamp,
 
+  /**
+   * Generates a random PositiveUint32 value within the valid range.
+   * @returns A random PositiveUint32 between 1 and 4294967295.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[1, 2^32)` */
+  /**
+   * Raises a PositiveUint32 to the power of another PositiveUint32.
+   * @param a The base PositiveUint32.
+   * @param b The exponent PositiveUint32.
+   * @returns `a ** b` clamped to [1, 4294967295] as a PositiveUint32.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[1, 2^32)` */
+  /**
+   * Adds two PositiveUint32 values.
+   * @param a The first PositiveUint32.
+   * @param b The second PositiveUint32.
+   * @returns `a + b` clamped to [1, 4294967295] as a PositiveUint32.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[1, 2^32)` */
+  /**
+   * Subtracts one PositiveUint32 from another.
+   * @param a The minuend PositiveUint32.
+   * @param b The subtrahend PositiveUint32.
+   * @returns `a - b` clamped to [1, 4294967295] as a PositiveUint32 (minimum 1).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[1, 2^32)` */
+  /**
+   * Multiplies two PositiveUint32 values.
+   * @param a The first PositiveUint32.
+   * @param b The second PositiveUint32.
+   * @returns `a * b` clamped to [1, 4294967295] as a PositiveUint32.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[1, 2^32)` */
+  /**
+   * Divides one PositiveUint32 by another using floor division.
+   * @param a The dividend PositiveUint32.
+   * @param b The divisor PositiveUint32.
+   * @returns `⌊a / b⌋` clamped to [1, 4294967295] as a PositiveUint32.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '0', value: 0 },
-    { name: '-1', value: -1 },
-    { name: '4294967296', value: 4294967296 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof PositiveUint32,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 1;
-    const max = 10;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof PositiveUint32,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof PositiveUint32,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof PositiveUint32,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('<=');

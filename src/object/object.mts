@@ -40,8 +40,8 @@ const shallowEq = (
  * @returns A new record containing only the specified keys and their values.
  * @example
  * ```typescript
+ * // Regular usage
  * const original = { a: 1, b: 2, c: 3, d: 4 };
- *
  * Obj.pick(original, ['a', 'c']); // { a: 1, c: 3 }
  * Obj.pick(original, ['b']); // { b: 2 }
  * Obj.pick(original, []); // {}
@@ -50,23 +50,53 @@ const shallowEq = (
  * const user = { id: 1, name: "Alice", email: "alice@example.com", age: 30 };
  * const publicUser = Obj.pick(user, ['id', 'name']); // { id: 1, name: "Alice" }
  *
+ * // Curried usage for pipe composition
+ * const pickIdAndName = Obj.pick(['id', 'name'] as const);
+ * const result = pipe(user).map(pickIdAndName).value; // { id: 1, name: "Alice" }
+ *
  * // Type safety - only valid keys are allowed
  * // Obj.pick(user, ['invalidKey']); // TypeScript error
  * ```
  */
-const pick = <
+export function pick<
+  const R extends UnknownRecord,
+  const Keys extends readonly (keyof R)[],
+>(record: R, keys: Keys): Pick<R, ArrayElement<Keys>>;
+export function pick<const Keys extends readonly PropertyKey[]>(
+  keys: Keys,
+): <const R extends Record<ArrayElement<Keys>, unknown>>(
+  record: R,
+) => Pick<R, ArrayElement<Keys>>;
+export function pick<
   const R extends UnknownRecord,
   const Keys extends readonly (keyof R)[],
 >(
-  record: R,
-  keys: Keys,
-): Pick<R, ArrayElement<Keys>> => {
-  const keysSet = new Set<keyof R>(keys);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-  return Object.fromEntries(
-    Object.entries(record).filter(([k, _v]) => keysSet.has(k)),
-  ) as never;
-};
+  ...args:
+    | readonly [record: R, keys: Keys]
+    | readonly [keys: readonly PropertyKey[]]
+): Pick<R, ArrayElement<Keys>> | ((record: R) => Pick<R, ArrayElement<Keys>>) {
+  if (args.length === 2) {
+    const [record, keys] = args;
+
+    const keysSet = new Set<keyof R>(keys);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    return Object.fromEntries(
+      Object.entries(record).filter(([k, _v]) => keysSet.has(k)),
+    ) as never;
+  } else {
+    const [keys] = args;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    const keysSet = new Set<keyof R>(keys as (keyof R)[]);
+
+    return (record) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+      Object.fromEntries(
+        Object.entries(record).filter(([k, _v]) => keysSet.has(k)),
+      ) as never;
+  }
+}
 
 /**
  * Creates a new record that omits the specified `keys` of `record` and contains the rest.
@@ -79,8 +109,8 @@ const pick = <
  * @returns A new record containing all properties except the specified keys.
  * @example
  * ```typescript
+ * // Regular usage
  * const original = { a: 1, b: 2, c: 3, d: 4 };
- *
  * Obj.omit(original, ['a', 'c']); // { b: 2, d: 4 }
  * Obj.omit(original, ['b']); // { a: 1, c: 3, d: 4 }
  * Obj.omit(original, []); // { a: 1, b: 2, c: 3, d: 4 } (no keys omitted)
@@ -89,26 +119,53 @@ const pick = <
  * const user = { id: 1, name: "Alice", email: "alice@example.com", password: "secret" };
  * const safeUser = Obj.omit(user, ['password']); // { id: 1, name: "Alice", email: "alice@example.com" }
  *
- * // Remove multiple sensitive fields
- * const publicData = Obj.omit(user, ['password', 'email']); // { id: 1, name: "Alice" }
+ * // Curried usage for pipe composition
+ * const omitSensitive = Obj.omit(['password', 'email'] as const);
+ * const result = pipe(user).map(omitSensitive).value; // { id: 1, name: "Alice" }
  *
  * // Type safety - only valid keys are allowed
  * // Obj.omit(user, ['invalidKey']); // TypeScript error
  * ```
  */
-const omit = <
+export function omit<
+  const R extends UnknownRecord,
+  const Keys extends readonly (keyof R)[],
+>(record: R, keys: Keys): Omit<R, ArrayElement<Keys>>;
+export function omit<const Keys extends readonly PropertyKey[]>(
+  keys: Keys,
+): <const R extends Record<ArrayElement<Keys>, unknown>>(
+  record: R,
+) => Omit<R, ArrayElement<Keys>>;
+export function omit<
   const R extends UnknownRecord,
   const Keys extends readonly (keyof R)[],
 >(
-  record: R,
-  keys: Keys,
-): Omit<R, ArrayElement<Keys>> => {
-  const keysSet = new Set<keyof R>(keys);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-  return Object.fromEntries(
-    Object.entries(record).filter(([k, _v]) => !keysSet.has(k)),
-  ) as never;
-};
+  ...args:
+    | readonly [record: R, keys: Keys]
+    | readonly [keys: readonly PropertyKey[]]
+): Omit<R, ArrayElement<Keys>> | ((record: R) => Omit<R, ArrayElement<Keys>>) {
+  if (args.length === 2) {
+    const [record, keys] = args;
+
+    const keysSet = new Set<keyof R>(keys);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    return Object.fromEntries(
+      Object.entries(record).filter(([k, _v]) => !keysSet.has(k)),
+    ) as never;
+  } else {
+    const [keys] = args;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    const keysSet = new Set<keyof R>(keys as (keyof R)[]);
+
+    return (record) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+      Object.fromEntries(
+        Object.entries(record).filter(([k, _v]) => !keysSet.has(k)),
+      ) as never;
+  }
+}
 
 /**
  * Returns an object created by key-value entries for properties and methods

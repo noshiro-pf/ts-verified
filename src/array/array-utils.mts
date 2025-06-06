@@ -25,7 +25,7 @@ import { castMutable, tp, unknownToString } from '../others/index.mjs';
  * Arr.isArray(null); // false
  * ```
  */
-const isArray = <T,>(
+const isArray = <const T,>(
   value: T,
 ): value is T extends readonly unknown[] ? T : never => Array.isArray(value);
 
@@ -40,7 +40,7 @@ const isArray = <T,>(
  * Arr.isEmpty([1, 2, 3]); // false
  * ```
  */
-const isEmpty = <E,>(array: readonly E[]): array is readonly [] =>
+const isEmpty = <const E,>(array: readonly E[]): array is readonly [] =>
   array.length === 0;
 
 /**
@@ -54,7 +54,7 @@ const isEmpty = <E,>(array: readonly E[]): array is readonly [] =>
  * Arr.isNonEmpty([]); // false
  * ```
  */
-const isNonEmpty = <E,>(array: readonly E[]): array is NonEmptyArray<E> =>
+const isNonEmpty = <const E,>(array: readonly E[]): array is NonEmptyArray<E> =>
   array.length > 0;
 
 /**
@@ -73,7 +73,7 @@ const isNonEmpty = <E,>(array: readonly E[]): array is NonEmptyArray<E> =>
  * Arr.isArrayOfLength([1, 2], 3); // false
  * ```
  */
-const isArrayOfLength = <E, N extends SizeType.ArgArrNonNegative>(
+const isArrayOfLength = <const E, const N extends SizeType.ArgArrNonNegative>(
   array: readonly E[],
   n: N,
 ): array is ArrayOfLength<N, E> => array.length === n;
@@ -94,7 +94,10 @@ const isArrayOfLength = <E, N extends SizeType.ArgArrNonNegative>(
  * Arr.isArrayAtLeastLength([1], 2); // false
  * ```
  */
-const isArrayAtLeastLength = <E, N extends SizeType.ArgArrNonNegative>(
+const isArrayAtLeastLength = <
+  const E,
+  const N extends SizeType.ArgArrNonNegative,
+>(
   array: readonly E[],
   length: N,
 ): array is ArrayAtLeastLen<N, E> => array.length >= length;
@@ -114,8 +117,8 @@ const isArrayAtLeastLength = <E, N extends SizeType.ArgArrNonNegative>(
  * Arr.indexIsInRange([], 0); // false
  * ```
  */
-const indexIsInRange = <T,>(
-  array: readonly T[],
+const indexIsInRange = <const E,>(
+  array: readonly E[],
   index: SizeType.ArgArrNonNegative,
 ): boolean => Num.isInRange(0, array.length)(index);
 
@@ -124,7 +127,7 @@ const indexIsInRange = <T,>(
  * For non-empty arrays, returns a positive number intersected with Uint32.
  * For potentially empty arrays, returns Uint32.
  *
- * @template T The type of the array
+ * @template Ar The type of the array
  * @param array The array to get the size of
  * @returns The size of the array as a branded Uint32 type
  * @example
@@ -139,11 +142,11 @@ const indexIsInRange = <T,>(
  * Arr.size(arr3); // Uint32
  * ```
  */
-function size<T extends NonEmptyArray<unknown>>(
-  array: T,
+function size<const Ar extends NonEmptyArray<unknown>>(
+  array: Ar,
 ): IntersectBrand<PositiveNumber, SizeType.Arr>;
-function size<T extends readonly unknown[]>(array: T): SizeType.Arr;
-function size<T extends readonly unknown[]>(array: T): SizeType.Arr {
+function size<const Ar extends readonly unknown[]>(array: Ar): SizeType.Arr;
+function size<const Ar extends readonly unknown[]>(array: Ar): SizeType.Arr {
   return asUint32(array.length);
 }
 
@@ -163,7 +166,7 @@ function size<T extends readonly unknown[]>(array: T): SizeType.Arr {
  * Arr.zeros(0); // []
  * ```
  */
-function zeros<N extends SmallUint>(len: N): ArrayOfLength<N, 0>;
+function zeros<const N extends SmallUint>(len: N): ArrayOfLength<N, 0>;
 function zeros(
   len: WithSmallInt<SizeType.ArgArrPositive & Uint32>,
 ): NonEmptyArray<0>;
@@ -185,7 +188,7 @@ function zeros(len: SizeType.ArgArrNonNegative): readonly 0[] {
  * Arr.seq(0); // []
  * ```
  */
-function seq<N extends SmallUint>(len: N): Seq<N>;
+function seq<const N extends SmallUint>(len: N): Seq<N>;
 function seq(len: SizeType.ArgArrPositive): NonEmptyArray<SizeType.Arr>;
 function seq(len: SizeType.ArgArrNonNegative): readonly SizeType.Arr[];
 function seq(len: SizeType.ArgArrNonNegative): readonly SizeType.Arr[] {
@@ -313,7 +316,7 @@ expectType<RangeList<5, 1>, readonly []>('=');
  * Arr.range(5, 1); // []
  * ```
  */
-function range<S extends SmallUint, E extends SmallUint>(
+function range<const S extends SmallUint, const E extends SmallUint>(
   start: S,
   end: E,
   step?: 1,
@@ -358,7 +361,10 @@ function range(
  * }
  * ```
  */
-const at = <T,>(array: readonly T[], index: SizeType.ArgArr): Optional<T> =>
+const at = <const E,>(
+  array: readonly E[],
+  index: SizeType.ArgArr,
+): Optional<E> =>
   pipe(index < 0 ? array.length + index : index).map((normalizedIndex) =>
     normalizedIndex < 0 || normalizedIndex >= array.length
       ? Optional.none
@@ -428,7 +434,7 @@ function last<const E>(array: readonly E[]): E | undefined {
  * Arr.sliceClamped([], 0, 5); // []
  * ```
  */
-const sliceClamped = <E,>(
+const sliceClamped = <const E,>(
   array: readonly E[],
   start: SizeType.ArgArr,
   end: SizeType.ArgArr,
@@ -641,15 +647,15 @@ function skipLast<const E>(
  * Arr.toUpdated([1, 2, 3], 5, (x) => x * 10); // [1, 2, 3] (index out of bounds)
  * ```
  */
-const toUpdated = <A, U>(
-  array: readonly A[],
+const toUpdated = <const E, const U>(
+  array: readonly E[],
   index: SizeType.ArgArrNonNegative,
-  updater: (prev: A) => U,
-): readonly (A | U)[] =>
+  updater: (prev: E) => U,
+): readonly (E | U)[] =>
   index < 0 || index >= array.length
     ? array // Return a copy if index is out of bounds
     : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (array as readonly (A | U)[]).with(index, updater(array[index]!));
+      (array as readonly (E | U)[]).with(index, updater(array[index]!));
 
 /**
  * Returns a new array with a new value inserted at the specified index.
@@ -666,11 +672,11 @@ const toUpdated = <A, U>(
  * Arr.toInserted([1, 2, 3], 3, 4); // [1, 2, 3, 4]
  * ```
  */
-const toInserted = <A,>(
-  array: readonly A[],
+const toInserted = <const E,>(
+  array: readonly E[],
   index: SizeType.ArgArrNonNegative,
-  newValue: A,
-): readonly A[] => array.toSpliced(index, 0, newValue);
+  newValue: E,
+): readonly E[] => array.toSpliced(index, 0, newValue);
 
 /**
  * Returns a new array with the element at the specified index removed.
@@ -685,10 +691,10 @@ const toInserted = <A,>(
  * Arr.toRemoved([1, 2, 3], 5); // [1, 2, 3] (index out of bounds)
  * ```
  */
-const toRemoved = <A,>(
-  array: readonly A[],
+const toRemoved = <const E,>(
+  array: readonly E[],
   index: SizeType.ArgArrNonNegative,
-): readonly A[] => array.toSpliced(index, 1);
+): readonly E[] => array.toSpliced(index, 1);
 
 /**
  * Returns a new array with a value added to the end.
@@ -746,12 +752,12 @@ const toUnshifted = <const T extends readonly unknown[], const V>(
  * }
  * ```
  */
-const toFilled = <T,>(
-  array: readonly T[],
-  value: T,
+const toFilled = <const E,>(
+  array: readonly E[],
+  value: E,
   start?: SizeType.ArgArr,
   end?: SizeType.ArgArr,
-): readonly T[] => {
+): readonly E[] => {
   const cp = castMutable(copy(array));
   cp.fill(value, start, end);
   return cp;
@@ -771,13 +777,13 @@ const toFilled = <T,>(
  * }
  * ```
  */
-const find = <T,>(
-  array: readonly T[],
-  predicate: (value: T, index: SizeType.Arr, arr: readonly T[]) => boolean,
-): Optional<T> => {
+const find = <const E,>(
+  array: readonly E[],
+  predicate: (value: E, index: SizeType.Arr, arr: readonly E[]) => boolean,
+): Optional<E> => {
   const foundIndex = array.findIndex(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-    predicate as (value: T, index: number, arr: readonly T[]) => boolean,
+    predicate as (value: E, index: number, arr: readonly E[]) => boolean,
   );
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -798,14 +804,14 @@ const find = <T,>(
  * }
  * ```
  */
-const findIndex = <T,>(
-  array: readonly T[],
-  predicate: (value: T, index: SizeType.Arr) => boolean,
+const findIndex = <const E,>(
+  array: readonly E[],
+  predicate: (value: E, index: SizeType.Arr) => boolean,
 ): Optional<SizeType.Arr> =>
   pipe(
     array.findIndex(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-      predicate as (value: T, index: number) => boolean,
+      predicate as (value: E, index: number) => boolean,
     ),
   ).map((idx) => (idx >= 0 ? Optional.some(asUint32(idx)) : Optional.none))
     .value;
@@ -825,9 +831,9 @@ const findIndex = <T,>(
  * }
  * ```
  */
-const indexOf = <T,>(
-  array: readonly T[],
-  searchElement: T,
+const indexOf = <const E,>(
+  array: readonly E[],
+  searchElement: E,
   fromIndex?: SizeType.ArgArr,
 ): Optional<SizeType.Arr> => {
   if (fromIndex !== undefined && !Number.isInteger(fromIndex)) {
@@ -853,9 +859,9 @@ const indexOf = <T,>(
  * }
  * ```
  */
-const lastIndexOf = <T,>(
-  array: readonly T[],
-  searchElement: T,
+const lastIndexOf = <const E,>(
+  array: readonly E[],
+  searchElement: E,
   fromIndex?: SizeType.ArgArr,
 ): Optional<SizeType.Arr> => {
   if (fromIndex !== undefined && !Number.isInteger(fromIndex)) {
@@ -885,16 +891,16 @@ const lastIndexOf = <T,>(
  * Arr.foldl(['a', 'b', 'c'], (str, char) => str + char, ''); // "abc"
  * ```
  */
-const foldl = <A, S>(
-  array: readonly A[],
+const foldl = <const E, const P>(
+  array: readonly E[],
   callbackfn: (
-    previousValue: S,
-    currentValue: A,
+    previousValue: P,
+    currentValue: E,
     currentIndex: SizeType.Arr,
-  ) => S,
-  initialValue: S,
-): S =>
-  array.reduce<S>(
+  ) => P,
+  initialValue: P,
+): P =>
+  array.reduce<P>(
     (prev, curr, index) => callbackfn(prev, curr, asUint32(index)),
     initialValue,
   );
@@ -919,15 +925,15 @@ const foldl = <A, S>(
  * Arr.foldr([1, 2, 3], (acc, curr) => curr - acc, 0); // 2 (i.e. 1-(2-(3-0)))
  * ```
  */
-const foldr = <A, S>(
-  array: readonly A[],
+const foldr = <const E, const P>(
+  array: readonly E[],
   callbackfn: (
-    previousValue: S,
-    currentValue: A,
+    previousValue: P,
+    currentValue: E,
     currentIndex: SizeType.Arr,
-  ) => S,
-  initialValue: S,
-): S =>
+  ) => P,
+  initialValue: P,
+): P =>
   array.reduceRight(
     (prev, curr, index) => callbackfn(prev, curr, asUint32(index)),
     initialValue,
@@ -945,23 +951,26 @@ const foldr = <A, S>(
  * Arr.min([{v:3}, {v:1}], (a,b) => a.v - b.v) // {v:1}
  * ```
  */
-function min<N extends number>(
+function min<const N extends number>(
   array: NonEmptyArray<N>,
   comparator?: (x: N, y: N) => number,
 ): N;
-function min<N extends number>(
+function min<const N extends number>(
   array: readonly N[],
   comparator?: (x: N, y: N) => number,
 ): N | undefined;
-function min<A>(array: NonEmptyArray<A>, comparator: (x: A, y: A) => number): A;
-function min<A>(
-  array: readonly A[],
-  comparator: (x: A, y: A) => number,
-): A | undefined;
-function min<A>(
-  array: readonly A[],
-  comparator?: (x: A, y: A) => number,
-): A | undefined {
+function min<const E>(
+  array: NonEmptyArray<E>,
+  comparator: (x: E, y: E) => number,
+): E;
+function min<const E>(
+  array: readonly E[],
+  comparator: (x: E, y: E) => number,
+): E | undefined;
+function min<const E>(
+  array: readonly E[],
+  comparator?: (x: E, y: E) => number,
+): E | undefined {
   const cmp = comparator ?? ((x, y) => Num.from(x) - Num.from(y));
 
   if (!isNonEmpty(array)) {
@@ -992,23 +1001,26 @@ function min<A>(
  * Arr.max([{v:3}, {v:1}], (a,b) => a.v - b.v) // {v:3}
  * ```
  */
-function max<N extends number>(
+function max<const N extends number>(
   array: NonEmptyArray<N>,
   comparator?: (x: N, y: N) => number,
 ): N;
-function max<N extends number>(
+function max<const N extends number>(
   array: readonly N[],
   comparator?: (x: N, y: N) => number,
 ): N | undefined;
-function max<A>(array: NonEmptyArray<A>, comparator: (x: A, y: A) => number): A;
-function max<A>(
-  array: readonly A[],
-  comparator: (x: A, y: A) => number,
-): A | undefined;
-function max<A>(
-  array: readonly A[],
-  comparator?: (x: A, y: A) => number,
-): A | undefined {
+function max<const E>(
+  array: NonEmptyArray<E>,
+  comparator: (x: E, y: E) => number,
+): E;
+function max<const E>(
+  array: readonly E[],
+  comparator: (x: E, y: E) => number,
+): E | undefined;
+function max<const E>(
+  array: readonly E[],
+  comparator?: (x: E, y: E) => number,
+): E | undefined {
   const cmp = comparator ?? ((x, y) => Num.from(x) - Num.from(y));
   // Find max by finding min with an inverted comparator
   return min(array, (x, y) => -cmp(x, y));
@@ -1021,7 +1033,7 @@ function max<A>(
  * - If the array is empty, returns `undefined`.
  * - You can provide a custom comparator for the mapped values.
  *
- * @template A The type of elements in the array.
+ * @template E The type of elements in the array.
  * @template V The type of the value to compare by.
  * @param array The input array.
  * @param comparatorValueMapper A function that maps an element to a value for comparison.
@@ -1033,29 +1045,29 @@ function max<A>(
  * Arr.minBy(people, p => p.age); // { name: 'Bob', age: 20 }
  * ```
  */
-function minBy<A>(
-  array: NonEmptyArray<A>,
-  comparatorValueMapper: (value: A) => number,
-): A;
-function minBy<A>(
-  array: readonly A[],
-  comparatorValueMapper: (value: A) => number,
-): A | undefined;
-function minBy<A, V>(
-  array: NonEmptyArray<A>,
-  comparatorValueMapper: (value: A) => V,
+function minBy<const E>(
+  array: NonEmptyArray<E>,
+  comparatorValueMapper: (value: E) => number,
+): E;
+function minBy<const E>(
+  array: readonly E[],
+  comparatorValueMapper: (value: E) => number,
+): E | undefined;
+function minBy<const E, const V>(
+  array: NonEmptyArray<E>,
+  comparatorValueMapper: (value: E) => V,
   comparator: (x: V, y: V) => number,
-): A;
-function minBy<A, V>(
-  array: readonly A[],
-  comparatorValueMapper: (value: A) => V,
+): E;
+function minBy<const E, const V>(
+  array: readonly E[],
+  comparatorValueMapper: (value: E) => V,
   comparator: (x: V, y: V) => number,
-): A | undefined;
-function minBy<A, V>(
-  array: readonly A[],
-  comparatorValueMapper: (value: A) => V,
+): E | undefined;
+function minBy<E, V>(
+  array: readonly E[],
+  comparatorValueMapper: (value: E) => V,
   comparator?: (x: V, y: V) => number,
-): A | undefined {
+): E | undefined {
   return min(array, (x, y) =>
     comparator === undefined
       ? Num.from(comparatorValueMapper(x)) - Num.from(comparatorValueMapper(y))
@@ -1070,7 +1082,7 @@ function minBy<A, V>(
  * - If the array is empty, returns `undefined`.
  * - You can provide a custom comparator for the mapped values.
  *
- * @template A The type of elements in the array.
+ * @template E The type of elements in the array.
  * @template V The type of the value to compare by.
  * @param array The input array.
  * @param comparatorValueMapper A function that maps an element to a value for comparison.
@@ -1082,10 +1094,10 @@ function minBy<A, V>(
  * Arr.maxBy(people, p => p.age); // { name: 'Alice', age: 30 }
  * ```
  */
-function maxBy<A>(
-  array: NonEmptyArray<A>,
-  comparatorValueMapper: (value: A) => number,
-): A;
+function maxBy<const E>(
+  array: NonEmptyArray<E>,
+  comparatorValueMapper: (value: E) => number,
+): E;
 function maxBy<A>(
   array: readonly A[],
   comparatorValueMapper: (value: A) => number,
@@ -1125,7 +1137,7 @@ function maxBy<A, V>(
  * Arr.count([], () => true); // 0
  * ```
  */
-const count = <A,>(
+const count = <const A,>(
   array: readonly A[],
   predicate: (value: A, index: SizeType.Arr) => boolean,
 ): SizeType.Arr =>
@@ -1152,7 +1164,7 @@ const count = <A,>(
  * // IMap { 'apple': 2, 'banana': 1 }
  * ```
  */
-const countBy = <A, G extends MapSetKeyType>(
+const countBy = <const A, const G extends MapSetKeyType>(
   array: readonly A[],
   grouper: (value: A, index: SizeType.Arr) => G,
 ): IMap<G, SizeType.Arr> => {
@@ -1179,8 +1191,11 @@ const countBy = <A, G extends MapSetKeyType>(
  * Arr.sum([-1, 0, 1]); // 0
  * ```
  */
-const sum = (array: readonly number[]): number =>
-  array.reduce((prev, curr) => prev + curr, 0);
+function sum(array: readonly Int[]): Int;
+function sum(array: readonly number[]): number;
+function sum(array: readonly number[]): number {
+  return array.reduce((prev, curr) => prev + curr, 0);
+}
 
 /**
  * Joins array elements into a string.
@@ -1202,8 +1217,8 @@ const sum = (array: readonly number[]): number =>
  * // Result.Err with Error about circular reference
  * ```
  */
-const join = <T,>(
-  array: readonly T[],
+const join = <const E,>(
+  array: readonly E[],
   separator?: string,
 ): Result<string, Error> => {
   try {
@@ -1237,7 +1252,10 @@ const join = <T,>(
  * Arr.zip([], ['a']); // []
  * ```
  */
-const zip = <T1 extends readonly unknown[], T2 extends readonly unknown[]>(
+const zip = <
+  const T1 extends readonly unknown[],
+  const T2 extends readonly unknown[],
+>(
   array1: T1,
   array2: T2,
 ): List.Zip<T1, T2> =>
@@ -1261,7 +1279,7 @@ const zip = <T1 extends readonly unknown[], T2 extends readonly unknown[]>(
  * Arr.filterNot(['apple', 'banana', 'avocado'], (s) => s.startsWith('a')); // ['banana']
  * ```
  */
-const filterNot = <A,>(
+const filterNot = <const A,>(
   array: readonly A[],
   predicate: (a: A, index: SizeType.Arr) => boolean,
 ): readonly A[] => array.filter((a, i) => !predicate(a, asUint32(i)));
@@ -1305,7 +1323,10 @@ const concat = <
  * Arr.partition([], 2); // []
  * ```
  */
-const partition = <N extends WithSmallInt<PositiveInt & SizeType.Arr>, A>(
+const partition = <
+  const N extends WithSmallInt<PositiveInt & SizeType.Arr>,
+  const A,
+>(
   array: readonly A[],
   chunkSize: N,
 ): readonly (readonly A[])[] =>
@@ -1331,7 +1352,7 @@ const partition = <N extends WithSmallInt<PositiveInt & SizeType.Arr>, A>(
  * // [{ name: 'Adam', score: 90 }, { name: 'Bob', score: 80 }, { name: 'Eve', score: 70 }]
  * ```
  */
-function toSortedBy<A>(
+function toSortedBy<const A>(
   array: readonly A[],
   comparatorValueMapper: (value: A) => number,
   comparator?: (x: number, y: number) => number,
@@ -1346,12 +1367,12 @@ function toSortedBy<A>(
  * @param comparator A custom comparator function `(x: V, y: V) => number` for values of type `V`.
  * @returns A new array sorted by the mapped values.
  */
-function toSortedBy<A, V>(
+function toSortedBy<const A, const V>(
   array: readonly A[],
   comparatorValueMapper: (value: A) => V,
   comparator: (x: V, y: V) => number,
 ): readonly A[];
-function toSortedBy<A, V>(
+function toSortedBy<const A, const V>(
   array: readonly A[],
   comparatorValueMapper: (value: A) => V,
   comparator?: (x: V, y: V) => number,
@@ -1385,7 +1406,7 @@ function toSortedBy<A, V>(
  * Arr.scan([], (acc, curr: number) => acc + curr, 100); // [100]
  * ```
  */
-const scan = <A, S>(
+const scan = <const A, const S>(
   array: readonly A[],
   reducer: (accumulator: S, currentValue: A, currentIndex: SizeType.Arr) => S,
   init: S,
@@ -1426,7 +1447,7 @@ const scan = <A, S>(
  * // IMap { 'odd' => [1, 3], 'even' => [2, 4] }
  * ```
  */
-const groupBy = <A, G extends MapSetKeyType>(
+const groupBy = <const A, const G extends MapSetKeyType>(
   array: readonly A[],
   grouper: (value: A, index: SizeType.Arr) => G,
 ): IMap<G, readonly A[]> => {
@@ -1457,7 +1478,7 @@ const groupBy = <A, G extends MapSetKeyType>(
  * Arr.uniq(['a', 'b', 'a']); // ['a', 'b']
  * ```
  */
-function uniq<P extends Primitive>(array: readonly P[]): readonly P[] {
+function uniq<const P extends Primitive>(array: readonly P[]): readonly P[] {
   return Array.from(new Set(array));
 }
 
@@ -1482,15 +1503,15 @@ function uniq<P extends Primitive>(array: readonly P[]): readonly P[] {
  * Arr.uniqBy(users, user => user.id); // [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]
  * ```
  */
-function uniqBy<A, P extends Primitive>(
+function uniqBy<const A, const P extends Primitive>(
   array: NonEmptyArray<A>,
   mapFn: (value: A) => P,
 ): NonEmptyArray<A>;
-function uniqBy<A, P extends Primitive>(
+function uniqBy<const A, const P extends Primitive>(
   array: readonly A[],
   mapFn: (value: A) => P,
 ): readonly A[];
-function uniqBy<A, P extends Primitive>(
+function uniqBy<const A, const P extends Primitive>(
   array: readonly A[],
   mapFn: (value: A) => P,
 ): readonly A[] {
@@ -1522,7 +1543,7 @@ function uniqBy<A, P extends Primitive>(
  * Arr.eq([{a:1}], [{a:1}], (o1, o2) => o1.a === o2.a); // true
  * ```
  */
-const eq = <T,>(
+const eq = <const T,>(
   array1: readonly T[],
   array2: readonly T[],
   equality: (a: T, b: T) => boolean = Object.is,
@@ -1549,7 +1570,7 @@ const eq = <T,>(
  * Arr.isSubset([1, 5], [1, 2, 3]); // false
  * ```
  */
-const isSubset = <A extends Primitive, B extends Primitive = A>(
+const isSubset = <const A extends Primitive, const B extends Primitive = A>(
   array1: readonly A[],
   array2: readonly B[],
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -1572,7 +1593,7 @@ const isSubset = <A extends Primitive, B extends Primitive = A>(
  * Arr.isSuperset([1, 2, 3], []); // true
  * ```
  */
-const isSuperset = <A extends Primitive, B extends Primitive = A>(
+const isSuperset = <const A extends Primitive, const B extends Primitive = A>(
   array1: readonly A[],
   array2: readonly B[],
 ): boolean => isSubset(array2, array1);
@@ -1592,7 +1613,10 @@ const isSuperset = <A extends Primitive, B extends Primitive = A>(
  * Arr.setIntersection([1, 2], [3, 4]); // []
  * ```
  */
-const setIntersection = <A extends Primitive, B extends Primitive = A>(
+const setIntersection = <
+  const A extends Primitive,
+  const B extends Primitive = A,
+>(
   array1: readonly A[],
   array2: readonly B[],
 ): readonly (A & B)[] =>
@@ -1614,7 +1638,7 @@ const setIntersection = <A extends Primitive, B extends Primitive = A>(
  * Arr.setDifference([1, 2], [3, 4]); // [1, 2]
  * ```
  */
-const setDifference = <A extends Primitive>(
+const setDifference = <const A extends Primitive>(
   array1: readonly A[],
   array2: readonly A[],
 ): readonly A[] => array1.filter((e) => !array2.includes(e));
@@ -1634,7 +1658,7 @@ const setDifference = <A extends Primitive>(
  * Arr.sortedNumSetDifference([1, 2], [3, 4]); // [1, 2]
  * ```
  */
-const sortedNumSetDifference = <T extends number>(
+const sortedNumSetDifference = <const T extends number>(
   sortedList1: readonly T[],
   sortedList2: readonly T[],
 ): readonly T[] => {

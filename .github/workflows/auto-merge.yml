@@ -1,47 +1,55 @@
 name: Dependabot Auto-Merge
 on:
-  pull_request:
-  check_suite:
+  check_suite: # Trigger on check_suite completion
     types: [completed]
 
 permissions:
   contents: write
   pull-requests: write
-  checks: read
+  checks: read # Added to read check status
 
 jobs:
-  dependabot:
+  dependabot_merge_on_checks_passed: # Renamed job
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'noshiro-pf/ts-verified'
+    # This job runs if the check_suite is successful, there's an associated PR, and it's the specified repository
+    if: github.event.check_suite.conclusion == 'success' && github.event.check_suite.pull_requests.length > 0 && github.repository == 'noshiro-pf/ts-verified'
     steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
-        with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-
-      - name: Check if all CI checks have passed
-        id: check-status
+      - name: Get PR Info and Author
+        id: pr_details
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Get the first pull request number associated with the check_suite
+          PR_NUMBER: ${{ github.event.check_suite.pull_requests[0].number }}
         run: |
-          # Get PR number from event
-          PR_NUMBER="${{ github.event.pull_request.number }}"
+          echo "Checking PR #$PR_NUMBER associated with this check_suite."
+          # Use gh CLI to get PR author and head SHA
+          PR_AUTHOR=$(gh pr view $PR_NUMBER --json author --jq '.author.login')
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_OUTPUT
+          PR_HEAD_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
+          echo "PR_HEAD_SHA=$PR_HEAD_SHA" >> $GITHUB_OUTPUT
+          # Construct PR URL
+          echo "PR_URL=https://github.com/${{ github.repository }}/pull/$PR_NUMBER" >> $GITHUB_OUTPUT
 
-          # Check if all required status checks are successful
-          CHECKS_STATUS=$(gh pr checks $PR_NUMBER --json statusCheckRollup --jq '.statusCheckRollup[] | select(.status == "PENDING" or .conclusion == "FAILURE" or .conclusion == "CANCELLED") | length')
+      - name: Merge if Dependabot PR and all checks green
+        # This step only runs if the PR author is dependabot[bot]
+        if: steps.pr_details.outputs.PR_AUTHOR == 'dependabot[bot]'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr_details.outputs.PR_NUMBER }}
+          PR_HEAD_SHA: ${{ steps.pr_details.outputs.PR_HEAD_SHA }}
+          PR_URL: ${{ steps.pr_details.outputs.PR_URL }}
+        run: |
+          echo "PR #$PR_NUMBER is authored by Dependabot. Checking overall status for commit $PR_HEAD_SHA."
 
-          if [ "$CHECKS_STATUS" = "0" ] || [ -z "$CHECKS_STATUS" ]; then
-            echo "All CI checks have passed"
-            echo "checks_passed=true" >> $GITHUB_OUTPUT
+          # Use GitHub API to get the combined status of all checks for the PR's head commit
+          COMBINED_STATUS=$(gh api "repos/${{ github.repository }}/commits/$PR_HEAD_SHA/status" --jq '.state')
+          echo "Combined status for $PR_HEAD_SHA: $COMBINED_STATUS"
+
+          if [ "$COMBINED_STATUS" = "success" ]; then
+            echo "All checks passed for Dependabot PR #$PR_NUMBER. Merging."
+            # Squash merge the PR and delete the branch
+            gh pr merge "$PR_URL" --squash --delete-branch
           else
-            echo "Some CI checks are still pending or failed"
-            echo "checks_passed=false" >> $GITHUB_OUTPUT
+            echo "Not all checks passed for Dependabot PR #$PR_NUMBER (Combined Status: $COMBINED_STATUS)."
+            echo "PR will not be merged by this workflow run."
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Enable auto-merge for Dependabot PRs
-        if: steps.check-status.outputs.checks_passed == 'true'
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,13 +1,9 @@
 name: Dependabot Auto-Merge
-on:
-  pull_request:
-  check_suite:
-    types: [completed]
+on: pull_request
 
 permissions:
   contents: write
   pull-requests: write
-  checks: read
 
 jobs:
   dependabot:
@@ -19,35 +15,8 @@ jobs:
         uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
         with:
           github-token: '${{ secrets.GITHUB_TOKEN }}'
-
-      - name: Check if all CI checks have passed
-        id: check-status
-        run: |
-          # Get PR number from event
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-
-          # Check if all required status checks are successful
-          # First, let's see what fields are available
-          echo "Checking status of PR #$PR_NUMBER"
-
-          # Use gh pr checks without JSON to get a simple status
-          CHECK_OUTPUT=$(gh pr checks $PR_NUMBER 2>&1)
-
-          # Check if there are any failing or pending checks
-          if echo "$CHECK_OUTPUT" | grep -E "(pending|fail|error)" > /dev/null; then
-            echo "Some CI checks are still pending or failed"
-            echo "Check output: $CHECK_OUTPUT"
-            echo "checks_passed=false" >> $GITHUB_OUTPUT
-          else
-            echo "All CI checks have passed"
-            echo "checks_passed=true" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Enable auto-merge for Dependabot PRs
-        if: steps.check-status.outputs.checks_passed == 'true'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}

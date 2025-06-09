@@ -14,9 +14,15 @@ Provides utility functions for IMap.
 
 > **create**\<`K`, `V`\>(`iterable`): [`IMap`](../README.md#imap)\<`K`, `V`\>
 
-Defined in: [src/collections/imap.mts:259](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap.mts#L259)
+Defined in: [src/collections/imap.mts:334](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap.mts#L334)
 
-Creates a new IMap instance.
+Creates a new IMap instance from an iterable of key-value pairs.
+
+This factory function accepts any iterable of [key, value] tuples, including arrays,
+JavaScript Maps, other IMaps, or custom iterables. The resulting IMap will contain
+all the entries from the input iterable.
+
+**Performance:** O(n) where n is the number of entries in the iterable.
 
 #### Type Parameters
 
@@ -24,7 +30,7 @@ Creates a new IMap instance.
 
 `K` _extends_ `MapSetKeyType`
 
-The type of the keys.
+The type of the keys. Must extend MapSetKeyType.
 
 ##### V
 
@@ -38,40 +44,50 @@ The type of the values.
 
 `Iterable`\<readonly \[`K`, `V`\]\>
 
-An iterable of key-value pairs.
+An iterable of key-value pairs (e.g., Array, Map, IMap, etc.)
 
 #### Returns
 
 [`IMap`](../README.md#imap)\<`K`, `V`\>
 
-A new IMap instance.
+A new IMap instance containing all entries from the iterable.
 
 #### Example
 
 ```typescript
-const mapFromStringPairs = IMap.create<string, number>([
-    ['one', 1],
-    ['two', 2],
+// From array of tuples
+const userScores = IMap.create<string, number>([
+    ['alice', 95],
+    ['bob', 87],
+    ['charlie', 92],
 ]);
-console.log(mapFromStringPairs.get('one').unwrap()); // Output: 1
+console.log(userScores.get('alice').unwrap()); // Output: 95
 
-const mapFromNumberPairs = IMap.create<number, string>([
-    [10, 'ten'],
-    [20, 'twenty'],
+// From JavaScript Map
+const jsMap = new Map([
+    ['config', { debug: true }],
+    ['env', 'production'],
 ]);
-console.log(mapFromNumberPairs.get(20).unwrap()); // Output: "twenty"
+const config = IMap.create(jsMap);
+console.log(config.get('env').unwrap()); // Output: "production"
 
-// Can also be created from another Map or IMap
-const existingJsMap = new Map([
-    ['a', 100],
-    ['b', 200],
-]);
-const iMapFromJsMap = IMap.create(existingJsMap);
-console.log(iMapFromJsMap.get('b').unwrap()); // Output: 200
+// From another IMap (creates a copy)
+const originalMap = IMap.create<string, boolean>([['enabled', true]]);
+const copiedMap = IMap.create(originalMap);
+console.log(copiedMap.get('enabled').unwrap()); // Output: true
 
-const anotherIMap = IMap.create<string, boolean>([['active', true]]);
-const iMapFromIMap = IMap.create(anotherIMap);
-console.log(iMapFromIMap.get('active').unwrap()); // Output: true
+// Empty map
+const emptyMap = IMap.create<string, number>([]);
+console.log(emptyMap.size); // Output: 0
+
+// From custom iterable
+function* generateEntries(): Generator<[string, number]> {
+    for (let i = 0; i < 3; i++) {
+        yield [`item${i}`, i * 10];
+    }
+}
+const generatedMap = IMap.create(generateEntries());
+console.log(generatedMap.size); // Output: 3
 ```
 
 ---
@@ -80,10 +96,15 @@ console.log(iMapFromIMap.get('active').unwrap()); // Output: true
 
 > **equal**\<`K`, `V`\>(`a`, `b`): `boolean`
 
-Defined in: [src/collections/imap.mts:289](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap.mts#L289)
+Defined in: [src/collections/imap.mts:397](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap.mts#L397)
 
-Checks if two IMap instances are equal.
-Equality is determined by having the same size and all key-value pairs being equal.
+Checks if two IMap instances are structurally equal.
+
+Two IMaps are considered equal if they have the same size and contain exactly the same
+key-value pairs. The order of entries does not matter for equality comparison.
+Values are compared using JavaScript's `===` operator.
+
+**Performance:** O(n) where n is the size of the smaller map.
 
 #### Type Parameters
 
@@ -105,56 +126,61 @@ The type of the values.
 
 [`IMap`](../README.md#imap)\<`K`, `V`\>
 
-The first IMap instance.
+The first IMap instance to compare.
 
 ##### b
 
 [`IMap`](../README.md#imap)\<`K`, `V`\>
 
-The second IMap instance.
+The second IMap instance to compare.
 
 #### Returns
 
 `boolean`
 
-`true` if the maps are equal, `false` otherwise.
+`true` if the maps contain exactly the same key-value pairs, `false` otherwise.
 
 #### Example
 
 ```typescript
-const map1 = IMap.create<string, number>([
-    ['a', 1],
-    ['b', 2],
+// Basic equality comparison
+const preferences1 = IMap.create<string, boolean>([
+    ['darkMode', true],
+    ['notifications', false],
 ]);
-const map2 = IMap.create<string, number>([
-    ['a', 1],
-    ['b', 2],
+const preferences2 = IMap.create<string, boolean>([
+    ['darkMode', true],
+    ['notifications', false],
 ]);
-const map3 = IMap.create<string, number>([
-    ['a', 1],
-    ['c', 3],
+const preferences3 = IMap.create<string, boolean>([
+    ['notifications', false],
+    ['darkMode', true], // Order doesn't matter
 ]);
-const map4 = IMap.create<string, number>([
-    ['a', 1],
-    ['b', 99],
-]);
-const map5 = IMap.create<string, number>([
-    ['b', 2],
-    ['a', 1],
-]); // Order doesn't matter for equality
 
-console.log(IMap.equal(map1, map2)); // Output: true
-console.log(IMap.equal(map1, map3)); // Output: false (different keys/values)
-console.log(IMap.equal(map1, map4)); // Output: false (different value for key "b")
-console.log(IMap.equal(map1, map5)); // Output: true
+console.log(IMap.equal(preferences1, preferences2)); // true
+console.log(IMap.equal(preferences1, preferences3)); // true (order doesn't matter)
 
-const mapNum1 = IMap.create<number, string>([
-    [1, 'x'],
-    [2, 'y'],
+// Different values
+const preferences4 = IMap.create<string, boolean>([
+    ['darkMode', false], // Different value
+    ['notifications', false],
 ]);
-const mapNum2 = IMap.create<number, string>([
-    [2, 'y'],
-    [1, 'x'],
+console.log(IMap.equal(preferences1, preferences4)); // false
+
+// Different keys
+const preferences5 = IMap.create<string, boolean>([
+    ['darkMode', true],
+    ['sounds', false], // Different key
 ]);
-console.log(IMap.equal(mapNum1, mapNum2)); // Output: true
+console.log(IMap.equal(preferences1, preferences5)); // false
+
+// Empty maps
+const empty1 = IMap.create<string, number>([]);
+const empty2 = IMap.create<string, number>([]);
+console.log(IMap.equal(empty1, empty2)); // true
+
+// Note: For deep equality of object values, use a custom comparison
+const users1 = IMap.create<string, User>([['1', { name: 'Alice' }]]);
+const users2 = IMap.create<string, User>([['1', { name: 'Alice' }]]);
+console.log(IMap.equal(users1, users2)); // false (different object references)
 ```

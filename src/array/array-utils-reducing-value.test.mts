@@ -368,8 +368,14 @@ describe('Arr', () => {
   describe('sum', () => {
     test('empty array', () => {
       const result = Arr.sum([]);
-      expectType<typeof result, Int>('=');
+      expectType<typeof result, 0>('=');
       expect(result).toBe(0);
+    });
+
+    test('one element array', () => {
+      const result = Arr.sum([23]);
+      expectType<typeof result, 23>('=');
+      expect(result).toBe(23);
     });
 
     test('positive numbers', () => {

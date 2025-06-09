@@ -12,9 +12,13 @@
 
 > `const` **asPositiveInt**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
-Defined in: [src/number/branded-types/positive-int.mts:52](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L52)
+Defined in: [src/number/branded-types/positive-int.mts:77](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L77)
 
-Casts a number to a PositiveInt type.
+Casts a number to a PositiveInt branded type.
+
+This function validates that the input is a positive integer (>= 1)
+and returns it with the PositiveInt brand. This ensures type safety
+for operations that require strictly positive integer values.
 
 #### Type Parameters
 
@@ -32,19 +36,24 @@ Casts a number to a PositiveInt type.
 
 `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N`
 
-The value as a PositiveInt type.
+The value as a PositiveInt branded type
 
 #### Throws
 
-If the value is not a positive integer.
+If the value is not a positive integer
 
 #### Example
 
 ```typescript
-const x = asPositiveInt(5); // PositiveInt
-const y = asPositiveInt(100); // PositiveInt
-// asPositiveInt(0); // throws TypeError
-// asPositiveInt(-1); // throws TypeError
+const count = asPositiveInt(5); // PositiveInt
+const length = asPositiveInt(100); // PositiveInt
+const one = asPositiveInt(1); // PositiveInt (minimum valid)
+
+// These throw TypeError:
+// asPositiveInt(0);                 // Zero is not positive
+// asPositiveInt(-1);                // Negative numbers not allowed
+// asPositiveInt(5.5);               // Not an integer
+// asPositiveInt(Infinity);          // Not finite
 ```
 
 ---
@@ -53,9 +62,12 @@ const y = asPositiveInt(100); // PositiveInt
 
 > `const` **isPositiveInt**: (`a`) => `a is PositiveInt` = `is`
 
-Defined in: [src/number/branded-types/positive-int.mts:37](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L37)
+Defined in: [src/number/branded-types/positive-int.mts:51](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L51)
 
-Checks if a number is a PositiveInt (a positive integer >= 1).
+Type guard that checks if a value is a positive integer.
+
+A positive integer is any integer greater than zero (>= 1).
+This excludes zero, negative numbers, and non-integers.
 
 #### Parameters
 
@@ -67,7 +79,18 @@ Checks if a number is a PositiveInt (a positive integer >= 1).
 
 `a is PositiveInt`
 
-`true` if the value is a PositiveInt, `false` otherwise.
+`true` if the value is a positive integer, `false` otherwise
+
+#### Example
+
+```typescript
+isPositiveInt(5); // true
+isPositiveInt(1); // true
+isPositiveInt(0); // false (zero is not positive)
+isPositiveInt(-1); // false (negative)
+isPositiveInt(5.5); // false (not an integer)
+isPositiveInt(NaN); // false
+```
 
 ---
 
@@ -75,11 +98,21 @@ Checks if a number is a PositiveInt (a positive integer >= 1).
 
 > `const` **PositiveInt**: `object`
 
-Defined in: [src/number/branded-types/positive-int.mts:87](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L87)
+Defined in: [src/number/branded-types/positive-int.mts:123](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/positive-int.mts#L123)
 
-Utility functions for working with PositiveInt (positive integer) branded types.
-Provides type-safe operations that ensure results remain positive integers (>= 1).
-All arithmetic operations are clamped to maintain the positive constraint.
+Namespace providing type-safe operations for PositiveInt branded types.
+
+PositiveInt represents integers that are strictly greater than zero (>= 1).
+All operations automatically clamp results to maintain the positive constraint,
+ensuring that arithmetic operations never produce zero or negative values.
+
+This type is essential for:
+
+- Array lengths and sizes (length >= 1)
+- Counts and quantities that must be positive
+- Denominators in division operations
+- Loop counters and iteration counts
+- Database primary keys and IDs
 
 #### Type declaration
 
@@ -115,7 +148,10 @@ PositiveInt.add(asPositiveInt(5), asPositiveInt(3)); // PositiveInt (8)
 
 > **clamp**: (`x`) => `PositiveInt`
 
-Clamps a positive integer to be within the specified range.
+Clamps a number to the positive integer range.
+
+Since PositiveInt has a minimum value of 1, this function ensures
+that any input less than 1 is clamped to 1.
 
 ###### Parameters
 
@@ -127,20 +163,25 @@ Clamps a positive integer to be within the specified range.
 
 `PositiveInt`
 
-The clamped value as a PositiveInt
+The value clamped to >= 1 as a PositiveInt
 
 ###### Example
 
 ```typescript
-PositiveInt.clamp(asPositiveInt(15), asPositiveInt(5), asPositiveInt(10)); // PositiveInt (10)
-PositiveInt.clamp(asPositiveInt(2), asPositiveInt(5), asPositiveInt(10)); // PositiveInt (5)
+PositiveInt.clamp(5); // PositiveInt (5)
+PositiveInt.clamp(0); // PositiveInt (1) - clamped to minimum
+PositiveInt.clamp(-10); // PositiveInt (1) - clamped to minimum
+PositiveInt.clamp(100); // PositiveInt (100)
 ```
 
 ##### div()
 
 > **div**: (`x`, `y`) => `PositiveInt`
 
-Divides two positive integers using floor division, ensuring the result is never less than 1.
+Divides two positive integers using floor division, clamping to remain positive.
+
+Performs mathematical floor division: `⌊a / b⌋`. If the result would be 0
+(when a < b), it is clamped to 1 to maintain the positive integer constraint.
 
 ###### Parameters
 
@@ -156,20 +197,22 @@ Divides two positive integers using floor division, ensuring the result is never
 
 `PositiveInt`
 
-`⌊a / b⌋` as a PositiveInt, but never less than 1 (clamped)
+`max(1, ⌊a / b⌋)` as a PositiveInt
 
 ###### Example
 
 ```typescript
 PositiveInt.div(asPositiveInt(10), asPositiveInt(3)); // PositiveInt (3)
+PositiveInt.div(asPositiveInt(9), asPositiveInt(3)); // PositiveInt (3)
 PositiveInt.div(asPositiveInt(2), asPositiveInt(3)); // PositiveInt (1) - clamped
+PositiveInt.div(asPositiveInt(1), asPositiveInt(5)); // PositiveInt (1) - clamped
 ```
 
 ##### is()
 
 > **is**: (`a`) => `a is PositiveInt`
 
-Type guard that checks if a value is a positive integer (>= 1).
+Type guard that checks if a value is a positive integer.
 
 ###### Parameters
 
@@ -183,11 +226,15 @@ Type guard that checks if a value is a positive integer (>= 1).
 
 `true` if the value is a positive integer, `false` otherwise
 
+###### See
+
+[isPositiveInt](#ispositiveint) for usage examples
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `PositiveInt` = `max_`
 
-Returns the maximum of two positive integers.
+Returns the maximum value from a list of positive integers.
 
 ###### Parameters
 
@@ -195,17 +242,29 @@ Returns the maximum of two positive integers.
 
 ...readonly `WithSmallInt`\<`PositiveInt`, `40`\>[]
 
+The positive integers to compare (at least one required)
+
 ###### Returns
 
 `PositiveInt`
 
-The larger value as a PositiveInt
+The largest value as a PositiveInt
+
+###### Example
+
+```typescript
+PositiveInt.max(asPositiveInt(5), asPositiveInt(3)); // PositiveInt (5)
+PositiveInt.max(asPositiveInt(10), asPositiveInt(1), asPositiveInt(7)); // PositiveInt (10)
+```
 
 ##### min()
 
 > `readonly` **min**: (...`values`) => `PositiveInt` = `min_`
 
-Returns the minimum of two positive integers.
+Returns the minimum value from a list of positive integers.
+
+Since all inputs are guaranteed to be >= 1, the result is also guaranteed
+to be a positive integer.
 
 ###### Parameters
 
@@ -213,11 +272,20 @@ Returns the minimum of two positive integers.
 
 ...readonly `WithSmallInt`\<`PositiveInt`, `40`\>[]
 
+The positive integers to compare (at least one required)
+
 ###### Returns
 
 `PositiveInt`
 
-The smaller value as a PositiveInt
+The smallest value as a PositiveInt
+
+###### Example
+
+```typescript
+PositiveInt.min(asPositiveInt(5), asPositiveInt(3)); // PositiveInt (3)
+PositiveInt.min(asPositiveInt(10), asPositiveInt(1), asPositiveInt(7)); // PositiveInt (1)
+```
 
 ##### MIN_VALUE
 
@@ -285,7 +353,10 @@ PositiveInt.pow(asPositiveInt(2), asPositiveInt(3)); // PositiveInt (8)
 
 > **random**: (`min`, `max`) => `PositiveInt`
 
-Generates a random positive integer.
+Generates a random positive integer within the specified range (inclusive).
+
+Both bounds are inclusive, and both min and max must be positive integers.
+If min > max, they are automatically swapped.
 
 ###### Parameters
 
@@ -293,21 +364,41 @@ Generates a random positive integer.
 
 `WithSmallInt`
 
+The minimum value (inclusive, must be >= 1)
+
 ###### max
 
 `WithSmallInt`
+
+The maximum value (inclusive, must be >= min)
 
 ###### Returns
 
 `PositiveInt`
 
-A random PositiveInt value
+A random PositiveInt in the range [min, max]
+
+###### Example
+
+```typescript
+// Dice roll
+const d6 = PositiveInt.random(asPositiveInt(1), asPositiveInt(6));
+
+// Random user ID
+const userId = PositiveInt.random(asPositiveInt(1000), asPositiveInt(9999));
+
+// Random page count
+const pages = PositiveInt.random(asPositiveInt(50), asPositiveInt(500));
+```
 
 ##### sub()
 
 > **sub**: (`x`, `y`) => `PositiveInt`
 
-Subtracts two positive integers, ensuring the result is never less than 1.
+Subtracts two positive integers, clamping the result to remain positive.
+
+If the mathematical result would be <= 0, it is clamped to 1 to maintain
+the positive integer constraint.
 
 ###### Parameters
 
@@ -323,40 +414,43 @@ Subtracts two positive integers, ensuring the result is never less than 1.
 
 `PositiveInt`
 
-`a - b` as a PositiveInt, but never less than 1 (clamped)
+`max(1, a - b)` as a PositiveInt
 
 ###### Example
 
 ```typescript
 PositiveInt.sub(asPositiveInt(8), asPositiveInt(3)); // PositiveInt (5)
 PositiveInt.sub(asPositiveInt(3), asPositiveInt(8)); // PositiveInt (1) - clamped
+PositiveInt.sub(asPositiveInt(5), asPositiveInt(5)); // PositiveInt (1) - clamped
 ```
 
 #### Example
 
 ```typescript
-// Type checking
+// Type validation
 PositiveInt.is(5); // true
+PositiveInt.is(1); // true (minimum value)
 PositiveInt.is(0); // false
 PositiveInt.is(-1); // false
 
-// Using MIN_VALUE
-console.log(PositiveInt.MIN_VALUE); // 1
-
-// Arithmetic operations (all results clamped to >= 1)
+// Automatic clamping in operations
 const a = asPositiveInt(10);
 const b = asPositiveInt(3);
 
-PositiveInt.add(a, b); // PositiveInt (13)
-PositiveInt.sub(a, b); // PositiveInt (7)
-PositiveInt.sub(b, a); // PositiveInt (1) - clamped
-PositiveInt.mul(a, b); // PositiveInt (30)
-PositiveInt.div(a, b); // PositiveInt (3)
-PositiveInt.pow(a, b); // PositiveInt (1000)
+const sum = PositiveInt.add(a, b); // PositiveInt (13)
+const diff1 = PositiveInt.sub(a, b); // PositiveInt (7)
+const diff2 = PositiveInt.sub(b, a); // PositiveInt (1) - clamped!
+const product = PositiveInt.mul(a, b); // PositiveInt (30)
+const quotient = PositiveInt.div(a, b); // PositiveInt (3)
 
-// Utility functions
-PositiveInt.min(a, b); // PositiveInt (3)
-PositiveInt.max(a, b); // PositiveInt (10)
-PositiveInt.clamp(asPositiveInt(15), asPositiveInt(5), asPositiveInt(10)); // PositiveInt (10)
-PositiveInt.random(); // Random PositiveInt
+// Edge case: division that would be < 1
+const small = PositiveInt.div(asPositiveInt(2), asPositiveInt(3)); // PositiveInt (1)
+
+// Range operations
+const minimum = PositiveInt.min(a, b); // PositiveInt (3)
+const maximum = PositiveInt.max(a, b); // PositiveInt (10)
+
+// Random generation
+const dice = PositiveInt.random(asPositiveInt(1), asPositiveInt(6)); // 1-6
+const id = PositiveInt.random(asPositiveInt(1000), asPositiveInt(9999)); // 4-digit ID
 ```

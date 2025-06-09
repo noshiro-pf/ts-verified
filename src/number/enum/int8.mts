@@ -120,60 +120,102 @@ const random = (min: Int8, max: Int8): Int8 =>
   castType(randomImpl(castTypeImpl(min), castTypeImpl(max)));
 
 /**
- * Checks if a number is an Int8 (8-bit signed integer in the range [-128, 127]).
- * @param value The value to check.
- * @returns `true` if the value is an Int8, `false` otherwise.
+ * Type guard that checks if a value is an 8-bit signed integer.
+ *
+ * An Int8 is a signed integer in the range [-128, 127], representing
+ * values that fit in exactly 8 bits of memory.
+ *
+ * @param value - The value to check
+ * @returns `true` if the value is an Int8, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * isInt8(100);   // true
+ * isInt8(-50);   // true
+ * isInt8(127);   // true (max value)
+ * isInt8(-128);  // true (min value)
+ * isInt8(128);   // false (exceeds max)
+ * isInt8(-129);  // false (below min)
+ * isInt8(5.5);   // false (not integer)
+ * ```
  */
 export const isInt8 = is;
 
 /**
- * Casts a number to an Int8 type.
- * @param value The value to cast.
- * @returns The value as an Int8 type.
- * @throws {TypeError} If the value is not a valid 8-bit signed integer.
+ * Casts a number to an Int8 branded type.
+ *
+ * This function validates that the input is within the Int8 range [-128, 127]
+ * and is an integer, then returns it with the Int8 brand.
+ *
+ * @param value - The value to cast
+ * @returns The value as an Int8 branded type
+ * @throws {TypeError} If the value is not a valid 8-bit signed integer
+ *
  * @example
  * ```typescript
- * const x = asInt8(127); // Int8
- * const y = asInt8(-128); // Int8
- * // asInt8(128); // throws TypeError
- * // asInt8(-129); // throws TypeError
- * // asInt8(1.5); // throws TypeError
+ * const byte = asInt8(100);     // Int8
+ * const max = asInt8(127);      // Int8 (maximum value)
+ * const min = asInt8(-128);     // Int8 (minimum value)
+ * const zero = asInt8(0);       // Int8
+ *
+ * // These throw TypeError:
+ * // asInt8(128);               // Exceeds maximum (127)
+ * // asInt8(-129);              // Below minimum (-128)
+ * // asInt8(1.5);               // Not an integer
+ * // asInt8(NaN);               // Not a number
  * ```
  */
 export const asInt8 = castType;
 
 /**
- * Namespace providing type-safe arithmetic operations for 8-bit signed integers.
+ * Namespace providing type-safe operations for Int8 (8-bit signed integer) branded types.
  *
- * All operations automatically clamp results to the valid Int8 range [-128, 127].
- * This ensures that all arithmetic maintains the 8-bit signed integer constraint.
+ * Int8 represents signed integers in the range [-128, 127], equivalent to a signed
+ * byte in many programming languages. All operations automatically clamp results
+ * to stay within this range, preventing overflow/underflow issues.
+ *
+ * This type is useful for:
+ * - Binary data processing (signed bytes)
+ * - Small integer values with known bounds
+ * - Embedded systems programming
+ * - Memory-efficient integer storage
+ * - Image processing (signed pixel offsets)
  *
  * @example
  * ```typescript
+ * // Basic usage
  * const a = asInt8(100);
  * const b = asInt8(50);
  *
- * // Arithmetic operations with automatic clamping
- * const sum = Int8.add(a, b);       // Int8 (127 - clamped to MAX_VALUE)
- * const diff = Int8.sub(a, b);      // Int8 (50)
- * const product = Int8.mul(a, b);   // Int8 (127 - clamped due to overflow)
+ * // Arithmetic with automatic clamping
+ * const sum = Int8.add(a, b);        // Int8 (127) - clamped to maximum
+ * const diff = Int8.sub(a, b);       // Int8 (50)
+ * const product = Int8.mul(a, b);    // Int8 (127) - clamped due to overflow
+ * const quotient = Int8.div(a, b);   // Int8 (2)
  *
- * // Range operations
- * const clamped = Int8.clamp(200);     // Int8 (127)
- * const minimum = Int8.min(a, b);      // Int8 (50)
- * const maximum = Int8.max(a, b);      // Int8 (100)
+ * // Boundary handling
+ * const overflow = Int8.add(asInt8(127), asInt8(10));  // Int8 (127) - clamped
+ * const underflow = Int8.sub(asInt8(-128), asInt8(10)); // Int8 (-128) - clamped
  *
  * // Utility operations
- * const absolute = Int8.abs(asInt8(-100)); // Int8 (100)
- * const random = Int8.random(asInt8(-50), asInt8(50)); // Int8 (random value in [-50, 50])
- * const power = Int8.pow(asInt8(2), asInt8(6)); // Int8 (64)
+ * const clamped = Int8.clamp(200);          // Int8 (127)
+ * const absolute = Int8.abs(asInt8(-100));  // Int8 (100)
+ * const minimum = Int8.min(a, b);           // Int8 (50)
+ * const maximum = Int8.max(a, b);           // Int8 (100)
+ *
+ * // Random generation
+ * const die = Int8.random(asInt8(1), asInt8(6));        // Random 1-6
+ * const offset = Int8.random(asInt8(-10), asInt8(10));  // Random ±10
  * ```
  */
 export const Int8 = {
   /**
-   * Type guard to check if a value is an Int8.
-   * @param value The value to check.
-   * @returns `true` if the value is an 8-bit signed integer, `false` otherwise.
+   * Type guard that checks if a value is an 8-bit signed integer.
+   *
+   * @param value - The value to check
+   * @returns `true` if the value is in range [-128, 127] and is an integer
+   *
+   * @see {@link isInt8} for usage examples
    */
   is,
 
@@ -190,16 +232,28 @@ export const Int8 = {
   MAX_VALUE,
 
   /**
-   * Returns the smaller of the given Int8 values.
-   * @param values The Int8 values to compare.
-   * @returns The minimum value as an Int8.
+   * Returns the minimum value from a list of Int8 values.
+   *
+   * @param values - The Int8 values to compare (at least one required)
+   * @returns The smallest value as an Int8
+   *
+   * @example
+   * ```typescript
+   * Int8.min(asInt8(50), asInt8(-30), asInt8(100)); // Int8 (-30)
+   * ```
    */
   min: min_,
 
   /**
-   * Returns the larger of the given Int8 values.
-   * @param values The Int8 values to compare.
-   * @returns The maximum value as an Int8.
+   * Returns the maximum value from a list of Int8 values.
+   *
+   * @param values - The Int8 values to compare (at least one required)
+   * @returns The largest value as an Int8
+   *
+   * @example
+   * ```typescript
+   * Int8.max(asInt8(50), asInt8(-30), asInt8(100)); // Int8 (100)
+   * ```
    */
   max: max_,
 
@@ -218,10 +272,25 @@ export const Int8 = {
   abs,
 
   /**
-   * Generates a random Int8 value within the specified range.
-   * @param min The minimum value (inclusive).
-   * @param max The maximum value (inclusive).
-   * @returns A random Int8 between min and max.
+   * Generates a random Int8 value within the specified range (inclusive).
+   *
+   * Both bounds are inclusive. If min > max, they are automatically swapped.
+   *
+   * @param min - The minimum value (inclusive)
+   * @param max - The maximum value (inclusive)
+   * @returns A random Int8 in the range [min, max]
+   *
+   * @example
+   * ```typescript
+   * // Random signed byte
+   * const randomByte = Int8.random(Int8.MIN_VALUE, Int8.MAX_VALUE);
+   *
+   * // Random small range
+   * const dice = Int8.random(asInt8(1), asInt8(6));  // 1-6
+   *
+   * // Random offset
+   * const offset = Int8.random(asInt8(-10), asInt8(10)); // -10 to 10
+   * ```
    */
   random,
 

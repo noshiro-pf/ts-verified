@@ -18,17 +18,47 @@ const {
 } as const);
 
 /**
- * Checks if a number is a valid Uint8 (non-negative integer in [0, 255]).
+ * Type guard that checks if a value is an 8-bit unsigned integer.
+ *
+ * A Uint8 is an unsigned integer in the range [0, 255], representing
+ * values that fit in exactly 8 bits of memory (1 byte).
+ *
  * @param x - The number to check
- * @returns True if x is a valid Uint8
+ * @returns `true` if x is a valid Uint8, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * is(100);   // true
+ * is(0);     // true (minimum value)
+ * is(255);   // true (maximum value)
+ * is(256);   // false (exceeds max)
+ * is(-1);    // false (negative)
+ * is(5.5);   // false (not integer)
+ * ```
  */
 const is = (x: number): x is Uint8 => isImpl(x);
 
 /**
- * Converts a number to Uint8, throwing an error if invalid.
+ * Casts a number to a Uint8 branded type.
+ *
+ * This function validates that the input is within the Uint8 range [0, 255]
+ * and is an integer, then returns it with the Uint8 brand.
+ *
  * @param x - The number to convert
- * @returns The number as Uint8
- * @throws TypeError if x is not a valid Uint8
+ * @returns The number as a Uint8 branded type
+ * @throws {TypeError} If x is not a valid 8-bit unsigned integer
+ *
+ * @example
+ * ```typescript
+ * const byte = castType(200);    // Uint8
+ * const zero = castType(0);      // Uint8 (minimum)
+ * const max = castType(255);     // Uint8 (maximum)
+ *
+ * // These throw TypeError:
+ * // castType(256);              // Exceeds maximum
+ * // castType(-1);               // Negative value
+ * // castType(1.5);              // Not an integer
+ * ```
  */
 const castType = (x: number): Uint8 =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -42,9 +72,16 @@ const castType = (x: number): Uint8 =>
 const clamp = (a: number): Uint8 => castType(clampImpl(a));
 
 /**
- * Returns the minimum of the given Uint8 values.
- * @param values - The Uint8 values to compare
- * @returns The minimum value
+ * Returns the minimum value from a list of Uint8 values.
+ *
+ * @param values - The Uint8 values to compare (at least one required)
+ * @returns The smallest value as a Uint8
+ *
+ * @example
+ * ```typescript
+ * min_(asUint8(50), asUint8(30), asUint8(100)); // Uint8 (30)
+ * min_(asUint8(0), asUint8(255));               // Uint8 (0)
+ * ```
  */
 const min_ = (...values: readonly Uint8[]): Uint8 =>
   castType(Math.min(...values));

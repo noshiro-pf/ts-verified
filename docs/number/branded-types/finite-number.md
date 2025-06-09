@@ -12,9 +12,13 @@
 
 > `const` **asFiniteNumber**: \<`N`\>(`x`) => `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N` = `castType`
 
-Defined in: [src/number/branded-types/finite-number.mts:70](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L70)
+Defined in: [src/number/branded-types/finite-number.mts:96](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L96)
 
-Casts a number to a FiniteNumber type.
+Casts a number to a FiniteNumber branded type.
+
+This function validates that the input is finite (not NaN, Infinity, or -Infinity)
+and returns it with the FiniteNumber brand. This ensures type safety for operations
+that require finite numeric values.
 
 #### Type Parameters
 
@@ -32,19 +36,24 @@ Casts a number to a FiniteNumber type.
 
 `number` & `object` & `Readonly`\<\{ `TSTypeForgeInternals--edd2f9ce-7ca5-45b0-9d1a-bd61b9b5d9c3`: `unknown`; \}\> & `N`
 
-The value as a FiniteNumber type.
+The value as a FiniteNumber branded type
 
 #### Throws
 
-If the value is not a finite number (NaN or Infinity).
+If the value is NaN, Infinity, or -Infinity
 
 #### Example
 
 ```typescript
 const x = asFiniteNumber(5.5); // FiniteNumber
 const y = asFiniteNumber(-10); // FiniteNumber
-// asFiniteNumber(Infinity); // throws TypeError
-// asFiniteNumber(NaN); // throws TypeError
+const z = asFiniteNumber(0); // FiniteNumber
+
+// These throw TypeError:
+// asFiniteNumber(Infinity);     // Not finite
+// asFiniteNumber(-Infinity);    // Not finite
+// asFiniteNumber(NaN);          // Not a number
+// asFiniteNumber(Math.sqrt(-1)); // Results in NaN
 ```
 
 ---
@@ -53,11 +62,19 @@ const y = asFiniteNumber(-10); // FiniteNumber
 
 > `const` **FiniteNumber**: `object`
 
-Defined in: [src/number/branded-types/finite-number.mts:108](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L108)
+Defined in: [src/number/branded-types/finite-number.mts:142](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L142)
 
-Utility functions for working with FiniteNumber branded types.
-Provides type-safe operations that ensure results remain finite numbers (not NaN or Infinity).
-All operations preserve the finite property of the input values.
+Namespace providing type-safe operations for FiniteNumber branded types.
+
+The FiniteNumber type represents any finite numeric value, excluding the
+special values NaN, Infinity, and -Infinity. All operations are guaranteed
+to maintain the finite constraint when given finite inputs.
+
+This type is essential for:
+
+- Mathematical operations that require real numbers
+- Preventing NaN/Infinity propagation in calculations
+- Ensuring numeric stability in algorithms
 
 #### Type declaration
 
@@ -149,6 +166,10 @@ FiniteNumber.ceil(asFiniteNumber(-5.8)); // Int (-5)
 
 Divides two finite numbers.
 
+The divisor must be non-zero (enforced by type constraints).
+The result is guaranteed to be finite when both inputs are finite
+and the divisor is non-zero.
+
 ###### Parameters
 
 ###### x
@@ -163,12 +184,21 @@ Divides two finite numbers.
 
 `FiniteNumber`
 
-`a / b` as a FiniteNumber
+The quotient `a / b` as a FiniteNumber
 
 ###### Example
 
 ```typescript
-FiniteNumber.div(asFiniteNumber(11), asFiniteNumber(2)); // FiniteNumber (5.5)
+const a = asFiniteNumber(11);
+const b = asFiniteNumber(2);
+
+FiniteNumber.div(a, b); // FiniteNumber (5.5)
+
+// With non-zero type guard
+const divisor = asFiniteNumber(userInput);
+if (Num.isNonZero(divisor)) {
+    const result = FiniteNumber.div(a, divisor);
+}
 ```
 
 ##### floor()
@@ -202,7 +232,7 @@ FiniteNumber.floor(asFiniteNumber(-5.2)); // Int (-6)
 
 > **is**: (`a`) => `a is FiniteNumber`
 
-Type guard that checks if a value is a finite number (not NaN or Infinity).
+Type guard that checks if a value is a finite number.
 
 ###### Parameters
 
@@ -216,11 +246,15 @@ Type guard that checks if a value is a finite number (not NaN or Infinity).
 
 `true` if the value is finite, `false` otherwise
 
+###### See
+
+[isFiniteNumber](#isfinitenumber) for usage examples
+
 ##### max()
 
 > `readonly` **max**: (...`values`) => `FiniteNumber` = `max_`
 
-Returns the maximum of multiple finite numbers.
+Returns the maximum value from a list of finite numbers.
 
 ###### Parameters
 
@@ -228,7 +262,7 @@ Returns the maximum of multiple finite numbers.
 
 ...readonly `FiniteNumber`[]
 
-The finite numbers to compare
+The finite numbers to compare (at least one required)
 
 ###### Returns
 
@@ -236,11 +270,22 @@ The finite numbers to compare
 
 The largest value as a FiniteNumber
 
+###### Example
+
+```typescript
+const a = asFiniteNumber(5.5);
+const b = asFiniteNumber(3.2);
+const c = asFiniteNumber(7.8);
+
+FiniteNumber.max(a, b); // FiniteNumber (7.8)
+FiniteNumber.max(a, b, c); // FiniteNumber (7.8)
+```
+
 ##### min()
 
 > `readonly` **min**: (...`values`) => `FiniteNumber` = `min_`
 
-Returns the minimum of multiple finite numbers.
+Returns the minimum value from a list of finite numbers.
 
 ###### Parameters
 
@@ -248,13 +293,24 @@ Returns the minimum of multiple finite numbers.
 
 ...readonly `FiniteNumber`[]
 
-The finite numbers to compare
+The finite numbers to compare (at least one required)
 
 ###### Returns
 
 `FiniteNumber`
 
 The smallest value as a FiniteNumber
+
+###### Example
+
+```typescript
+const a = asFiniteNumber(5.5);
+const b = asFiniteNumber(3.2);
+const c = asFiniteNumber(7.8);
+
+FiniteNumber.min(a, b); // FiniteNumber (3.2)
+FiniteNumber.min(a, b, c); // FiniteNumber (3.2)
+```
 
 ##### mul()
 
@@ -316,7 +372,10 @@ FiniteNumber.pow(asFiniteNumber(2.5), asFiniteNumber(3)); // FiniteNumber (15.62
 
 > **random**: (`min`, `max`) => `FiniteNumber`
 
-Generates a random finite number.
+Generates a random finite number within the specified range.
+
+The generated value is uniformly distributed in the range [min, max].
+Both bounds are inclusive.
 
 ###### Parameters
 
@@ -324,15 +383,29 @@ Generates a random finite number.
 
 `FiniteNumber`
 
+The minimum value (inclusive)
+
 ###### max
 
 `FiniteNumber`
+
+The maximum value (inclusive)
 
 ###### Returns
 
 `FiniteNumber`
 
-A random FiniteNumber value
+A random FiniteNumber in the range [min, max]
+
+###### Example
+
+```typescript
+// Random percentage (0-100)
+const pct = FiniteNumber.random(asFiniteNumber(0), asFiniteNumber(100));
+
+// Random coordinate (-1 to 1)
+const coord = FiniteNumber.random(asFiniteNumber(-1), asFiniteNumber(1));
+```
 
 ##### round()
 
@@ -393,33 +466,34 @@ FiniteNumber.sub(asFiniteNumber(8.7), asFiniteNumber(3.2)); // FiniteNumber (5.5
 #### Example
 
 ```typescript
-// Type checking
-FiniteNumber.is(5.5); // true
+// Type validation
+FiniteNumber.is(3.14); // true
 FiniteNumber.is(Infinity); // false
-FiniteNumber.is(NaN); // false
+FiniteNumber.is(0 / 0); // false (NaN)
 
-// Arithmetic operations
+// Arithmetic with guaranteed finite results
 const a = asFiniteNumber(10.5);
 const b = asFiniteNumber(3.2);
 
-FiniteNumber.add(a, b); // FiniteNumber (13.7)
-FiniteNumber.sub(a, b); // FiniteNumber (7.3)
-FiniteNumber.mul(a, b); // FiniteNumber (33.6)
-FiniteNumber.div(a, b); // FiniteNumber (3.28125)
-FiniteNumber.pow(a, b); // FiniteNumber (a^b)
+const sum = FiniteNumber.add(a, b); // FiniteNumber (13.7)
+const diff = FiniteNumber.sub(a, b); // FiniteNumber (7.3)
+const product = FiniteNumber.mul(a, b); // FiniteNumber (33.6)
+const quotient = FiniteNumber.div(a, b); // FiniteNumber (3.28125)
+const power = FiniteNumber.pow(a, asFiniteNumber(2)); // FiniteNumber (110.25)
 
-// Utility functions
-FiniteNumber.abs(asFiniteNumber(-5.5)); // FiniteNumber (5.5)
-FiniteNumber.min(a, b); // FiniteNumber (3.2)
-FiniteNumber.max(a, b); // FiniteNumber (10.5)
+// Rounding to integers
+const value = asFiniteNumber(5.7);
+const floored = FiniteNumber.floor(value); // Int (5)
+const ceiled = FiniteNumber.ceil(value); // Int (6)
+const rounded = FiniteNumber.round(value); // Int (6)
 
-// Rounding operations (return Int)
-FiniteNumber.floor(asFiniteNumber(5.8)); // Int (5)
-FiniteNumber.ceil(asFiniteNumber(5.2)); // Int (6)
-FiniteNumber.round(asFiniteNumber(5.4)); // Int (5)
-FiniteNumber.round(asFiniteNumber(5.6)); // Int (6)
+// Utility operations
+const absolute = FiniteNumber.abs(asFiniteNumber(-42.5)); // FiniteNumber (42.5)
+const minimum = FiniteNumber.min(a, b, asFiniteNumber(5)); // FiniteNumber (3.2)
+const maximum = FiniteNumber.max(a, b, asFiniteNumber(5)); // FiniteNumber (10.5)
 
-FiniteNumber.random(); // Random FiniteNumber
+// Random generation
+const rand = FiniteNumber.random(asFiniteNumber(0), asFiniteNumber(1)); // Random in [0, 1]
 ```
 
 ---
@@ -428,9 +502,12 @@ FiniteNumber.random(); // Random FiniteNumber
 
 > `const` **isFiniteNumber**: (`a`) => `a is FiniteNumber` = `is`
 
-Defined in: [src/number/branded-types/finite-number.mts:55](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L55)
+Defined in: [src/number/branded-types/finite-number.mts:70](https://github.com/noshiro-pf/ts-verified/blob/main/src/number/branded-types/finite-number.mts#L70)
 
-Checks if a number is a FiniteNumber.
+Type guard that checks if a value is a finite number.
+
+Returns `true` if the value is a finite number (not NaN, Infinity, or -Infinity).
+This is stricter than the standard number type, which includes these special values.
 
 #### Parameters
 
@@ -442,4 +519,16 @@ Checks if a number is a FiniteNumber.
 
 `a is FiniteNumber`
 
-`true` if the value is a FiniteNumber, `false` otherwise.
+`true` if the value is finite, `false` otherwise
+
+#### Example
+
+```typescript
+isFiniteNumber(42); // true
+isFiniteNumber(3.14); // true
+isFiniteNumber(-0); // true
+isFiniteNumber(Infinity); // false
+isFiniteNumber(-Infinity); // false
+isFiniteNumber(NaN); // false
+isFiniteNumber(1 / 0); // false (Infinity)
+```

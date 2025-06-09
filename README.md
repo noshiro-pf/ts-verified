@@ -302,9 +302,10 @@ const zeros: readonly [0, 0, 0, 0, 0] = Arr.zeros(5); // [0, 0, 0, 0, 0]
 const range: readonly [1, 2, 3] = Arr.range(1, 4); // [1, 2, 3]
 
 // Type-safe length checking
-if (Arr.isArrayAtLeastLength(numbers, 3)) {
+if (Arr.isArrayAtLeastLength(numbers, 2)) {
     // numbers is now guaranteed to have at least 3 elements
-    console.log(numbers[2]); // Safe access to index 2
+    expectType<typeof numbers, readonly [number, number, ...number[]]>('=');
+    console.log(numbers[1]); // Safe access to index 2
 }
 
 // Take first n elements

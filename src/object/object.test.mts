@@ -54,6 +54,20 @@ describe('pick', () => {
     const result = pickNone({ a: 1, b: 2 });
     expect(result).toStrictEqual({});
   });
+
+  test('should work for records that only partially contain the key in curried form', () => {
+    const pickVisible = Obj.pick(['name', 'age']);
+    const user = {
+      id: 1,
+      name: 'Alice',
+      password: 'secret123',
+    } as const;
+
+    const result = pipe(user).map(pickVisible).value satisfies {
+      name: string;
+    };
+    expect(result).toStrictEqual({ name: 'Alice' });
+  });
 });
 
 describe('omit', () => {
@@ -91,5 +105,20 @@ describe('omit', () => {
     const omitBAndD = Obj.omit(['b', 'd']);
     const result = omitBAndD({ a: 1, b: 2, c: 3, d: 4, e: 5 });
     expect(result).toStrictEqual({ a: 1, c: 3, e: 5 });
+  });
+
+  test('should work for records that only partially contain the key in curried form', () => {
+    const omitSensitive = Obj.omit(['password', 'email']);
+    const user = {
+      id: 1,
+      name: 'Alice',
+      password: 'secret123',
+    } as const;
+
+    const result = pipe(user).map(omitSensitive).value satisfies {
+      id: number;
+      name: string;
+    };
+    expect(result).toStrictEqual({ id: 1, name: 'Alice' });
   });
 });

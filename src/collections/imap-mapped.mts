@@ -3,25 +3,48 @@ import { asUint32 } from '../number/index.mjs';
 import { tp } from '../others/index.mjs';
 
 /**
- * Interface for an immutable map where keys of type `K` are mapped to an underlying `MapKeyType` `KM`.
- * This type alias defines the structure of methods and properties for IMapMapped.
- * @template K The type of the keys in the map.
+ * Interface for an immutable map with custom key mapping and O(1) lookup performance.
+ *
+ * IMapMapped allows you to use complex objects as keys by providing transformation functions
+ * that convert between your custom key type `K` and a primitive `MapSetKeyType` `KM` that can
+ * be efficiently stored in JavaScript's native Map. This enables high-performance operations
+ * on maps with complex keys while maintaining type safety and immutability.
+ *
+ * **Key Features:**
+ * - **Custom Key Types**: Use any type as keys by providing `toKey`/`fromKey` functions
+ * - **O(1) Performance**: Maintains O(1) average-case performance for core operations
+ * - **Immutable**: All operations return new instances, preserving immutability
+ * - **Type Safe**: Full TypeScript support with generic key/value types
+ *
+ * **Performance Characteristics:**
+ * - get/has/delete: O(1) average case (plus key transformation overhead)
+ * - set: O(1) average case (plus key transformation overhead)
+ * - map/filter operations: O(n)
+ * - Iteration: O(n) (plus key transformation overhead)
+ *
+ * @template K The type of the custom keys in the map.
  * @template V The type of the values in the map.
- * @template KM The type of the mapped keys (number or string).
+ * @template KM The type of the mapped primitive keys (string, number, etc.).
+ *
  * @example
  * ```typescript
- * // This is a type alias describing an interface, so it's not directly instantiated.
- * // See IMapMapped.create for an example of creating an IMapMapped instance that conforms to this.
+ * // Example with complex object keys
+ * type UserId = { department: string; employeeId: number };
  *
- * // Example of how you might use a variable that implements this structure:
- * declare const myMap: IMapMapped<string, number, string>; // IMapMapped implements IMapMappedInterface
+ * // Define transformation functions
+ * const userIdToKey = (id: UserId): string => `${id.department}:${id.employeeId}`;
+ * const keyToUserId = (key: string): UserId => {
+ *   const [department, employeeId] = key.split(':');
+ *   return { department, employeeId: Number(employeeId) };
+ * };
  *
- * console.log(myMap.size);
- * if (myMap.has("myKey")) {
- *   const value = myMap.get("myKey").unwrapOr(-1);
- *   console.log(value);
- * }
- * const updatedMap = myMap.set("newKey", 123);
+ * declare const userMap: IMapMapped<UserId, UserProfile, string>;
+ *
+ * // All operations work with the complex key type
+ * const userId: UserId = { department: "engineering", employeeId: 123 };
+ * const hasUser = userMap.has(userId);                    // O(1)
+ * const profile = userMap.get(userId).unwrapOr(defaultProfile); // O(1)
+ * const updated = userMap.set(userId, newProfile);        // O(1) - returns new IMapMapped
  * ```
  */
 type IMapMappedInterface<K, V, KM extends MapSetKeyType> = Readonly<{
@@ -198,43 +221,80 @@ type IMapMappedInterface<K, V, KM extends MapSetKeyType> = Readonly<{
 }>;
 
 /**
- * Represents an immutable map where keys of type `K` are mapped to an underlying `MapKeyType` `KM`.
- * It is iterable and provides various methods for manipulation and querying.
- * @template K The type of the keys in the map.
+ * Represents an immutable map with custom key transformation and high-performance operations.
+ *
+ * IMapMapped is a specialized persistent data structure that enables using complex objects as map keys
+ * while maintaining the performance benefits of JavaScript's native Map. It achieves this by requiring
+ * bidirectional transformation functions that convert between your custom key type and a primitive type
+ * that can be efficiently stored and compared.
+ *
+ * **Key Features:**
+ * - **Complex Keys**: Use objects, arrays, or any custom type as map keys
+ * - **High Performance**: O(1) operations through efficient key transformation
+ * - **Immutable**: All mutation operations return new instances
+ * - **Type Safe**: Full TypeScript support with compile-time key/value type checking
+ * - **Bidirectional**: Maintains ability to reconstruct original keys from mapped keys
+ *
+ * **Use Cases:**
+ * - Maps with composite keys (e.g., coordinates, user IDs with metadata)
+ * - Caching with complex cache keys
+ * - State management where entities have multi-part identifiers
+ * - Performance-critical maps with non-primitive keys
+ *
+ * @template K The type of the custom keys in the map.
  * @template V The type of the values in the map.
- * @template KM The type of the mapped keys (number or string).
+ * @template KM The type of the mapped primitive keys (string, number, etc.).
+ *
  * @example
  * ```typescript
- * // Define a custom key type and its mapping functions
- * type MyKey = { id: number; category: string };
- * const toKey = (key: MyKey): string => `${key.category}_${key.id}`;
- * const fromKey = (km: string): MyKey => {
- *   const [category, idStr] = km.split('_');
- *   return { id: Number(idStr), category };
+ * // Example: Product catalog with composite keys
+ * type ProductKey = { brand: string; model: string; year: number };
+ * type Product = { name: string; price: number; inStock: boolean };
+ *
+ * // Define bidirectional transformation functions
+ * const productKeyToString = (key: ProductKey): string =>
+ *   `${key.brand}|${key.model}|${key.year}`;
+ *
+ * const stringToProductKey = (str: string): ProductKey => {
+ *   const [brand, model, yearStr] = str.split('|');
+ *   return { brand, model, year: Number(yearStr) };
  * };
  *
- * // Create an IMapMapped instance
- * let map: IMapMapped<MyKey, string, string> = IMapMapped.create<MyKey, string, string>(
+ * // Create a map with complex keys
+ * let catalog = IMapMapped.create<ProductKey, Product, string>(
  *   [],
- *   toKey,
- *   fromKey
+ *   productKeyToString,
+ *   stringToProductKey
  * );
  *
- * const key1: MyKey = { id: 1, category: "A" };
- * const key2: MyKey = { id: 2, category: "B" };
+ * // Use complex objects as keys naturally
+ * const toyotaCamry2023: ProductKey = { brand: "Toyota", model: "Camry", year: 2023 };
+ * const hondaAccord2022: ProductKey = { brand: "Honda", model: "Accord", year: 2022 };
  *
- * map = map.set(key1, "Value for A1");
- * map = map.set(key2, "Value for B2");
+ * catalog = catalog
+ *   .set(toyotaCamry2023, { name: "Toyota Camry 2023", price: 28000, inStock: true })
+ *   .set(hondaAccord2022, { name: "Honda Accord 2022", price: 26500, inStock: false });
  *
- * console.log(map.get(key1).unwrapOr("Not found")); // Output: Value for A1
- * console.log(map.size); // Output: 2
+ * // All operations work with the original key type
+ * console.log(catalog.get(toyotaCamry2023).unwrapOr(notFound).name);
+ * // Output: "Toyota Camry 2023"
  *
- * for (const [key, value] of map) {
- *   console.log(`Key: ${toKey(key)}, Value: ${value}`);
+ * console.log(catalog.has(hondaAccord2022)); // Output: true
+ * console.log(catalog.size); // Output: 2
+ *
+ * // Iteration preserves original key types
+ * for (const [productKey, product] of catalog) {
+ *   console.log(`${productKey.brand} ${productKey.model} (${productKey.year}): $${product.price}`);
  * }
  * // Output:
- * // Key: A_1, Value: Value for A1
- * // Key: B_2, Value: Value for B2
+ * // Toyota Camry (2023): $28000
+ * // Honda Accord (2022): $26500
+ *
+ * // Functional transformations work seamlessly
+ * const discountedCatalog = catalog.map((product, key) => ({
+ *   ...product,
+ *   price: Math.round(product.price * 0.9) // 10% discount
+ * }));
  * ```
  */
 export type IMapMapped<K, V, KM extends MapSetKeyType> = Iterable<
@@ -247,43 +307,95 @@ export type IMapMapped<K, V, KM extends MapSetKeyType> = Iterable<
  */
 export namespace IMapMapped {
   /**
-   * Creates a new IMapMapped instance.
-   * @template K The type of the keys.
+   * Creates a new IMapMapped instance with custom key transformation functions.
+   *
+   * This factory function creates an immutable map that can use complex objects as keys
+   * by providing bidirectional transformation functions. The `toKey` function converts
+   * your custom key type to a primitive type that can be efficiently stored, while
+   * `fromKey` reconstructs the original key type for iteration and access.
+   *
+   * **Performance:** O(n) where n is the number of entries in the iterable.
+   *
+   * @template K The type of the custom keys.
    * @template V The type of the values.
-   * @template KM The type of the mapped keys.
-   * @param iterable An iterable of key-value pairs.
-   * @param toKey A function to convert `K` to `KM`.
-   * @param fromKey A function to convert `KM` to `K`.
-   * @returns A new IMapMapped instance.
+   * @template KM The type of the mapped primitive keys.
+   * @param iterable An iterable of key-value pairs using the custom key type.
+   * @param toKey A function that converts a custom key `K` to a primitive key `KM`.
+   *              This function must be deterministic and produce unique values for unique keys.
+   * @param fromKey A function that converts a primitive key `KM` back to the custom key `K`.
+   *                This should be the inverse of `toKey`.
+   * @returns A new IMapMapped instance containing all entries from the iterable.
+   *
    * @example
    * ```typescript
-   * type ComplexKey = { partA: string; partB: number };
-   * const complexKeyToString = (ck: ComplexKey): string => `${ck.partA}-${ck.partB}`;
-   * const stringToComplexKey = (s: string): ComplexKey => {
-   *   const [partA, partBStr] = s.split('-');
-   *   return { partA, partB: Number(partBStr) };
+   * // Example 1: Geographic coordinates as keys
+   * type Coordinate = { lat: number; lng: number };
+   * type LocationInfo = { name: string; population: number };
+   *
+   * const coordToString = (coord: Coordinate): string => `${coord.lat},${coord.lng}`;
+   * const stringToCoord = (str: string): Coordinate => {
+   *   const [lat, lng] = str.split(',').map(Number);
+   *   return { lat, lng };
    * };
    *
-   * const initialData: Array<[ComplexKey, boolean]> = [
-   *   [{ partA: "item", partB: 1 }, true],
-   *   [{ partA: "item", partB: 2 }, false],
-   * ];
-   *
-   * const myMappedMap = IMapMapped.create<ComplexKey, boolean, string>(
-   *   initialData,
-   *   complexKeyToString,
-   *   stringToComplexKey
+   * const locationMap = IMapMapped.create<Coordinate, LocationInfo, string>(
+   *   [
+   *     [{ lat: 40.7128, lng: -74.0060 }, { name: "New York", population: 8000000 }],
+   *     [{ lat: 34.0522, lng: -118.2437 }, { name: "Los Angeles", population: 4000000 }]
+   *   ],
+   *   coordToString,
+   *   stringToCoord
    * );
    *
-   * console.log(myMappedMap.size); // Output: 2
-   * console.log(myMappedMap.get({ partA: "item", partB: 1 }).unwrap()); // Output: true
+   * const nyCoord = { lat: 40.7128, lng: -74.0060 };
+   * console.log(locationMap.get(nyCoord).unwrap().name); // Output: "New York"
    *
-   * const mapWithSimpleKeys = IMapMapped.create<string, number, string>(
-   *   [["a", 1], ["b", 2]],
-   *   (s) => s, // identity for string keys
-   *   (s) => s  // identity for string keys
+   * // Example 2: Multi-part business keys
+   * type OrderId = { customerId: string; year: number; orderNumber: number };
+   *
+   * const orderIdToKey = (id: OrderId): string =>
+   *   `${id.customerId}:${id.year}:${id.orderNumber}`;
+   *
+   * const keyToOrderId = (key: string): OrderId => {
+   *   const [customerId, yearStr, orderNumStr] = key.split(':');
+   *   return {
+   *     customerId,
+   *     year: Number(yearStr),
+   *     orderNumber: Number(orderNumStr)
+   *   };
+   * };
+   *
+   * const orderMap = IMapMapped.create<OrderId, Order, string>(
+   *   [],
+   *   orderIdToKey,
+   *   keyToOrderId
    * );
-   * console.log(mapWithSimpleKeys.get("b").unwrap()); // Output: 2
+   *
+   * // Example 3: Simple case with string keys (identity transformation)
+   * const simpleMap = IMapMapped.create<string, number, string>(
+   *   [["key1", 100], ["key2", 200]],
+   *   (s) => s,  // identity function
+   *   (s) => s   // identity function
+   * );
+   *
+   * // Example 4: From existing data structures
+   * const existingEntries = new Map([
+   *   [{ id: 1, type: "user" }, { name: "Alice", active: true }],
+   *   [{ id: 2, type: "user" }, { name: "Bob", active: false }]
+   * ]);
+   *
+   * type EntityKey = { id: number; type: string };
+   * const entityKeyToString = (key: EntityKey): string => `${key.type}_${key.id}`;
+   * const stringToEntityKey = (str: string): EntityKey => {
+   *   const [type, idStr] = str.split('_');
+   *   return { type, id: Number(idStr) };
+   * };
+   *
+   * const entityMap = IMapMapped.create<EntityKey, Entity, string>(
+   *   existingEntries,
+   *   entityKeyToString,
+   *   stringToEntityKey
+   * );
    * ```
    */
   export const create = <K, V, KM extends MapSetKeyType>(
@@ -294,44 +406,83 @@ export namespace IMapMapped {
     new IMapMappedClass<K, V, KM>(iterable, toKey, fromKey);
 
   /**
-   * Checks if two IMapMapped instances are equal.
-   * Equality is determined by having the same size and all key-value pairs being equal.
-   * @template K The type of the keys.
+   * Checks if two IMapMapped instances are structurally equal.
+   *
+   * Two IMapMapped instances are considered equal if they have the same size and contain
+   * exactly the same key-value pairs. The comparison is performed on the underlying mapped
+   * keys and values, so the transformation functions themselves don't need to be identical.
+   * Values are compared using JavaScript's `===` operator.
+   *
+   * **Performance:** O(n) where n is the size of the smaller map.
+   *
+   * @template K The type of the custom keys.
    * @template V The type of the values.
-   * @template KM The type of the mapped keys.
-   * @param a The first IMapMapped instance.
-   * @param b The second IMapMapped instance.
-   * @returns `true` if the maps are equal, `false` otherwise.
+   * @template KM The type of the mapped primitive keys.
+   * @param a The first IMapMapped instance to compare.
+   * @param b The second IMapMapped instance to compare.
+   * @returns `true` if the maps contain exactly the same key-value pairs, `false` otherwise.
+   *
    * @example
    * ```typescript
-   * const toKey = (s: string) => s;
-   * const fromKey = (s: string) => s;
+   * // Example with coordinate keys
+   * type Point = { x: number; y: number };
+   * const pointToString = (p: Point): string => `${p.x},${p.y}`;
+   * const stringToPoint = (s: string): Point => {
+   *   const [x, y] = s.split(',').map(Number);
+   *   return { x, y };
+   * };
    *
-   * const map1 = IMapMapped.create<string, number, string>([["a", 1], ["b", 2]], toKey, fromKey);
-   * const map2 = IMapMapped.create<string, number, string>([["a", 1], ["b", 2]], toKey, fromKey);
-   * const map3 = IMapMapped.create<string, number, string>([["a", 1], ["c", 3]], toKey, fromKey);
-   * const map4 = IMapMapped.create<string, number, string>([["a", 1], ["b", 99]], toKey, fromKey);
-   *
-   * console.log(IMapMapped.equal(map1, map2)); // Output: true
-   * console.log(IMapMapped.equal(map1, map3)); // Output: false (different keys/values)
-   * console.log(IMapMapped.equal(map1, map4)); // Output: false (different value for key "b")
-   *
-   * // Example with custom key type
-   * type MyObjKey = { id: number };
-   * const toObjKey = (k: MyObjKey): string => `id_${k.id}`;
-   * const fromObjKey = (s: string): MyObjKey => ({ id: Number(s.substring(3)) });
-   *
-   * const mapObj1 = IMapMapped.create<MyObjKey, string, string>(
-   *   [[{ id: 1 }, "val1"]],
-   *   toObjKey,
-   *   fromObjKey
+   * const map1 = IMapMapped.create<Point, string, string>(
+   *   [[{ x: 1, y: 2 }, "point1"], [{ x: 3, y: 4 }, "point2"]],
+   *   pointToString,
+   *   stringToPoint
    * );
-   * const mapObj2 = IMapMapped.create<MyObjKey, string, string>(
-   *   [[{ id: 1 }, "val1"]],
-   *   toObjKey,
-   *   fromObjKey
+   *
+   * const map2 = IMapMapped.create<Point, string, string>(
+   *   [[{ x: 1, y: 2 }, "point1"], [{ x: 3, y: 4 }, "point2"]], // Same content
+   *   pointToString,
+   *   stringToPoint
    * );
-   * console.log(IMapMapped.equal(mapObj1, mapObj2)); // Output: true
+   *
+   * const map3 = IMapMapped.create<Point, string, string>(
+   *   [[{ x: 1, y: 2 }, "point1"], [{ x: 3, y: 4 }, "different"]], // Different value
+   *   pointToString,
+   *   stringToPoint
+   * );
+   *
+   * console.log(IMapMapped.equal(map1, map2)); // true
+   * console.log(IMapMapped.equal(map1, map3)); // false (different value)
+   *
+   * // Order doesn't matter for equality
+   * const map4 = IMapMapped.create<Point, string, string>(
+   *   [[{ x: 3, y: 4 }, "point2"], [{ x: 1, y: 2 }, "point1"]], // Different order
+   *   pointToString,
+   *   stringToPoint
+   * );
+   *
+   * console.log(IMapMapped.equal(map1, map4)); // true
+   *
+   * // Different transformation functions but same logical content
+   * const alternativePointToString = (p: Point): string => `(${p.x},${p.y})`; // Different format
+   * const alternativeStringToPoint = (s: string): Point => {
+   *   const match = s.match(/\((\d+),(\d+)\)/);
+   *   return { x: Number(match![1]), y: Number(match![2]) };
+   * };
+   *
+   * const map5 = IMapMapped.create<Point, string, string>(
+   *   [[{ x: 1, y: 2 }, "point1"], [{ x: 3, y: 4 }, "point2"]],
+   *   alternativePointToString,
+   *   alternativeStringToPoint
+   * );
+   *
+   * // This would be false because the underlying mapped keys are different
+   * // even though the logical content is the same
+   * console.log(IMapMapped.equal(map1, map5)); // false
+   *
+   * // Empty maps
+   * const empty1 = IMapMapped.create<Point, string, string>([], pointToString, stringToPoint);
+   * const empty2 = IMapMapped.create<Point, string, string>([], pointToString, stringToPoint);
+   * console.log(IMapMapped.equal(empty1, empty2)); // true
    * ```
    */
   export const equal = <K, V, KM extends MapSetKeyType>(
@@ -341,12 +492,24 @@ export namespace IMapMapped {
 }
 
 /**
- * Class implementation for IMapMapped.
- * @template K The type of the keys.
+ * Internal class implementation for IMapMapped providing immutable map operations with key transformation.
+ *
+ * This class implements the IMapMapped interface by maintaining a JavaScript Map with primitive keys
+ * internally while exposing an API that works with custom key types. The transformation between
+ * custom and primitive keys is handled transparently through the provided `toKey` and `fromKey` functions.
+ *
+ * **Implementation Details:**
+ * - Uses ReadonlyMap<KM, V> internally where KM is the primitive key type
+ * - Stores transformation functions for bidirectional key conversion
+ * - Implements copy-on-write semantics for efficiency
+ * - Provides optional debug messaging for development
+ *
+ * @template K The type of the custom keys.
  * @template V The type of the values.
- * @template KM The type of the mapped keys.
+ * @template KM The type of the mapped primitive keys.
  * @implements IMapMapped
  * @implements Iterable
+ * @internal This class should not be used directly. Use IMapMapped.create() instead.
  */
 class IMapMappedClass<K, V, KM extends MapSetKeyType>
   implements IMapMapped<K, V, KM>, Iterable<readonly [K, V]>
@@ -357,11 +520,17 @@ class IMapMappedClass<K, V, KM extends MapSetKeyType>
   readonly #showNotFoundMessage: boolean;
 
   /**
-   * Constructs an IMapMappedClass instance.
-   * @param iterable An iterable of key-value pairs.
-   * @param toKey A function to convert `K` to `KM`.
-   * @param fromKey A function to convert `KM` to `K`.
-   * @param showNotFoundMessage Whether to show a detailed message when a key is not found during get() operations. Defaults to false.
+   * Constructs an IMapMappedClass instance with custom key transformation.
+   *
+   * @param iterable An iterable of key-value pairs using the custom key type K.
+   * @param toKey A function that converts a custom key K to a primitive key KM.
+   *              Must be deterministic and produce unique values for unique keys.
+   * @param fromKey A function that converts a primitive key KM back to the custom key K.
+   *                Should be the inverse of the toKey function.
+   * @param showNotFoundMessage Whether to log warning messages when operations
+   *                           are performed on non-existent keys. Useful for debugging.
+   *                           Defaults to false for production use.
+   * @internal Use IMapMapped.create() instead of calling this constructor directly.
    */
   constructor(
     iterable: Iterable<readonly [K, V]>,

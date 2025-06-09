@@ -109,7 +109,7 @@ describe('Stack', () => {
   });
 
   test('should work with object types', () => {
-    type Item = { id: number; name: string };
+    type Item = Readonly<{ id: number; name: string }>;
     const stack = createStack<Item>();
 
     const item1: Item = { id: 1, name: 'first' };

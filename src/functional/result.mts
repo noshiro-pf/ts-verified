@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { isRecord } from '../guard/index.mjs';
 import { unknownToString } from '../others/index.mjs';
 import { Optional } from './optional.mjs';
@@ -106,9 +107,31 @@ export namespace Result {
 
   /**
    * Creates a `Result.Ok` containing the given success value.
+   *
+   * Use this constructor when an operation succeeds and you want to wrap
+   * the successful result in a Result type for consistent error handling.
+   *
    * @template S The type of the success value.
    * @param value The success value.
    * @returns A `Result.Ok<S>` containing the value.
+   * @example
+   * ```typescript
+   * // Basic success case
+   * const success = Result.ok(42);
+   * console.log(Result.isOk(success)); // true
+   * console.log(Result.unwrapOk(success)); // 42
+   *
+   * // Function that returns a Result
+   * function divide(a: number, b: number): Result<number, string> {
+   *   if (b === 0) {
+   *     return Result.err("Division by zero");
+   *   }
+   *   return Result.ok(a / b);
+   * }
+   *
+   * const result = divide(10, 2);
+   * console.log(Result.unwrapOk(result)); // 5
+   * ```
    */
   export const ok = <S,>(value: S): Ok<S> => ({
     type: OkTypeSymbol,
@@ -117,9 +140,43 @@ export namespace Result {
 
   /**
    * Creates a `Result.Err` containing the given error value.
+   *
+   * Use this constructor when an operation fails and you want to wrap
+   * the error information in a Result type for consistent error handling.
+   *
    * @template E The type of the error value.
    * @param value The error value.
    * @returns A `Result.Err<E>` containing the value.
+   * @example
+   * ```typescript
+   * // Basic error case
+   * const failure = Result.err("Something went wrong");
+   * console.log(Result.isErr(failure)); // true
+   * console.log(Result.unwrapErr(failure)); // "Something went wrong"
+   *
+   * // Function that can fail
+   * function parseInteger(input: string): Result<number, string> {
+   *   const num = parseInt(input, 10);
+   *   if (isNaN(num)) {
+   *     return Result.err(`Invalid number format: ${input}`);
+   *   }
+   *   return Result.ok(num);
+   * }
+   *
+   * const result = parseInteger("abc");
+   * console.log(Result.unwrapErr(result)); // "Invalid number format: abc"
+   *
+   * // Using custom error types
+   * interface ValidationError {
+   *   field: string;
+   *   message: string;
+   * }
+   *
+   * const validationError = Result.err<ValidationError>({
+   *   field: "email",
+   *   message: "Invalid email format"
+   * });
+   * ```
    */
   export const err = <E,>(value: E): Err<E> => ({
     type: ErrTypeSymbol,
@@ -134,20 +191,89 @@ export namespace Result {
 
   /**
    * Checks if a `Result` is `Result.Ok`.
-   * Acts as a type guard.
+   * Acts as a type guard, narrowing the type to the success variant.
+   *
+   * This function is essential for type-safe Result handling, allowing
+   * TypeScript to understand that subsequent operations will work with
+   * the success value rather than the error value.
+   *
    * @template R The `Result.Base` type to check.
    * @param result The `Result` to check.
    * @returns `true` if the `Result` is `Result.Ok`, otherwise `false`.
+   * @example
+   * ```typescript
+   * // Basic type guard usage
+   * const result: Result<number, string> = divide(10, 2);
+   *
+   * if (Result.isOk(result)) {
+   *   // TypeScript knows result is Result.Ok<number>
+   *   console.log(result.value); // Safe to access .value
+   *   console.log(Result.unwrapOk(result)); // 5
+   * } else {
+   *   // TypeScript knows result is Result.Err<string>
+   *   console.log(result.value); // Error message
+   * }
+   *
+   * // Using in conditional logic
+   * const processResult = (r: Result<string, Error>) => {
+   *   return Result.isOk(r)
+   *     ? r.value.toUpperCase() // Safe string operations
+   *     : "Error occurred";
+   * };
+   *
+   * // Filtering arrays of Results
+   * const results: Result<number, string>[] = [
+   *   Result.ok(1),
+   *   Result.err("error"),
+   *   Result.ok(2)
+   * ];
+   * const successes = results.filter(Result.isOk);
+   * // successes is Result.Ok<number>[]
+   * ```
    */
   export const isOk = <R extends Base>(result: R): result is NarrowToOk<R> =>
     result.type === OkTypeSymbol;
 
   /**
    * Checks if a `Result` is `Result.Err`.
-   * Acts as a type guard.
+   * Acts as a type guard, narrowing the type to the error variant.
+   *
+   * This function is essential for type-safe Result handling, allowing
+   * TypeScript to understand that subsequent operations will work with
+   * the error value rather than the success value.
+   *
    * @template R The `Result.Base` type to check.
    * @param result The `Result` to check.
    * @returns `true` if the `Result` is `Result.Err`, otherwise `false`.
+   * @example
+   * ```typescript
+   * // Basic type guard usage
+   * const result: Result<number, string> = divide(10, 0);
+   *
+   * if (Result.isErr(result)) {
+   *   // TypeScript knows result is Result.Err<string>
+   *   console.log(result.value); // Safe to access error .value
+   *   console.log(Result.unwrapErr(result)); // "Division by zero"
+   * } else {
+   *   // TypeScript knows result is Result.Ok<number>
+   *   console.log(result.value); // Success value
+   * }
+   *
+   * // Error handling patterns
+   * const handleResult = (r: Result<Data, ApiError>) => {
+   *   if (Result.isErr(r)) {
+   *     logError(r.value); // Safe error operations
+   *     return null;
+   *   }
+   *   return processData(r.value);
+   * };
+   *
+   * // Collecting errors from multiple Results
+   * const results: Result<string, ValidationError>[] = validateForm();
+   * const errors = results
+   *   .filter(Result.isErr)
+   *   .map(err => err.value); // ValidationError[]
+   * ```
    */
   export const isErr = <R extends Base>(result: R): result is NarrowToErr<R> =>
     result.type === ErrTypeSymbol;
@@ -155,48 +281,108 @@ export namespace Result {
   /**
    * Unwraps a `Result`, returning the success value.
    * Throws an error if the `Result` is `Result.Err`.
+   *
+   * This is useful when you're confident that a Result should contain a success value
+   * and want to treat errors as exceptional conditions. The error message will be
+   * constructed from the error value using the provided string conversion function.
+   *
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @param toStr An optional function to convert the error value to a string for the error message. Defaults to `String`.
    * @returns The success value if `Result.Ok`.
-   * @throws Error if the `Result` is `Result.Err`.
+   * @throws {Error} Error with the stringified error value if the `Result` is `Result.Err`.
+   * @example
+   * ```typescript
+   * // Basic usage with default string conversion
+   * const success = Result.ok(42);
+   * console.log(Result.unwrapThrow(success)); // 42
+   *
+   * const failure = Result.err("Network error");
+   * try {
+   *   Result.unwrapThrow(failure); // throws Error: "Network error"
+   * } catch (error) {
+   *   console.log(error.message); // "Network error"
+   * }
+   *
+   * // Custom error string conversion
+   * interface ApiError {
+   *   code: number;
+   *   message: string;
+   * }
+   *
+   * const apiResult = Result.err<ApiError>({ code: 404, message: "Not found" });
+   * try {
+   *   Result.unwrapThrow(apiResult, err => `API Error ${err.code}: ${err.message}`);
+   * } catch (error) {
+   *   console.log(error.message); // "API Error 404: Not found"
+   * }
+   *
+   * // In contexts where failure is unexpected
+   * const configResult = loadConfiguration();
+   * const config = Result.unwrapThrow(configResult, err =>
+   *   `Failed to load configuration: ${err}`
+   * ); // Will throw if config loading fails
+   * ```
    */
   export const unwrapThrow = <R extends Base>(
     result: R,
     toStr: (e: UnwrapErr<R>) => string = toStr_,
   ): UnwrapOk<R> => {
     if (isErr(result)) {
-      throw new Error(
-        toStr(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          result.value as UnwrapErr<R>,
-        ),
-      );
+      throw new Error(toStr(result.value as UnwrapErr<R>));
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+
     return result.value as UnwrapOk<R>;
   };
 
   /**
-   * Unwraps a `Result` that is known to be `Ok`, returning the success value.
-   * @template R The `Result.Ok` type to unwrap.
-   * @param result The `Result.Ok` to unwrap.
-   * @returns The success value.
-   */
-  export function unwrapOk<R extends Ok<unknown>>(result: R): UnwrapOk<R>;
-  /**
-   * Unwraps a `Result`, returning the success value or `undefined` if it is `Result.Err`.
+   * Unwraps a `Result`, returning the success value or `undefined` if it's an error.
+   *
+   * This function provides a safe way to extract success values from Results without
+   * throwing exceptions. It has overloaded behavior based on the type:
+   * - For `Result.Ok<T>`: Always returns `T` (guaranteed by type system)
+   * - For general `Result<T, E>`: Returns `T | undefined`
+   *
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @returns The success value if `Result.Ok`, otherwise `undefined`.
+   * @example
+   * ```typescript
+   * // With guaranteed Ok - returns the value
+   * const success = Result.ok(42);
+   * const value = Result.unwrapOk(success); // Type: number, Value: 42
+   *
+   * // With general Result - may return undefined
+   * const maybeResult: Result<string, Error> = fetchData();
+   * const data = Result.unwrapOk(maybeResult); // Type: string | undefined
+   *
+   * // Safe pattern for handling both cases
+   * const result = Result.ok("hello");
+   * const unwrapped = Result.unwrapOk(result);
+   * if (unwrapped !== undefined) {
+   *   console.log(unwrapped.toUpperCase()); // "HELLO"
+   * }
+   *
+   * // Useful in conditional chains
+   * const processResult = (r: Result<number, string>) => {
+   *   const value = Result.unwrapOk(r);
+   *   return value !== undefined ? value * 2 : 0;
+   * };
+   * ```
    */
-  export function unwrapOk<R extends Base>(result: R): UnwrapOk<R> | undefined;
-  export function unwrapOk<R extends Base>(result: R): UnwrapOk<R> | undefined {
-    return isErr(result)
+  export const unwrapOk: UnwrapOkFnOverload = (<R extends Base>(
+    result: R,
+  ): UnwrapOk<R> | undefined =>
+    isErr(result)
       ? undefined
-      : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result.value as UnwrapOk<R>);
-  }
+      : (result.value as UnwrapOk<R>)) as UnwrapOkFnOverload;
+
+  type UnwrapOkFnOverload = {
+    <R extends Ok<unknown>>(result: R): UnwrapOk<R>;
+
+    // Curried version
+    <R extends Base>(result: R): UnwrapOk<R> | undefined;
+  };
 
   /**
    * Unwraps a `Result`, returning the success value or a default value if it is `Result.Err`.
@@ -218,40 +404,79 @@ export namespace Result {
    * console.log(value2); // 0
    * ```
    */
-  export function unwrapOkOr<R extends Base, D>(
-    result: R,
-    defaultValue: D,
-  ): D | UnwrapOk<R>;
-  export function unwrapOkOr<S, D>(
-    defaultValue: D,
-  ): <E>(result: Result<S, E>) => D | S;
-  export function unwrapOkOr<R extends Base, D>(
+  export const unwrapOkOr: UnwrapOkOrFnOverload = (<R extends Base, D>(
     ...args: readonly [result: R, defaultValue: D] | readonly [defaultValue: D]
   ):
     | D
     | UnwrapOk<R>
-    | (<E>(result: Result<UnwrapOk<R>, E>) => D | UnwrapOk<R>) {
-    if (args.length === 2) {
-      const [result, defaultValue] = args;
-      return isErr(result)
-        ? defaultValue
-        : // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          (result.value as UnwrapOk<R>);
-    } else {
-      const [defaultValue] = args;
-      return <E,>(result: Result<UnwrapOk<R>, E>) =>
-        isErr(result) ? defaultValue : result.value;
+    | (<E>(result: Result<UnwrapOk<R>, E>) => D | UnwrapOk<R>) => {
+    switch (args.length) {
+      case 2: {
+        // Direct version: first argument is result
+        const [result, defaultValue] = args;
+        return isErr(result) ? defaultValue : (result.value as UnwrapOk<R>);
+      }
+
+      case 1: {
+        // Curried version: first argument is default value
+        const [defaultValue] = args;
+        return <E,>(result: Result<UnwrapOk<R>, E>) =>
+          unwrapOkOr(result, defaultValue);
+      }
     }
-  }
+  }) as UnwrapOkOrFnOverload;
+
+  type UnwrapOkOrFnOverload = {
+    <R extends Base, D>(result: R, defaultValue: D): D | UnwrapOk<R>;
+
+    // Curried version
+    <S, D>(defaultValue: D): <E>(result: Result<S, E>) => D | S;
+  };
 
   /**
    * Unwraps a `Result`, returning the error value.
    * Throws an error if the `Result` is `Result.Ok`.
+   *
+   * This function is used when you expect a Result to be an error and want to
+   * extract the error value. If the Result is unexpectedly Ok, it will throw
+   * an error with information about the unexpected success value.
+   *
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @param toStr An optional function to convert the success value to a string for the error message when the Result is unexpectedly Ok. Defaults to `String`.
    * @returns The error value if `Result.Err`.
-   * @throws Error if the `Result` is `Result.Ok`.
+   * @throws {Error} Error with message "Expected Err but got Ok: {value}" if the `Result` is `Result.Ok`.
+   * @example
+   * ```typescript
+   * // Basic usage - extracting error from known failure
+   * const failure = Result.err("Network timeout");
+   * console.log(Result.unwrapErrThrow(failure)); // "Network timeout"
+   *
+   * // Throws when Result is unexpectedly Ok
+   * const success = Result.ok(42);
+   * try {
+   *   Result.unwrapErrThrow(success); // throws Error: "Expected Err but got Ok: 42"
+   * } catch (error) {
+   *   console.log(error.message); // "Expected Err but got Ok: 42"
+   * }
+   *
+   * // Custom success value string conversion
+   * interface User { name: string; id: number; }
+   * const userResult = Result.ok<User>({ name: "John", id: 123 });
+   * try {
+   *   Result.unwrapErrThrow(userResult, user => `User(${user.name}:${user.id})`);
+   * } catch (error) {
+   *   console.log(error.message); // "Expected Err but got Ok: User(John:123)"
+   * }
+   *
+   * // In error handling contexts
+   * const validateAndGetError = (result: Result<any, ValidationError>) => {
+   *   if (Result.isErr(result)) {
+   *     return Result.unwrapErrThrow(result); // Safe to unwrap error
+   *   }
+   *   throw new Error("Validation unexpectedly succeeded");
+   * };
+   * ```
    */
   export const unwrapErrThrow = <R extends Base>(
     result: R,
@@ -259,29 +484,64 @@ export namespace Result {
   ): UnwrapErr<R> => {
     if (isOk(result)) {
       throw new Error(
-        `Expected Err but got Ok: ${toStr(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          result.value as UnwrapOk<R>,
-        )}`,
+        `Expected Err but got Ok: ${toStr(result.value as UnwrapOk<R>)}`,
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+
     return result.value as UnwrapErr<R>;
   };
 
   /**
    * Unwraps a `Result`, returning the error value or `undefined` if it is `Result.Ok`.
+   *
+   * This provides a safe way to extract error values from Results without throwing
+   * exceptions. Useful for error handling patterns where you want to check for
+   * specific error conditions.
+   *
    * @template R The `Result.Base` type to unwrap.
    * @param result The `Result` to unwrap.
    * @returns The error value if `Result.Err`, otherwise `undefined`.
+   * @example
+   * ```typescript
+   * // Basic error extraction
+   * const failure = Result.err("Connection failed");
+   * console.log(Result.unwrapErr(failure)); // "Connection failed"
+   *
+   * const success = Result.ok(42);
+   * console.log(Result.unwrapErr(success)); // undefined
+   *
+   * // Error handling patterns
+   * const handleApiCall = (result: Result<Data, ApiError>) => {
+   *   const error = Result.unwrapErr(result);
+   *   if (error !== undefined) {
+   *     switch (error.type) {
+   *       case "NETWORK_ERROR":
+   *         return retry(result);
+   *       case "AUTH_ERROR":
+   *         return redirectToLogin();
+   *       default:
+   *         return showGenericError(error);
+   *     }
+   *   }
+   *   // Handle success case...
+   * };
+   *
+   * // Collecting errors from multiple operations
+   * const results = await Promise.all([
+   *   operation1(),
+   *   operation2(),
+   *   operation3()
+   * ]);
+   *
+   * const errors = results
+   *   .map(Result.unwrapErr)
+   *   .filter(err => err !== undefined); // Only actual errors
+   * ```
    */
   export const unwrapErr = <R extends Base>(
     result: R,
   ): UnwrapErr<R> | undefined =>
-    isErr(result)
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        (result.value as UnwrapErr<R>)
-      : undefined;
+    isErr(result) ? (result.value as UnwrapErr<R>) : undefined;
 
   /**
    * Unwraps a `Result`, returning the error value or a default value if it is `Result.Ok`.
@@ -303,31 +563,34 @@ export namespace Result {
    * console.log(error2); // "unknown error"
    * ```
    */
-  export function unwrapErrOr<R extends Base, D>(
-    result: R,
-    defaultValue: D,
-  ): D | UnwrapErr<R>;
-  export function unwrapErrOr<E, D>(
-    defaultValue: D,
-  ): <S>(result: Result<S, E>) => D | E;
-  export function unwrapErrOr<R extends Base, D>(
+  export const unwrapErrOr: UnwrapErrOrFnOverload = (<R extends Base, D>(
     ...args: readonly [result: R, defaultValue: D] | readonly [defaultValue: D]
   ):
     | D
     | UnwrapErr<R>
-    | (<S>(result: Result<S, UnwrapErr<R>>) => D | UnwrapErr<R>) {
-    if (args.length === 2) {
-      const [result, defaultValue] = args;
-      return isErr(result)
-        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          (result.value as UnwrapErr<R>)
-        : defaultValue;
-    } else {
-      const [defaultValue] = args;
-      return <S,>(result: Result<S, UnwrapErr<R>>) =>
-        isErr(result) ? result.value : defaultValue;
+    | (<S>(result: Result<S, UnwrapErr<R>>) => D | UnwrapErr<R>) => {
+    switch (args.length) {
+      case 2: {
+        // Direct version: first argument is result
+        const [result, defaultValue] = args;
+        return isErr(result) ? (result.value as UnwrapErr<R>) : defaultValue;
+      }
+
+      case 1: {
+        // Curried version: first argument is default value
+        const [defaultValue] = args;
+        return <S,>(result: Result<S, UnwrapErr<R>>) =>
+          unwrapErrOr(result, defaultValue);
+      }
     }
-  }
+  }) as UnwrapErrOrFnOverload;
+
+  type UnwrapErrOrFnOverload = {
+    <R extends Base, D>(result: R, defaultValue: D): D | UnwrapErr<R>;
+
+    // Curried version
+    <E, D>(defaultValue: D): <S>(result: Result<S, E>) => D | E;
+  };
 
   /**
    * Maps a `Result<S, E>` to `Result<S2, E>` by applying a function to the success value.
@@ -350,37 +613,38 @@ export namespace Result {
    * console.log(Result.unwrap(result2)); // 10
    * ```
    */
-  export function map<R extends Base, S2>(
-    result: R,
-    mapFn: (value: UnwrapOk<R>) => S2,
-  ): Result<S2, UnwrapErr<R>>;
-  export function map<S, S2>(
-    mapFn: (value: S) => S2,
-  ): <E>(result: Result<S, E>) => Result<S2, E>;
-  export function map<R extends Base, S2>(
+  export const map: MapFnOverload = (<R extends Base, S2>(
     ...args:
       | readonly [result: R, mapFn: (value: UnwrapOk<R>) => S2]
       | readonly [mapFn: (value: UnwrapOk<R>) => S2]
-  ):
-    | Result<S2, UnwrapErr<R>>
-    | (<E>(result: Result<UnwrapOk<R>, E>) => Result<S2, E>) {
-    if (args.length === 2) {
-      const [result, mapFn] = args;
-      return isErr(result)
-        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          (result as Err<UnwrapErr<R>>)
-        : ok(
-            mapFn(
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-              result.value as UnwrapOk<R>,
-            ),
-          );
-    } else {
-      const [mapFn] = args;
-      return <E,>(result: Result<UnwrapOk<R>, E>) =>
-        isErr(result) ? result : ok(mapFn(result.value));
+  ): Result<S2, UnwrapErr<R>> | ((result: R) => Result<S2, UnwrapErr<R>>) => {
+    switch (args.length) {
+      case 2: {
+        const [result, mapFn] = args;
+        return isErr(result)
+          ? (result as Err<UnwrapErr<R>>)
+          : ok(mapFn(result.value as UnwrapOk<R>));
+      }
+
+      case 1: {
+        // Curried version: first argument is mapping function
+        const [mapFn] = args;
+        return (result: R) => map(result, mapFn);
+      }
     }
-  }
+  }) as MapFnOverload;
+
+  type MapFnOverload = {
+    <R extends Base, S2>(
+      result: R,
+      mapFn: (value: UnwrapOk<R>) => S2,
+    ): Result<S2, UnwrapErr<R>>;
+
+    // Curried version
+    <S, S2>(
+      mapFn: (value: S) => S2,
+    ): <E>(result: Result<S, E>) => Result<S2, E>;
+  };
 
   /**
    * Maps a `Result<S, E>` to `Result<S, E2>` by applying a function to the error value.
@@ -403,37 +667,38 @@ export namespace Result {
    * console.log(Result.unwrapErr(result2)); // "ERROR"
    * ```
    */
-  export function mapErr<R extends Base, E2>(
-    result: R,
-    mapFn: (error: UnwrapErr<R>) => E2,
-  ): Result<UnwrapOk<R>, E2>;
-  export function mapErr<E, E2>(
-    mapFn: (error: E) => E2,
-  ): <S>(result: Result<S, E>) => Result<S, E2>;
-  export function mapErr<R extends Base, E2>(
+  export const mapErr: MapErrFnOverload = (<R extends Base, E2>(
     ...args:
       | readonly [result: R, mapFn: (error: UnwrapErr<R>) => E2]
       | readonly [mapFn: (error: UnwrapErr<R>) => E2]
-  ):
-    | Result<UnwrapOk<R>, E2>
-    | (<S>(result: Result<S, UnwrapErr<R>>) => Result<S, E2>) {
-    if (args.length === 2) {
-      const [result, mapFn] = args;
-      return isOk(result)
-        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          (result as Ok<UnwrapOk<R>>)
-        : err(
-            mapFn(
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-              result.value as UnwrapErr<R>,
-            ),
-          );
-    } else {
-      const [mapFn] = args;
-      return <S,>(result: Result<S, UnwrapErr<R>>) =>
-        isOk(result) ? result : err(mapFn(result.value));
+  ): Result<UnwrapOk<R>, E2> | ((result: R) => Result<UnwrapOk<R>, E2>) => {
+    switch (args.length) {
+      case 2: {
+        const [result, mapFn] = args;
+        return isOk(result)
+          ? (result as Ok<UnwrapOk<R>>)
+          : err(mapFn(result.value as UnwrapErr<R>));
+      }
+
+      case 1: {
+        // Curried version: first argument is mapping function
+        const [mapFn] = args;
+        return (result: R) => mapErr(result, mapFn);
+      }
     }
-  }
+  }) as MapErrFnOverload;
+
+  type MapErrFnOverload = {
+    <R extends Base, E2>(
+      result: R,
+      mapFn: (error: UnwrapErr<R>) => E2,
+    ): Result<UnwrapOk<R>, E2>;
+
+    // Curried version
+    <E, E2>(
+      mapFn: (error: E) => E2,
+    ): <S>(result: Result<S, E>) => Result<S, E2>;
+  };
 
   /**
    * Applies one of two functions depending on whether the `Result` is `Ok` or `Err`.
@@ -457,16 +722,7 @@ export namespace Result {
    * console.log(Result.unwrapOk(result2)); // 84
    * ```
    */
-  export function fold<R extends Base, S2, E2>(
-    result: R,
-    mapFn: (value: UnwrapOk<R>) => S2,
-    mapErrFn: (error: UnwrapErr<R>) => E2,
-  ): Result<S2, E2>;
-  export function fold<S, E, S2, E2>(
-    mapFn: (value: S) => S2,
-    mapErrFn: (error: E) => E2,
-  ): (result: Result<S, E>) => Result<S2, E2>;
-  export function fold<R extends Base, S2, E2>(
+  export const fold: FoldFnOverload = (<R extends Base, S2, E2>(
     ...args:
       | readonly [
           result: R,
@@ -479,28 +735,36 @@ export namespace Result {
         ]
   ):
     | Result<S2, E2>
-    | ((result: Result<UnwrapOk<R>, UnwrapErr<R>>) => Result<S2, E2>) {
-    if (args.length === 3) {
-      const [result, mapFn, mapErrFn] = args;
-      return isOk(result)
-        ? ok(
-            mapFn(
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-              result.value as UnwrapOk<R>,
-            ),
-          )
-        : err(
-            mapErrFn(
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-              result.value as UnwrapErr<R>,
-            ),
-          );
-    } else {
-      const [mapFn, mapErrFn] = args;
-      return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
-        isOk(result) ? ok(mapFn(result.value)) : err(mapErrFn(result.value));
+    | ((result: Result<UnwrapOk<R>, UnwrapErr<R>>) => Result<S2, E2>) => {
+    switch (args.length) {
+      case 3: {
+        const [result, mapFn, mapErrFn] = args;
+        return isOk(result)
+          ? ok(mapFn(result.value as UnwrapOk<R>))
+          : err(mapErrFn(result.value as UnwrapErr<R>));
+      }
+
+      case 2: {
+        const [mapFn, mapErrFn] = args;
+        return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
+          isOk(result) ? ok(mapFn(result.value)) : err(mapErrFn(result.value));
+      }
     }
-  }
+  }) as FoldFnOverload;
+
+  type FoldFnOverload = {
+    <R extends Base, S2, E2>(
+      result: R,
+      mapFn: (value: UnwrapOk<R>) => S2,
+      mapErrFn: (error: UnwrapErr<R>) => E2,
+    ): Result<S2, E2>;
+
+    // Curried version
+    <S, E, S2, E2>(
+      mapFn: (value: S) => S2,
+      mapErrFn: (error: E) => E2,
+    ): (result: Result<S, E>) => Result<S2, E2>;
+  };
 
   /**
    * Applies a function that returns a `Result` to the success value of a `Result`.
@@ -527,35 +791,40 @@ export namespace Result {
    * console.log(Result.unwrapOk(result2)); // 5
    * ```
    */
-  export function flatMap<R extends Base, S2, E2>(
-    result: R,
-    flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>,
-  ): Result<S2, E2 | UnwrapErr<R>>;
-  export function flatMap<S, S2, E2>(
-    flatMapFn: (value: S) => Result<S2, E2>,
-  ): <E>(result: Result<S, E>) => Result<S2, E | E2>;
-  export function flatMap<R extends Base, S2, E2>(
+  export const flatMap: FlatMapFnOverload = (<R extends Base, S2, E2>(
     ...args:
       | readonly [result: R, flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>]
       | readonly [flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>]
   ):
     | Result<S2, E2 | UnwrapErr<R>>
-    | (<E>(result: Result<UnwrapOk<R>, E>) => Result<S2, E | E2>) {
-    if (args.length === 2) {
-      const [result, flatMapFn] = args;
-      return isErr(result)
-        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          (result as Err<UnwrapErr<R>>)
-        : flatMapFn(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            result.value as UnwrapOk<R>,
-          );
-    } else {
-      const [flatMapFn] = args;
-      return <E,>(result: Result<UnwrapOk<R>, E>) =>
-        isErr(result) ? result : flatMapFn(result.value);
+    | (<E>(result: Result<UnwrapOk<R>, E>) => Result<S2, E | E2>) => {
+    switch (args.length) {
+      case 2: {
+        const [result, flatMapFn] = args;
+        return isErr(result)
+          ? (result as Err<UnwrapErr<R>>)
+          : flatMapFn(result.value as UnwrapOk<R>);
+      }
+
+      case 1: {
+        const [flatMapFn] = args;
+        return <E,>(result: Result<UnwrapOk<R>, E>) =>
+          isErr(result) ? result : flatMapFn(result.value);
+      }
     }
-  }
+  }) as FlatMapFnOverload;
+
+  type FlatMapFnOverload = {
+    <R extends Base, S2, E2>(
+      result: R,
+      flatMapFn: (value: UnwrapOk<R>) => Result<S2, E2>,
+    ): Result<S2, E2 | UnwrapErr<R>>;
+
+    // Curried version
+    <S, S2, E2>(
+      flatMapFn: (value: S) => Result<S2, E2>,
+    ): <E>(result: Result<S, E>) => Result<S2, E | E2>;
+  };
 
   /**
    * Unwraps a `Result`, returning the success value or throwing an error with the provided message.
@@ -577,33 +846,35 @@ export namespace Result {
    * console.log(value2); // 42
    * ```
    */
-  export function expectToBe<R extends Base>(
-    result: R,
-    message: string,
-  ): UnwrapOk<R>;
-  export function expectToBe<S>(
-    message: string,
-  ): <E>(result: Result<S, E>) => S;
-  export function expectToBe<R extends Base>(
+  export const expectToBe: ExpectToBeFnOverload = (<R extends Base>(
     ...args: readonly [result: R, message: string] | readonly [message: string]
-  ): UnwrapOk<R> | (<E>(result: Result<UnwrapOk<R>, E>) => UnwrapOk<R>) {
-    if (args.length === 2) {
-      const [result, message] = args;
-      if (isErr(result)) {
+  ): UnwrapOk<R> | (<E>(result: Result<UnwrapOk<R>, E>) => UnwrapOk<R>) => {
+    switch (args.length) {
+      case 2: {
+        // Direct version: first argument is result
+        const [result, message] = args;
+        if (isOk(result)) {
+          return unwrapOk(result);
+        }
+
         throw new Error(message);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-      return result.value as UnwrapOk<R>;
-    } else {
-      const [message] = args;
-      return <E,>(result: Result<UnwrapOk<R>, E>): UnwrapOk<R> => {
-        if (isErr(result)) {
-          throw new Error(message);
-        }
-        return result.value;
-      };
+
+      case 1: {
+        // Curried version: first argument is message
+        const [message] = args;
+        return <E,>(result: Result<UnwrapOk<R>, E>): UnwrapOk<R> =>
+          expectToBe(result, message);
+      }
     }
-  }
+  }) as ExpectToBeFnOverload;
+
+  type ExpectToBeFnOverload = {
+    <R extends Base>(result: R, message: string): UnwrapOk<R>;
+
+    // Curried version
+    <S>(message: string): <E>(result: Result<S, E>) => S;
+  };
 
   /**
    * @internal
@@ -627,43 +898,65 @@ export namespace Result {
   export const fromPromise = <P extends Promise<unknown>>(
     promise: P,
   ): Promise<Result<UnwrapPromise<P>, unknown>> =>
-    promise
-      .then(
-        (v) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          ok(v) as Ok<UnwrapPromise<P>>,
-      )
-      .catch(err);
+    promise.then((v) => ok(v) as Ok<UnwrapPromise<P>>).catch(err);
 
   /**
    * Wraps a function that may throw an exception in a `Result`.
+   *
+   * This is a fundamental utility for converting traditional exception-based error
+   * handling into Result-based error handling. Any thrown value is converted to an
+   * Error object for consistent error handling.
+   *
    * If the function executes successfully, returns `Result.Ok` with the result.
    * If the function throws, returns `Result.Err` with the caught error.
+   *
    * @template T The return type of the function.
    * @param fn The function to execute that may throw.
    * @returns A `Result<T, Error>` containing either the successful result or the caught error.
    * @example
    * ```typescript
    * // Wrapping JSON.parse which can throw
-   * const parseJson = (text: string) =>
-   *   Result.fromThrowable(() => JSON.parse(text));
+   * const parseJson = <T>(text: string): Result<T, Error> =>
+   *   Result.fromThrowable(() => JSON.parse(text) as T);
    *
-   * const validJson = parseJson('{"valid": true}');
-   * console.log(Result.isOk(validJson)); // true
+   * const validJson = parseJson<{valid: boolean}>('{"valid": true}');
+   * if (Result.isOk(validJson)) {
+   *   console.log(validJson.value.valid); // true
+   * }
    *
    * const invalidJson = parseJson('{invalid json}');
-   * console.log(Result.isErr(invalidJson)); // true
+   * if (Result.isErr(invalidJson)) {
+   *   console.log(invalidJson.value.message); // SyntaxError message
+   * }
    *
-   * // Using with number conversion
-   * const parseNumber = (str: string) =>
+   * // Using with custom validation
+   * const parsePositiveNumber = (str: string): Result<number, Error> =>
    *   Result.fromThrowable(() => {
    *     const num = Number(str);
-   *     if (Number.isNaN(num)) throw new Error('Not a number');
+   *     if (Number.isNaN(num)) throw new Error(`Not a number: ${str}`);
+   *     if (num <= 0) throw new Error(`Must be positive: ${num}`);
    *     return num;
    *   });
    *
-   * const result = parseNumber('42').unwrapOr(0); // 42
-   * const fallback = parseNumber('abc').unwrapOr(0); // 0
+   * const success = parsePositiveNumber('42');
+   * console.log(Result.unwrapOkOr(success, 0)); // 42
+   *
+   * const failure = parsePositiveNumber('abc');
+   * console.log(Result.unwrapOkOr(failure, 0)); // 0
+   *
+   * // Wrapping DOM operations that might fail
+   * const getElementText = (id: string): Result<string, Error> =>
+   *   Result.fromThrowable(() => {
+   *     const element = document.getElementById(id);
+   *     if (!element) throw new Error(`Element not found: ${id}`);
+   *     return element.textContent || "";
+   *   });
+   *
+   * // Wrapping file operations
+   * const readFileSync = (path: string): Result<string, Error> =>
+   *   Result.fromThrowable(() =>
+   *     require('fs').readFileSync(path, 'utf8')
+   *   );
    * ```
    */
   export const fromThrowable = <T,>(fn: () => T): Result<T, Error> => {
@@ -698,31 +991,55 @@ export namespace Result {
   export const swap = <R extends Base>(
     result: R,
   ): Result<UnwrapErr<R>, UnwrapOk<R>> =>
-    isOk(result)
-      ? err(unwrapOk(result))
-      : ok(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          result.value as UnwrapErr<R>,
-        );
+    isOk(result) ? err(unwrapOk(result)) : ok(result.value as UnwrapErr<R>);
 
   /**
    * Converts a `Result` to an `Optional`.
+   *
+   * This conversion is useful when you want to discard error information and only
+   * care about whether an operation succeeded. The error information is lost in
+   * this conversion, so use it when error details are not needed.
+   *
    * If the `Result` is `Ok`, returns `Some` with the value.
    * If the `Result` is `Err`, returns `None`.
-   * Note: This is implemented as a type-only conversion without runtime imports
-   * to avoid circular dependencies.
+   *
    * @template R The input `Result.Base` type.
    * @param result The `Result` to convert.
-   * @returns An object compatible with `Optional` containing the success value or representing `None`.
+   * @returns An `Optional<UnwrapOk<R>>` containing the success value or representing `None`.
    * @example
    * ```typescript
+   * // Basic conversion
    * const okResult = Result.ok(42);
    * const optional = Result.toOptional(okResult);
-   * // optional can be used with Optional functions after importing Optional
+   * console.log(Optional.isSome(optional)); // true
+   * console.log(Optional.unwrap(optional)); // 42
    *
-   * const errResult = Result.err("error");
+   * const errResult = Result.err("Network error");
    * const none = Result.toOptional(errResult);
-   * // none represents Optional.none
+   * console.log(Optional.isNone(none)); // true
+   *
+   * // Use case: when you only care about success, not error details
+   * const fetchUserName = (id: number): Result<string, ApiError> => {
+   *   // ... implementation
+   * };
+   *
+   * const maybeUserName = Result.toOptional(fetchUserName(123));
+   * const displayName = Optional.unwrapOr(maybeUserName, "Unknown User");
+   *
+   * // Converting multiple Results and filtering successes
+   * const userIds = [1, 2, 3, 4];
+   * const userNames = userIds
+   *   .map(fetchUserName)
+   *   .map(Result.toOptional)
+   *   .filter(Optional.isSome)
+   *   .map(Optional.unwrap); // string[]
+   *
+   * // Chaining with Optional operations
+   * const processResult = (r: Result<string, Error>) =>
+   *   pipe(Result.toOptional(r))
+   *     .map(Optional.map(s => s.toUpperCase()))
+   *     .map(Optional.filter(s => s.length > 0))
+   *     .value;
    * ```
    */
   export const toOptional = <R extends Base>(
@@ -750,30 +1067,39 @@ export namespace Result {
    * console.log(Result.unwrapOk(result2)); // "fallback"
    * ```
    */
-  export function orElse<R extends Base, R2 extends Base>(
-    result: R,
-    alternative: R2,
-  ): NarrowToOk<R> | R2;
-  export function orElse<S, E, S2, E2>(
-    alternative: Result<S2, E2>,
-  ): (result: Result<S, E>) => Result<S, E> | Result<S2, E2>;
-  export function orElse<R extends Base, R2 extends Base>(
+  export const orElse: OrElseFnOverload = (<R extends Base, R2 extends Base>(
     ...args: readonly [result: R, alternative: R2] | readonly [alternative: R2]
   ):
-    | NarrowToOk<R>
-    | R2
+    | (NarrowToOk<R> | R2)
     | ((
         result: Result<UnwrapOk<R>, UnwrapErr<R>>,
-      ) => Result<UnwrapOk<R>, UnwrapErr<R>> | R2) {
-    if (args.length === 2) {
-      const [result, alternative] = args;
-      return isOk(result) ? result : alternative;
-    } else {
-      const [alternative] = args;
-      return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
-        isOk(result) ? result : alternative;
+      ) => Result<UnwrapOk<R>, UnwrapErr<R>> | R2) => {
+    switch (args.length) {
+      case 2: {
+        const [result, alternative] = args;
+        return isOk(result) ? result : alternative;
+      }
+
+      case 1: {
+        // Curried version: one argument (alternative) provided
+        const [alternative] = args;
+        return (result: Result<UnwrapOk<R>, UnwrapErr<R>>) =>
+          orElse(result, alternative);
+      }
     }
-  }
+  }) as OrElseFnOverload;
+
+  type OrElseFnOverload = {
+    <R extends Base, R2 extends Base>(
+      result: R,
+      alternative: R2,
+    ): NarrowToOk<R> | R2;
+
+    // Curried version
+    <S, E, S2, E2>(
+      alternative: Result<S2, E2>,
+    ): (result: Result<S, E>) => Result<S, E> | Result<S2, E2>;
+  };
 
   /**
    * Combines two `Result` values into a single `Result` containing a tuple.

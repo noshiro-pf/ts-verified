@@ -4,6 +4,7 @@
   "words": [
     "bivariant",
     "contravariance",
+    "darkred",
     "foldl",
     "foldr",
     "funcs",
@@ -11,10 +12,15 @@
     "LEQC",
     "NAND",
     "noshiro",
+    "nums",
+    "strs",
     "testw",
     "tscw",
+    "unmemoized",
     "unshift",
     "unshifted",
+    "Unstringifiable",
+    "uppercased",
     "XNOR"
   ],
   "flagWords": [],

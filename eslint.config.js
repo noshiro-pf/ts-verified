@@ -678,7 +678,7 @@ export default tseslint.config(
       '@typescript-eslint/switch-exhaustiveness-check': [
         'error',
         {
-          allowDefaultCaseForExhaustiveSwitch: true,
+          allowDefaultCaseForExhaustiveSwitch: false,
           requireDefaultForNonUnion: true,
         },
       ],

@@ -16,10 +16,29 @@
 
 > **IMapMapped**\<`K`, `V`, `KM`\> = `Iterable`\<readonly \[`K`, `V`\]\> & `IMapMappedInterface`\<`K`, `V`, `KM`\>
 
-Defined in: [src/collections/imap-mapped.mts:240](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap-mapped.mts#L240)
+Defined in: [src/collections/imap-mapped.mts:300](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/imap-mapped.mts#L300)
 
-Represents an immutable map where keys of type `K` are mapped to an underlying `MapKeyType` `KM`.
-It is iterable and provides various methods for manipulation and querying.
+Represents an immutable map with custom key transformation and high-performance operations.
+
+IMapMapped is a specialized persistent data structure that enables using complex objects as map keys
+while maintaining the performance benefits of JavaScript's native Map. It achieves this by requiring
+bidirectional transformation functions that convert between your custom key type and a primitive type
+that can be efficiently stored and compared.
+
+**Key Features:**
+
+- **Complex Keys**: Use objects, arrays, or any custom type as map keys
+- **High Performance**: O(1) operations through efficient key transformation
+- **Immutable**: All mutation operations return new instances
+- **Type Safe**: Full TypeScript support with compile-time key/value type checking
+- **Bidirectional**: Maintains ability to reconstruct original keys from mapped keys
+
+**Use Cases:**
+
+- Maps with composite keys (e.g., coordinates, user IDs with metadata)
+- Caching with complex cache keys
+- State management where entities have multi-part identifiers
+- Performance-critical maps with non-primitive keys
 
 #### Type Parameters
 
@@ -27,7 +46,7 @@ It is iterable and provides various methods for manipulation and querying.
 
 `K`
 
-The type of the keys in the map.
+The type of the custom keys in the map.
 
 ##### V
 
@@ -39,39 +58,75 @@ The type of the values in the map.
 
 `KM` _extends_ `MapSetKeyType`
 
-The type of the mapped keys (number or string).
+The type of the mapped primitive keys (string, number, etc.).
 
 #### Example
 
 ```typescript
-// Define a custom key type and its mapping functions
-type MyKey = { id: number; category: string };
-const toKey = (key: MyKey): string => `${key.category}_${key.id}`;
-const fromKey = (km: string): MyKey => {
-    const [category, idStr] = km.split('_');
-    return { id: Number(idStr), category };
+// Example: Product catalog with composite keys
+type ProductKey = { brand: string; model: string; year: number };
+type Product = { name: string; price: number; inStock: boolean };
+
+// Define bidirectional transformation functions
+const productKeyToString = (key: ProductKey): string =>
+    `${key.brand}|${key.model}|${key.year}`;
+
+const stringToProductKey = (str: string): ProductKey => {
+    const [brand, model, yearStr] = str.split('|');
+    return { brand, model, year: Number(yearStr) };
 };
 
-// Create an IMapMapped instance
-let map: IMapMapped<MyKey, string, string> = IMapMapped.create<
-    MyKey,
-    string,
-    string
->([], toKey, fromKey);
+// Create a map with complex keys
+let catalog = IMapMapped.create<ProductKey, Product, string>(
+    [],
+    productKeyToString,
+    stringToProductKey,
+);
 
-const key1: MyKey = { id: 1, category: 'A' };
-const key2: MyKey = { id: 2, category: 'B' };
+// Use complex objects as keys naturally
+const toyotaCamry2023: ProductKey = {
+    brand: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+};
+const hondaAccord2022: ProductKey = {
+    brand: 'Honda',
+    model: 'Accord',
+    year: 2022,
+};
 
-map = map.set(key1, 'Value for A1');
-map = map.set(key2, 'Value for B2');
+catalog = catalog
+    .set(toyotaCamry2023, {
+        name: 'Toyota Camry 2023',
+        price: 28000,
+        inStock: true,
+    })
+    .set(hondaAccord2022, {
+        name: 'Honda Accord 2022',
+        price: 26500,
+        inStock: false,
+    });
 
-console.log(map.get(key1).unwrapOr('Not found')); // Output: Value for A1
-console.log(map.size); // Output: 2
+// All operations work with the original key type
+console.log(catalog.get(toyotaCamry2023).unwrapOr(notFound).name);
+// Output: "Toyota Camry 2023"
 
-for (const [key, value] of map) {
-    console.log(`Key: ${toKey(key)}, Value: ${value}`);
+console.log(catalog.has(hondaAccord2022)); // Output: true
+console.log(catalog.size); // Output: 2
+
+// Iteration preserves original key types
+for (const [productKey, product] of catalog) {
+    console.log(
+        `${productKey.brand} ${productKey.model} (${productKey.year}): $${product.price}`,
+    );
 }
 // Output:
-// Key: A_1, Value: Value for A1
-// Key: B_2, Value: Value for B2
+// Toyota Camry (2023): $28000
+// Honda Accord (2022): $26500
+
+// Functional transformations work seamlessly
+const discountedCatalog = catalog.map((product, key) => ({
+    ...product,
+    price: Math.round(product.price * 0.9), // 10% discount
+}));
 ```

@@ -20,6 +20,7 @@ describe('Num', () => {
     testClamp([0, 2], Number.NaN, 0);
 
     test('should support regular usage with three parameters', () => {
+      expectTypeOf(Num.clamp(15, 0, 10)).toEqualTypeOf<number>();
       expect(Num.clamp(15, 0, 10)).toBe(10);
       expect(Num.clamp(-5, 0, 10)).toBe(0);
       expect(Num.clamp(5, 0, 10)).toBe(5);
@@ -41,6 +42,8 @@ describe('Num', () => {
 
     test('should handle edge cases in curried form', () => {
       const clampTo5_15 = Num.clamp(5, 15);
+
+      expectType<typeof clampTo5_15, (target: number) => number>('=');
 
       // Invalid (non-finite) values return the lower bound
       expect(clampTo5_15(Number.POSITIVE_INFINITY)).toBe(5);

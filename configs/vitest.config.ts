@@ -16,7 +16,7 @@ export default defineConfig({
     hideSkippedTests: true,
     coverage: {
       provider: 'v8',
-      reporter: ['html'],
+      reporter: ['html', 'lcov', 'text'],
       include: ['src/**'],
     },
   },

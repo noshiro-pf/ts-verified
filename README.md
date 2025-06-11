@@ -1,5 +1,10 @@
 # ts-verified
 
+[![npm version](https://img.shields.io/npm/v/ts-verified.svg)](https://www.npmjs.com/package/ts-verified)
+[![npm downloads](https://img.shields.io/npm/dm/ts-verified.svg)](https://www.npmjs.com/package/ts-verified)
+[![License](https://img.shields.io/npm/l/ts-verified.svg)](./LICENSE)
+[![codecov](https://codecov.io/gh/noshiro-pf/ts-verified/graph/badge.svg?token=H01WAPIFKG)](https://codecov.io/gh/noshiro-pf/ts-verified)
+
 `ts-verified` is a TypeScript library providing a collection of type-safe utilities and verification tools. It aims to enhance development robustness, maintainability, and correctness by leveraging TypeScript's powerful type system.
 
 ## Features

@@ -14,5 +14,10 @@ export default defineConfig({
     passWithNoTests: true,
     restoreMocks: true,
     hideSkippedTests: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['html', 'lcov', 'text'],
+      include: ['src/**'],
+    },
   },
 });

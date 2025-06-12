@@ -59,7 +59,25 @@ const banTypes = {
 };
 
 const restrictedImportsOption = {
-  paths: [],
+  patterns: [
+    {
+      group: ['vitest'],
+      importNames: ['describe', 'expect', 'it'],
+      message: 'Use globals instead.',
+    },
+    {
+      group: ['src/**'],
+      message: 'Use relative import instead.',
+    },
+    {
+      group: ['**/../index.mjs'],
+      message: "Don't import from index.mjs.",
+    },
+    {
+      group: ['**/../index.mjs'],
+      message: "Don't import from index.mjs.",
+    },
+  ],
 };
 
 export default tseslint.config(

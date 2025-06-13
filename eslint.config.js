@@ -73,10 +73,6 @@ const restrictedImportsOption = {
       group: ['**/../index.mjs'],
       message: "Don't import from index.mjs.",
     },
-    {
-      group: ['**/../index.mjs'],
-      message: "Don't import from index.mjs.",
-    },
   ],
 };
 

@@ -264,6 +264,8 @@ const unsigned = asUint(42); // Uint - non-negative integer
 const finite = asFiniteNumber(3.14); // FiniteNumber - finite floating-point
 const safeInt = asSafeInt(42); // SafeInt - integer in safe range
 
+const nonInteger = asInt(3.14); // This line causes a runtime error
+
 // Range-constrained types (16-bit, 32-bit)
 const int16 = asInt16(1000); // Int16: [-32768, 32767]
 const uint32 = asUint32(3000000000); // Uint32: [0, 4294967295]
@@ -341,21 +343,21 @@ console.log(mapWithTwo.get('one')); // Optional.some(1)
 console.log(mapWithTwo.has('three')); // false
 
 // Using pipe for fluent updates
-const updatedMap = pipe(IMap.create<string, number>([]))
-    .map((map) => map.set('one', 1))
-    .map((map) => map.set('two', 2))
-    .map((map) => map.set('three', 3)).value;
+const idMap = pipe(Arr.seq(10))
+    .map(Arr.map<number>(i => [i, i.toString()])
+     .map(Arr.skip(1)) // [ [1, "1"], ..., [9, "9"]]
+    .map(IMap.create<number, string>).value;
 
-console.log(updatedMap.size); // 3
+console.log(idMap.size); // 9
 
 // Efficient batch updates with withMutations
-const largeMap = IMap.create<string, number>([]).withMutations([
-    { type: 'set', key: 'key1', value: 1 },
-    { type: 'set', key: 'key2', value: 2 },
-    { type: 'set', key: 'key3', value: 3 },
+const idMapUpdated = idMap.withMutations([
+    { type: 'set', key: 99, value: "99" },
+    { type: 'update', key: 5, value: "five" },
+    { type: 'delete', key: 4 },
 ]);
 
-console.log(largeMap.size); // 3
+console.log(idMapUpdated.size); // 9
 
 // ISet usage
 const originalSet = ISet.create<number>([]);

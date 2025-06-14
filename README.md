@@ -74,7 +74,7 @@ Essential FP utilities for cleaner, more reliable code.
 
 Runtime type checking with TypeScript integration.
 
-- **Type Checks** - `isString`, `isNumber`, `isNonNulish`, etc.
+- **Type Checks** - `isString`, `isNumber`, `isNonNullish`, etc.
 - **Object Guards** - `isRecord`, `isNonNullObject`, `hasKey`
 - **Utility Guards** - `isNonEmptyString`, `isPrimitive`
 
@@ -101,6 +101,7 @@ Immutable data structures for safer state management.
 - **ISet** - Immutable Set implementation
 
 And mutable Queue/Stack implementation
+
 - **Queue** - FIFO queue with O(1) operations
 - **Stack** - LIFO stack implementation
 
@@ -138,7 +139,7 @@ expectType<{ x: number }, { x: number }>('=');
 // The following would cause a compile-time error:
 // expectType<User, Admin>("="); // Error: Type 'User' is not strictly equal to type 'Admin'.
 
-expectType<User, any>("!="); // Error: Comparisons with `any` are also strictly checked.
+expectType<User, any>('!='); // Error: Comparisons with `any` are also strictly checked.
 ```
 
 ### 2. Functional Programming with `Optional`, `Result`, `pipe`, and `match`

@@ -41,7 +41,7 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
 
   expectType<
     HasKeyReturnType<
-      | MutableRecord<string, number>
+      | ReadonlyRecord<string, number>
       | Readonly<{ a: 0 }>
       | Readonly<{ a: 1; b: 1 }>
       | Readonly<{ b: 2 }>,
@@ -49,12 +49,12 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
     >,
     | Readonly<{ a: 0 }>
     | Readonly<{ a: 1; b: 1 }>
-    | (MutableRecord<'a', number> & MutableRecord<string, number>)
+    | (ReadonlyRecord<'a', number> & ReadonlyRecord<string, number>)
   >('=');
 
   expectType<
-    HasKeyReturnType<MutableRecord<string, unknown>, 'a'>,
-    MutableRecord<'a', unknown> & MutableRecord<string, unknown>
+    HasKeyReturnType<ReadonlyRecord<string, unknown>, 'a'>,
+    ReadonlyRecord<'a', unknown> & ReadonlyRecord<string, unknown>
   >('=');
 }
 
@@ -93,7 +93,7 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
 
 {
   type R =
-    | MutableRecord<string, number>
+    | ReadonlyRecord<string, number>
     | Readonly<{ a: 0 }>
     | Readonly<{ a: 1; b: 1 }>
     | Readonly<{ b: 2 }>;
@@ -101,7 +101,13 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const obj: R = { a: 0 } as R;
 
-  expectType<R, MutableRecord<string, number>>('!=');
+  expectType<
+    R,
+    | ReadonlyRecord<string, number>
+    | Readonly<{ a: 0 }>
+    | Readonly<{ a: 1; b: 1 }>
+    | Readonly<{ b: 2 }>
+  >('=');
 
   if (hasKey(obj, 'a')) {
     expectType<typeof obj.a, number>('=');
@@ -110,7 +116,7 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
       typeof obj,
       | Readonly<{ a: 0 }>
       | Readonly<{ a: 1; b: 1 }>
-      | (MutableRecord<'a', number> & MutableRecord<string, number>)
+      | (ReadonlyRecord<'a', number> & ReadonlyRecord<string, number>)
     >('=');
   }
 
@@ -120,21 +126,21 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
     expectType<
       typeof obj,
       | Readonly<{ a: 1; b: 1 }>
-      | (MutableRecord<'a', number> &
-          MutableRecord<'b', number> &
-          MutableRecord<string, number>)
+      | (ReadonlyRecord<'a', number> &
+          ReadonlyRecord<'b', number> &
+          ReadonlyRecord<string, number>)
     >('=');
   }
 }
 
 {
-  const o: MutableRecord<string, unknown> = { a: 0, b: 1 };
+  const o: ReadonlyRecord<string, unknown> = { a: 0, b: 1 };
 
   if (hasKey(o, 'a')) {
     expectType<typeof o.a, unknown>('=');
     expectType<
       typeof o,
-      MutableRecord<'a', unknown> & MutableRecord<string, unknown>
+      ReadonlyRecord<'a', unknown> & ReadonlyRecord<string, unknown>
     >('=');
   }
 
@@ -142,7 +148,7 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
     expectType<typeof o.c, unknown>('=');
     expectType<
       typeof o,
-      MutableRecord<'c', unknown> & MutableRecord<string, unknown>
+      ReadonlyRecord<'c', unknown> & ReadonlyRecord<string, unknown>
     >('=');
   }
 
@@ -151,9 +157,9 @@ import { hasKey, type HasKeyReturnType } from './has-key.mjs';
     expectType<typeof o.b, unknown>('=');
     expectType<
       typeof o,
-      MutableRecord<'a', unknown> &
-        MutableRecord<'b', unknown> &
-        MutableRecord<string, unknown>
+      ReadonlyRecord<'a', unknown> &
+        ReadonlyRecord<'b', unknown> &
+        ReadonlyRecord<string, unknown>
     >('=');
   }
 

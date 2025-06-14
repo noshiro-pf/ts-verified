@@ -35,6 +35,18 @@ describe('SafeInt', () => {
       expect(asSafeInt(Number.MAX_SAFE_INTEGER)).toBe(Number.MAX_SAFE_INTEGER);
       expect(asSafeInt(Number.MIN_SAFE_INTEGER)).toBe(Number.MIN_SAFE_INTEGER);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+    ] as const)(`asSafeInt($name) should throw a TypeError`, ({ value }) => {
+      expect(() => asSafeInt(value)).toThrow(
+        new TypeError(`Expected a safe integer, got: ${value}`),
+      );
+    });
   });
 
   describe('SafeInt.is', () => {
@@ -151,10 +163,8 @@ describe('SafeInt', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<SafeInt, number>('<=');
-      expectType<number, SafeInt>('>=');
 
-      const _value = asSafeInt(5);
-      expectType<typeof _value, SafeInt>('<=');
+      expectTypeOf(asSafeInt(5)).toExtend<SafeInt>();
     });
   });
 });

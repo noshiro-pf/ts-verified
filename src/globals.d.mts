@@ -6,7 +6,7 @@ type PositiveSmallInt = SmallInt<'>0'>;
 /**
  * Represents the type of keys that can be used in a standard JavaScript Map.
  */
-type MapSetKeyType = number | string;
+type MapSetKeyType = Primitive;
 
 // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array/length
 // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/length

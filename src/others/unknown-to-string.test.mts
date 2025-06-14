@@ -100,7 +100,7 @@ describe('unknownToString', () => {
     const result = unknownToString(circular);
     expect(Result.isErr(result)).toBe(true);
     if (Result.isErr(result)) {
-      expect(result.value).toContain('circular');
+      expect(result.value.message).toContain('circular');
     }
   });
 

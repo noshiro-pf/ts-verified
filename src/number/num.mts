@@ -1,8 +1,38 @@
 import { expectType } from '../expect-type.mjs';
 
 /**
- * A collection of number utility functions.
- * Provides functions for number conversion, range checking, clamping, arithmetic operations, rounding, and type guards for numbers.
+ * Namespace providing utility functions for number manipulation and validation.
+ *
+ * This namespace offers a comprehensive set of type-safe number utilities including:
+ * - Type conversion and validation
+ * - Type guards for numeric constraints (non-zero, non-negative, positive)
+ * - Range checking and clamping operations
+ * - Mathematical operations with type safety
+ * - Rounding utilities
+ *
+ * Many functions in this namespace leverage TypeScript's type system to provide
+ * compile-time guarantees about numeric constraints.
+ *
+ * @example
+ * ```typescript
+ * // Type conversion
+ * const num = Num.from('123.45'); // 123.45
+ * const invalid = Num.from('abc'); // NaN
+ *
+ * // Type guards
+ * const value = 5;
+ * if (Num.isPositive(value)) {
+ *   // value is typed as PositiveNumber & 5
+ * }
+ *
+ * // Range checking
+ * const isValid = Num.isInRange(0, 100)(50); // true
+ *
+ * // Clamping
+ * const clamped = Num.clamp(150, 0, 100); // 100
+ * const clampFn = Num.clamp(0, 100);
+ * const result = clampFn(150); // 100
+ * ```
  */
 export namespace Num {
   /**
@@ -21,11 +51,30 @@ export namespace Num {
   export const from: (n: unknown) => number = Number;
 
   /**
-   * Checks if a number is non-zero.
-   * Acts as a type guard.
-   * @template N The type of the number.
-   * @param num The number to check.
-   * @returns `true` if `a` is not zero, `false` otherwise.
+   * Type guard that checks if a number is non-zero.
+   *
+   * When this function returns `true`, TypeScript narrows the type to exclude zero,
+   * providing compile-time safety for division operations and other calculations
+   * that require non-zero values.
+   *
+   * @template N - The numeric literal type or number type to check
+   * @param num - The number to check
+   * @returns `true` if the number is not zero, `false` otherwise
+   *
+   * @example
+   * ```typescript
+   * const value = 5;
+   * if (Num.isNonZero(value)) {
+   *   // value is typed as NonZeroNumber & 5
+   *   const result = 10 / value; // Safe division
+   * }
+   *
+   * // Works with numeric literals
+   * const literal = 0 as 0 | 1 | 2;
+   * if (Num.isNonZero(literal)) {
+   *   // literal is typed as 1 | 2
+   * }
+   * ```
    */
   export const isNonZero = <N extends number>(
     num: N,
@@ -34,11 +83,30 @@ export namespace Num {
   expectType<NonZeroNumber & RelaxedExclude<123, 0>, UnknownBrand>('<=');
 
   /**
-   * Checks if a number is non-negative (i.e., >= 0).
-   * Acts as a type guard.
-   * @template N The type of the number.
-   * @param num The number to check.
-   * @returns `true` if `a` is non-negative, `false` otherwise.
+   * Type guard that checks if a number is non-negative (greater than or equal to zero).
+   *
+   * When this function returns `true`, TypeScript narrows the type to exclude negative
+   * values, which is useful for operations that require non-negative inputs like
+   * array indices or measurements.
+   *
+   * @template N - The numeric literal type or number type to check
+   * @param num - The number to check
+   * @returns `true` if the number is >= 0, `false` otherwise
+   *
+   * @example
+   * ```typescript
+   * const value = 10;
+   * if (Num.isNonNegative(value)) {
+   *   // value is typed as NonNegativeNumber & 10
+   *   const arr = new Array(value); // Safe array creation
+   * }
+   *
+   * // Type narrowing with unions
+   * const index = -1 as -1 | 0 | 1;
+   * if (Num.isNonNegative(index)) {
+   *   // index is typed as 0 | 1
+   * }
+   * ```
    */
   export const isNonNegative = <N extends number>(
     num: N,
@@ -46,11 +114,30 @@ export namespace Num {
     num >= 0;
 
   /**
-   * Checks if a number is positive (i.e., > 0).
-   * Acts as a type guard.
-   * @template N The type of the number.
-   * @param num The number to check.
-   * @returns `true` if `a` is positive, `false` otherwise.
+   * Type guard that checks if a number is positive (greater than zero).
+   *
+   * When this function returns `true`, TypeScript narrows the type to exclude zero
+   * and negative values. This is particularly useful for validating inputs that
+   * must be strictly positive, such as dimensions, counts, or rates.
+   *
+   * @template N - The numeric literal type or number type to check
+   * @param num - The number to check
+   * @returns `true` if the number is > 0, `false` otherwise
+   *
+   * @example
+   * ```typescript
+   * const count = 5;
+   * if (Num.isPositive(count)) {
+   *   // count is typed as PositiveNumber & 5
+   *   const average = total / count; // Safe division
+   * }
+   *
+   * // Type narrowing with numeric literals
+   * const value = 0 as -1 | 0 | 1 | 2;
+   * if (Num.isPositive(value)) {
+   *   // value is typed as 1 | 2
+   * }
+   * ```
    */
   export const isPositive = <N extends number>(
     num: N,
@@ -97,123 +184,259 @@ export namespace Num {
 
   /**
    * @internal
-   * Helper type for representing indices up to a `SmallUint`.
-   * `LEQ[N]` means "less than or equal to N".
-   * For example, `LEQ[3]` would be `0 | 1 | 2`. (Assuming `Index<N>` generates `0 | ... | N-1`)
-   * Actually, `Index<N>` is `0 | ... | N-1`. So `LEQ[N]` is `Index<N>`.
-   * This type maps each `SmallUint` `N` to `Index<N>` (i.e., integers from `0` to `N-1`).
-   * @template N A `SmallUint`.
+   * Helper type mapping each SmallUint N to the union of integers from 0 to N-1.
+   * Used internally for type-safe range operations.
+   *
+   * For example:
+   * - LT[3] = 0 | 1 | 2
+   * - LT[5] = 0 | 1 | 2 | 3 | 4
+   *
+   * @template N - A SmallUint representing the exclusive upper bound
    */
-  type LEQ = {
-    readonly [N in SmallUint]: Index<N>;
+  type LT = {
+    [N in SmallUint]: Index<N>;
   };
 
   /**
    * @internal
-   * Helper type for representing indices up to and including a `SmallUint`.
-   * `LEQC[N]` means "less than or equal to N, closed interval".
-   * For example, `LEQC[3]` would be `0 | 1 | 2 | 3`.
-   * This type maps each `SmallUint` `N` to `Index<N> | N` (i.e., integers from `0` to `N`).
-   * @template N A `SmallUint`.
+   * Helper type mapping each SmallUint N to the union of integers from 0 to N (inclusive).
+   * Used internally for type-safe range operations with inclusive upper bounds.
+   *
+   * For example:
+   * - LEQ[3] = 0 | 1 | 2 | 3
+   * - LEQ[5] = 0 | 1 | 2 | 3 | 4 | 5
+   *
+   * @template N - A SmallUint representing the inclusive upper bound
    */
-  type LEQC = {
-    readonly [N in SmallUint]: Index<N> | N;
+  type LEQ = {
+    [N in SmallUint]: Index<N> | N;
   };
 
   /**
-   * Checks if a number `x` is an unsigned integer within the range `lowerBound <= x < upperBound`.
-   * Acts as a type guard.
-   * @template L The lower bound type, a `SmallUint`.
-   * @template U The upper bound type, a `SmallUint`.
-   * @param lowerBound The lower bound (inclusive).
-   * @param upperBound The upper bound (exclusive).
-   * @returns A function that takes a number `x` and returns `true` if `x` is a safe integer in the range, `false` otherwise.
+   * Creates a type guard that checks if a number is an unsigned integer within a specified range.
+   *
+   * This function returns a predicate that validates whether a number is:
+   * - A safe integer (no floating point)
+   * - Within the range [lowerBound, upperBound)
+   *
+   * The returned type guard provides precise type narrowing when the bounds are
+   * SmallUint literals, making it ideal for array index validation.
+   *
+   * @template L - The lower bound as a SmallUint literal type
+   * @template U - The upper bound as a SmallUint literal type
+   * @param lowerBound - The minimum value (inclusive)
+   * @param upperBound - The maximum value (exclusive)
+   * @returns A type guard function that validates and narrows number types
+   *
    * @example
    * ```typescript
-   * const isIndex = Num.isUintInRange(0, 10);
-   * if (isIndex(5)) {
-   *   // x is typed as 5
-   *   console.log("Valid index");
+   * // Array index validation
+   * const isValidIndex = Num.isUintInRange(0, 10);
+   * const index: number = getUserInput();
+   *
+   * if (isValidIndex(index)) {
+   *   // index is typed as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+   *   const value = array[index]; // Safe array access
+   * }
+   *
+   * // Custom range validation
+   * const isValidPercentage = Num.isUintInRange(0, 101);
+   * if (isValidPercentage(value)) {
+   *   // value is typed as 0 | 1 | ... | 100
    * }
    * ```
    */
   export const isUintInRange =
     <L extends SmallUint, U extends SmallUint>(lowerBound: L, upperBound: U) =>
-    (x: number): x is RelaxedExclude<LEQ[U], LEQ[Min<L>]> =>
+    (x: number): x is RelaxedExclude<LT[U], LT[Min<L>]> =>
       Number.isSafeInteger(x) && lowerBound <= x && x < upperBound;
 
   /**
-   * Checks if a number `x` is an unsigned integer within the range `lowerBound <= x <= upperBound`.
-   * Acts as a type guard.
-   * @template L The lower bound type, a `SmallUint`.
-   * @template U The upper bound type, a `SmallUint`.
-   * @param lowerBound The lower bound (inclusive).
-   * @param upperBound The upper bound (inclusive).
-   * @returns A function that takes a number `x` and returns `true` if `x` is a safe integer in the range, `false` otherwise.
+   * Creates a type guard that checks if a number is an unsigned integer within a specified inclusive range.
+   *
+   * This function returns a predicate that validates whether a number is:
+   * - A safe integer (no floating point)
+   * - Within the range [lowerBound, upperBound] (both bounds inclusive)
+   *
+   * The returned type guard provides precise type narrowing when the bounds are
+   * SmallUint literals, useful for validating scores, percentages, or other bounded values.
+   *
+   * @template L - The lower bound as a SmallUint literal type
+   * @template U - The upper bound as a SmallUint literal type
+   * @param lowerBound - The minimum value (inclusive)
+   * @param upperBound - The maximum value (inclusive)
+   * @returns A type guard function that validates and narrows number types
+   *
    * @example
    * ```typescript
+   * // Score validation (0-100)
    * const isValidScore = Num.isUintInRangeInclusive(0, 100);
-   * if (isValidScore(85)) {
-   *   // x is typed as a number in range 0-100
-   *   console.log("Valid score");
+   * const score: number = getTestScore();
+   *
+   * if (isValidScore(score)) {
+   *   // score is typed as 0 | 1 | 2 | ... | 100
+   *   const grade = calculateGrade(score);
+   * }
+   *
+   * // Day of month validation
+   * const isValidDay = Num.isUintInRangeInclusive(1, 31);
+   * if (isValidDay(day)) {
+   *   // day is typed as 1 | 2 | ... | 31
    * }
    * ```
-   * @param lowerBound The lower bound (inclusive).
-   * @param upperBound The upper bound (inclusive).
-   * @returns A function that takes a number `x` and returns `true` if `x` is a safe integer in the range, `false` otherwise.
    */
   export const isUintInRangeInclusive =
     <L extends SmallUint, U extends SmallUint>(lowerBound: L, upperBound: U) =>
-    (x: number): x is RelaxedExclude<LEQC[U], LEQ[Min<L>]> =>
+    (x: number): x is RelaxedExclude<LEQ[U], LT[Min<L>]> =>
       Number.isSafeInteger(x) && lowerBound <= x && x <= upperBound;
 
   /**
    * Clamps a value within the given range. If the target value is invalid (not finite), returns the lower bound.
    *
+   * Provides two usage patterns for maximum flexibility:
+   * - **Direct usage**: Pass all three arguments to get the clamped value immediately
+   * - **Curried usage**: Pass bounds to get a reusable clamping function
+   *
    * @example
-   *   clamp(0, 2)(2.3); // 2
-   *   clamp(0, 2)(-0.5); // 0
-   *   clamp(0, 2)(1.5); // 1.5
-   * @template N The type of the numbers (lowerBound, upperBound, target).
-   * @param lowerBound The lower bound of the range.
-   * @param upperBound The upper bound of the range.
-   * @returns A function that takes a target number and returns the clamped value.
+   * Direct usage:
+   * ```typescript
+   * Num.clamp(15, 0, 10); // 10 (clamped to upper bound)
+   * Num.clamp(-5, 0, 10); // 0 (clamped to lower bound)
+   * Num.clamp(5, 0, 10);  // 5 (within bounds)
+   * Num.clamp(NaN, 0, 10); // 0 (invalid values default to lower bound)
+   * ```
+   *
+   * @example
+   * Curried usage for reusable functions:
+   * ```typescript
+   * const clampToPercent = Num.clamp(0, 100);
+   * clampToPercent(150); // 100
+   * clampToPercent(-10); // 0
+   * clampToPercent(75);  // 75
+   *
+   * // Perfect for pipe composition
+   * const result = pipe(userInput)
+   *   .map(Number)
+   *   .map(clampToPercent).value;
+   * ```
+   *
+   * @example
+   * Working with arrays and functional programming:
+   * ```typescript
+   * const clampTo0_1 = Num.clamp(0, 1);
+   * const normalizedValues = values.map(clampTo0_1);
+   *
+   * // Temperature clamping
+   * const clampTemperature = Num.clamp(-40, 50);
+   * const safeTemperatures = readings.map(clampTemperature);
+   * ```
    */
-  export const clamp =
-    (lowerBound: number, upperBound: number) =>
-    (target: number): number =>
-      !Number.isFinite(target)
-        ? lowerBound
-        : Math.max(lowerBound, Math.min(upperBound, target));
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+  export const clamp: ClampFnOverload = ((
+    ...args:
+      | readonly [target: number, lowerBound: number, upperBound: number]
+      | readonly [lowerBound: number, upperBound: number]
+  ) => {
+    switch (args.length) {
+      case 3: {
+        const [target, lowerBound, upperBound] = args;
+        return !Number.isFinite(target)
+          ? lowerBound
+          : Math.max(lowerBound, Math.min(upperBound, target));
+      }
+
+      case 2: {
+        const [lowerBound, upperBound] = args;
+        return (target: number): number =>
+          clamp(target, lowerBound, upperBound);
+      }
+    }
+  }) as ClampFnOverload;
+
+  type ClampFnOverload = {
+    (target: number, lowerBound: number, upperBound: number): number;
+
+    // Curried version
+    (lowerBound: number, upperBound: number): (target: number) => number;
+  };
 
   /**
-   * Performs division of two numbers.
-   * @param a The dividend.
-   * @param b The divisor. Must be non-zero (enforced at compile time).
-   * @returns The result of the division.
+   * Performs type-safe division with compile-time zero-check.
+   *
+   * This function leverages TypeScript's type system to prevent division by zero
+   * at compile time. The divisor must be typed as NonZeroNumber or a non-zero
+   * numeric literal.
+   *
+   * @param a - The dividend
+   * @param b - The divisor (must be non-zero, enforced by types)
+   * @returns The quotient of a / b
+   *
    * @example
    * ```typescript
-   * const result = Num.div(10, 2); // 5
-   * // Num.div(10, 0); // TypeScript error: Type '0' is not assignable
+   * // Safe division with literals
+   * const result1 = Num.div(10, 2); // 5
+   * const result2 = Num.div(7, 3); // 2.3333...
+   *
+   * // Compile-time error prevention
+   * // Num.div(10, 0); // ❌ TypeScript error: Type '0' is not assignable
+   *
+   * // With type guards
+   * const divisor: number = getDivisor();
+   * if (Num.isNonZero(divisor)) {
+   *   const result = Num.div(100, divisor); // ✅ Safe
+   * }
+   *
+   * // With branded types
+   * const nonZero = asNonZeroNumber(5);
+   * const result3 = Num.div(20, nonZero); // 4
    * ```
    */
   export const div = (a: number, b: NonZeroNumber | SmallInt<'!=0'>): number =>
     a / b;
 
   /**
-   * Performs integer division (Math.floor(a / b)).
-   * @param a The dividend.
-   * @param b The divisor. Must be non-zero.
-   * @returns The result of integer division. Returns `NaN` if `b` is zero.
+   * Performs integer division using floor division.
+   *
+   * Computes `⌊a / b⌋` by flooring both operands before division and then
+   * flooring the result. This ensures integer arithmetic semantics.
+   *
+   * Note: Unlike `div`, this function does not enforce non-zero divisor at
+   * compile time. Division by zero returns `NaN`.
+   *
+   * @param a - The dividend
+   * @param b - The divisor
+   * @returns The integer quotient, or `NaN` if b is zero
+   *
+   * @example
+   * ```typescript
+   * Num.divInt(10, 3);   // 3
+   * Num.divInt(10, -3);  // -4 (floor division)
+   * Num.divInt(-10, 3);  // -4
+   * Num.divInt(10.7, 3.2); // 3 (floors both inputs first)
+   * Num.divInt(10, 0);   // NaN
+   * ```
    */
   export const divInt = (a: number, b: number): number =>
     Math.floor(Math.floor(a) / Math.floor(b));
 
   /**
-   * Rounds a number to a specified number of decimal places (precision).
-   * @param num The number to round.
-   * @param precision The number of decimal places to round to.
-   * @returns The rounded number.
+   * Rounds a number to a specified number of decimal places.
+   *
+   * Uses the standard rounding algorithm (round half up) to round the number
+   * to the given precision. The precision must be a positive safe integer.
+   *
+   * @param num - The number to round
+   * @param precision - The number of decimal places (must be positive)
+   * @returns The rounded number
+   *
+   * @example
+   * ```typescript
+   * Num.roundAt(3.14159, 2);   // 3.14
+   * Num.roundAt(3.14159, 4);   // 3.1416
+   * Num.roundAt(10.5, 0);      // 11
+   * Num.roundAt(-10.5, 0);     // -10
+   * Num.roundAt(0.005, 2);     // 0.01
+   * ```
    */
   export const roundAt = (
     num: number,
@@ -225,18 +448,53 @@ export namespace Num {
   };
 
   /**
-   * Rounds a number to the nearest integer.
-   * Uses a bitwise OR for potentially faster rounding for positive numbers.
-   * @param num The number to round.
-   * @returns The nearest integer.
+   * Rounds a number to the nearest integer using bitwise operations.
+   *
+   * This function uses a bitwise OR trick for potentially faster rounding.
+   * Note: This implementation rounds half up for positive numbers but may
+   * behave differently for negative numbers compared to Math.round.
+   *
+   * @param num - The number to round
+   * @returns The rounded integer as an Int branded type
+   *
+   * @example
+   * ```typescript
+   * Num.roundToInt(3.2);   // 3
+   * Num.roundToInt(3.5);   // 4
+   * Num.roundToInt(3.8);   // 4
+   * Num.roundToInt(-3.2);  // -3
+   * Num.roundToInt(-3.8);  // -3
+   * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
   export const roundToInt = (num: number): Int => (0 | (num + 0.5)) as Int;
 
   /**
-   * Returns a function that rounds a number to a specified number of decimal places.
-   * @param digit The number of decimal places to round to.
-   * @returns A function that takes a target number and returns it rounded to `digit` decimal places.
+   * Creates a reusable rounding function with a fixed precision.
+   *
+   * This is a curried version of roundAt that returns a function configured
+   * to always round to the specified number of decimal places. Useful for
+   * creating consistent rounding behavior across multiple values.
+   *
+   * @param digit - The number of decimal places for rounding
+   * @returns A function that rounds numbers to the specified precision
+   *
+   * @example
+   * ```typescript
+   * // Create specialized rounding functions
+   * const roundTo2 = Num.round(2);
+   * const roundTo4 = Num.round(4);
+   *
+   * roundTo2(3.14159);  // 3.14
+   * roundTo2(2.71828);  // 2.72
+   * roundTo2(10);       // 10
+   *
+   * roundTo4(3.14159);  // 3.1416
+   *
+   * // Use with array operations
+   * const values = [1.234, 5.678, 9.012];
+   * const rounded = values.map(roundTo2); // [1.23, 5.68, 9.01]
+   * ```
    */
   export const round = (
     digit: PositiveSafeIntWithSmallInt,
@@ -247,10 +505,33 @@ export namespace Num {
   };
 
   /**
-   * Maps `NaN` to `undefined`, otherwise returns the original number.
-   * @template N The type of the number.
-   * @param num The number to check.
-   * @returns The original number if it's not `NaN`, otherwise `undefined`.
+   * Converts NaN values to undefined while preserving all other numbers.
+   *
+   * This function is useful for handling potentially invalid numeric operations
+   * in a type-safe way, converting NaN results to undefined for easier handling
+   * with optional chaining or nullish coalescing.
+   *
+   * @template N - The numeric type (literal or number)
+   * @param num - The number to check
+   * @returns The original number if not NaN, otherwise undefined
+   *
+   * @example
+   * ```typescript
+   * Num.mapNaN2Undefined(42);           // 42
+   * Num.mapNaN2Undefined(0);            // 0
+   * Num.mapNaN2Undefined(NaN);          // undefined
+   * Num.mapNaN2Undefined(Math.sqrt(-1)); // undefined
+   *
+   * // Useful in chains
+   * const result = Num.mapNaN2Undefined(parseFloat(userInput)) ?? 0;
+   *
+   * // Type narrowing
+   * const value = Math.sqrt(x);
+   * const safe = Num.mapNaN2Undefined(value);
+   * if (safe !== undefined) {
+   *   // safe is typed without NaN
+   * }
+   * ```
    */
   export const mapNaN2Undefined = <N extends number>(
     num: N,
@@ -261,20 +542,46 @@ export namespace Num {
         (num as RelaxedExclude<N, NaNType>);
 
   /**
-   * Increments a `SmallUint` value.
-   * @template N The type of the `SmallUint`.
-   * @param n The `SmallUint` to increment.
-   * @returns The incremented value as `Increment<N>`.
+   * Type-safe increment operation for SmallUint values.
+   *
+   * Increments a SmallUint (0-40) by 1 with the result type computed at
+   * compile time. This provides type-level arithmetic for small unsigned
+   * integers, useful for type-safe counter operations.
+   *
+   * @template N - A SmallUint literal type (0-40)
+   * @param n - The SmallUint value to increment
+   * @returns The incremented value with type Increment<N>
+   *
+   * @example
+   * ```typescript
+   * const zero = 0 as 0;
+   * const one = Num.increment(zero); // type is 1, value is 1
+   *
+   * const five = 5 as 5;
+   * const six = Num.increment(five); // type is 6, value is 6
+   *
+   * // Type-safe counter
+   * type Counter<N extends SmallUint> = {
+   *   value: N;
+   *   next(): Counter<Increment<N>>;
+   * };
+   * ```
    */
   export const increment = <N extends SmallUint>(n: N): Increment<N> =>
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
     (n + 1) as Increment<N>;
 
   /**
-   * Decrements a positive small integer by 1 at the type level.
-   * @template N A positive small integer type (1-40).
-   * @param n The positive small integer to decrement.
-   * @returns The decremented value with the correct type.
+   * Type-safe decrement operation for positive SmallInt values.
+   *
+   * Decrements a positive SmallInt (1-40) by 1 with the result type computed
+   * at compile time. This provides type-level arithmetic for small positive
+   * integers, useful for type-safe countdown operations.
+   *
+   * @template N - A positive SmallInt literal type (1-40)
+   * @param n - The positive SmallInt value to decrement
+   * @returns The decremented value with type Decrement<N>
+   *
    * @example
    * ```typescript
    * const three = 3 as 3;
@@ -282,6 +589,13 @@ export namespace Num {
    *
    * const one = 1 as 1;
    * const zero = Num.decrement(one); // type is 0, value is 0
+   *
+   * // Type-safe countdown
+   * function countdown<N extends PositiveSmallInt>(
+   *   n: N
+   * ): N extends 1 ? 0 : Decrement<N> {
+   *   return Num.decrement(n);
+   * }
    * ```
    */
   export const decrement = <N extends PositiveSmallInt>(n: N): Decrement<N> =>

@@ -6,132 +6,118 @@
 
 # iterator/range
 
-## Functions
+## Variables
 
-### range()
+### range
 
-#### Call Signature
+> `const` **range**: `RangeFnOverload`
 
-> **range**(`start`, `end`, `step?`): `Generator`\<`SafeUint`, `void`, `unknown`\>
+Defined in: [src/iterator/range.mts:94](https://github.com/noshiro-pf/ts-verified/blob/main/src/iterator/range.mts#L94)
 
-Defined in: [src/iterator/range.mts:38](https://github.com/noshiro-pf/ts-verified/blob/main/src/iterator/range.mts#L38)
+Generates a sequence of numbers within a specified range using a generator function.
 
-Generates a sequence of numbers within a specified range using a generator.
+This function creates a generator that yields numbers from `start` (inclusive) to `end` (exclusive)
+with the specified `step` increment/decrement. The function implements the JavaScript iterator protocol,
+making it compatible with for-of loops, spread operator, Array.from(), and other iterator consumers.
 
-The generator yields numbers from `start` (inclusive) to `end` (exclusive)
-with the specified `step` increment/decrement.
+The function has two overloaded signatures:
 
-##### Parameters
+1. For non-negative ranges: accepts SafeUint parameters and optional positive step
+2. For general ranges: accepts SafeInt parameters and optional non-zero step
 
-###### start
+**Generator Behavior:**
 
-`SafeUintWithSmallInt`
+- Yields values lazily (computed on-demand)
+- Returns `void` when iteration completes
+- Does not accept sent values (next parameter is ignored)
+- Automatically handles direction based on step sign and start/end relationship
 
-The starting number of the sequence (inclusive).
+**Step Parameter Behavior:**
 
-###### end
+- Positive step: iterates from start toward end (start < end expected)
+- Negative step: iterates from start toward end (start > end expected)
+- Zero step: not allowed (NonZeroSafeInt constraint)
+- Default step: 1 (positive direction)
 
-`SafeUintWithSmallInt`
+**Edge Cases:**
 
-The end number of the sequence (exclusive). The sequence does not include this number.
+- When start equals end: yields no values (empty sequence)
+- When step direction conflicts with start/end relationship: yields no values
+- All parameters must be safe integers (within JavaScript's safe integer range)
 
-###### step?
+#### Template
 
-`PositiveSafeIntWithSmallInt`
+The specific SafeInt or SafeUint type being generated
 
-The increment or decrement value. Defaults to 1. Must be non-zero.
+#### Param
 
-##### Returns
+The starting number of the sequence (inclusive). Must be a safe integer.
 
-`Generator`\<`SafeUint`, `void`, `unknown`\>
+#### Param
 
-A generator that yields numbers in the specified range.
+The end number of the sequence (exclusive). Must be a safe integer.
 
-##### Example
+#### Param
 
-```typescript
-// Basic ascending range
-for (const n of range(0, 5)) {
-    console.log(n); // 0, 1, 2, 3, 4
-}
+The increment or decrement value. Defaults to 1. Must be non-zero safe integer.
 
-// Range with custom step
-for (const n of range(0, 10, 2)) {
-    console.log(n); // 0, 2, 4, 6, 8
-}
+#### Returns
 
-// Descending range
-for (const n of range(5, 0, -1)) {
-    console.log(n); // 5, 4, 3, 2, 1
-}
+A Generator object that yields safe integers in the specified range.
 
-// Convert to array
-const arr = Array.from(range(1, 4)); // [1, 2, 3]
-
-// Empty range (start >= end with positive step)
-Array.from(range(5, 5)); // []
-Array.from(range(5, 3)); // []
-```
-
-#### Call Signature
-
-> **range**(`start`, `end`, `step?`): `Generator`\<`SafeInt`, `void`, `unknown`\>
-
-Defined in: [src/iterator/range.mts:43](https://github.com/noshiro-pf/ts-verified/blob/main/src/iterator/range.mts#L43)
-
-Generates a sequence of numbers within a specified range using a generator.
-
-The generator yields numbers from `start` (inclusive) to `end` (exclusive)
-with the specified `step` increment/decrement.
-
-##### Parameters
-
-###### start
-
-`SafeIntWithSmallInt`
-
-The starting number of the sequence (inclusive).
-
-###### end
-
-`SafeIntWithSmallInt`
-
-The end number of the sequence (exclusive). The sequence does not include this number.
-
-###### step?
-
-`NonZeroSafeIntWithSmallInt`
-
-The increment or decrement value. Defaults to 1. Must be non-zero.
-
-##### Returns
-
-`Generator`\<`SafeInt`, `void`, `unknown`\>
-
-A generator that yields numbers in the specified range.
-
-##### Example
+#### Example
 
 ```typescript
 // Basic ascending range
 for (const n of range(0, 5)) {
-    console.log(n); // 0, 1, 2, 3, 4
+    console.log(n); // Outputs: 0, 1, 2, 3, 4
 }
 
 // Range with custom step
 for (const n of range(0, 10, 2)) {
-    console.log(n); // 0, 2, 4, 6, 8
+    console.log(n); // Outputs: 0, 2, 4, 6, 8
 }
 
-// Descending range
-for (const n of range(5, 0, -1)) {
-    console.log(n); // 5, 4, 3, 2, 1
+// Descending range with negative step
+for (const n of range(10, 0, -1)) {
+    console.log(n); // Outputs: 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
 }
 
-// Convert to array
-const arr = Array.from(range(1, 4)); // [1, 2, 3]
+// Negative numbers with negative step
+for (const n of range(0, -10, -1)) {
+    console.log(n); // Outputs: 0, -1, -2, -3, -4, -5, -6, -7, -8, -9
+}
 
-// Empty range (start >= end with positive step)
-Array.from(range(5, 5)); // []
-Array.from(range(5, 3)); // []
+// Convert generator to array
+const numbers = Array.from(range(1, 4)); // [1, 2, 3]
+const evens = [...range(0, 11, 2)]; // [0, 2, 4, 6, 8, 10]
+
+// Empty ranges
+Array.from(range(5, 5)); // [] (start equals end)
+Array.from(range(5, 3)); // [] (positive step, start > end)
+Array.from(range(3, 5, -1)); // [] (negative step, start < end)
+
+// Using with iterator protocol manually
+const gen = range(1, 4);
+console.log(gen.next()); // { value: 1, done: false }
+console.log(gen.next()); // { value: 2, done: false }
+console.log(gen.next()); // { value: 3, done: false }
+console.log(gen.next()); // { value: undefined, done: true }
+
+// Practical usage patterns
+// Create index sequences
+const indices = Array.from(range(0, items.length));
+
+// Generate test data
+const testIds = [...range(1, 101)]; // [1, 2, ..., 100]
+
+// Iterate with step intervals
+for (const minute of range(0, 60, 5)) {
+    scheduleTask(minute); // Every 5 minutes
+}
+
+// Countdown sequences
+for (const count of range(10, 0, -1)) {
+    console.log(`T-minus ${count}`);
+}
 ```

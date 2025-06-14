@@ -12,11 +12,19 @@
 
 > **ifThen**(`antecedent`, `consequent`): `boolean`
 
-Defined in: [src/others/if-then.mts:27](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/if-then.mts#L27)
+Defined in: [src/others/if-then.mts:97](https://github.com/noshiro-pf/ts-verified/blob/main/src/others/if-then.mts#L97)
 
 Implements the logical implication (if-then) operator.
+
 Returns `true` if the antecedent is `false` or the consequent is `true`.
 In logical terms: `antecedent → consequent` is equivalent to `¬antecedent ∨ consequent`.
+
+**Truth table:**
+
+- `true → true` = `true` (valid implication)
+- `true → false` = `false` (invalid implication)
+- `false → true` = `true` (vacuously true)
+- `false → false` = `true` (vacuously true)
 
 #### Parameters
 
@@ -24,35 +32,93 @@ In logical terms: `antecedent → consequent` is equivalent to `¬antecedent ∨
 
 `boolean`
 
-The condition (if part).
+The condition (if part)
 
 ##### consequent
 
 `boolean`
 
-The result if the condition is true (then part).
+The result that should hold if the condition is true (then part)
 
 #### Returns
 
 `boolean`
 
-The result of the logical implication.
+`true` if the implication holds, `false` otherwise
 
-#### Example
+#### Examples
 
 ```typescript
 ifThen(true, true); // true  (if true then true = true)
 ifThen(true, false); // false (if true then false = false)
 ifThen(false, true); // true  (if false then true = true - vacuously true)
 ifThen(false, false); // true  (if false then false = true - vacuously true)
+```
 
-// Practical usage
-const hasPermission = true;
-const actionAllowed = false;
-const isValid = ifThen(hasPermission, actionAllowed); // false
+```typescript
+function validateField(value: string, isRequired: boolean): boolean {
+    const hasValue = value.trim().length > 0;
+    return ifThen(isRequired, hasValue);
+}
 
-// Used in validation logic
-const isRequired = true;
-const hasValue = Boolean(userInput);
-const isValidInput = ifThen(isRequired, hasValue); // true only if not required OR has value
+validateField('hello', true); // true (required and has value)
+validateField('', true); // false (required but no value)
+validateField('', false); // true (not required, so valid)
+validateField('hello', false); // true (not required, but has value is fine)
+```
+
+```typescript
+function checkPermission(user: User, permission: string): boolean {
+    const isAdmin = user.role === 'admin';
+    const hasPermission = user.permissions.includes(permission);
+
+    // Admin must have all permissions
+    return ifThen(isAdmin, hasPermission);
+}
+
+const adminUser = { role: 'admin', permissions: ['read', 'write'] };
+checkPermission(adminUser, 'delete'); // false (admin without delete permission = invalid)
+
+const regularUser = { role: 'user', permissions: ['read'] };
+checkPermission(regularUser, 'delete'); // true (non-admin without permission is valid)
+```
+
+```typescript
+interface Subscription {
+    isPremium: boolean;
+    features: {
+        advancedAnalytics: boolean;
+        unlimitedStorage: boolean;
+        prioritySupport: boolean;
+    };
+}
+
+function validateSubscription(sub: Subscription): boolean {
+    // If premium, then all premium features must be enabled
+    return ifThen(
+        sub.isPremium,
+        sub.features.advancedAnalytics &&
+            sub.features.unlimitedStorage &&
+            sub.features.prioritySupport,
+    );
+}
+```
+
+```typescript
+// "If A then B" AND "If B then C"
+function validateChain(a: boolean, b: boolean, c: boolean): boolean {
+    return ifThen(a, b) && ifThen(b, c);
+}
+
+validateChain(true, true, true); // true (valid chain)
+validateChain(true, false, true); // false (breaks at first implication)
+validateChain(false, false, false); // true (vacuously true chain)
+```
+
+```typescript
+// "If not expired then valid" is equivalent to "expired OR valid"
+const isExpired = Date.now() > expiryDate;
+const isValid = checkValidity();
+const result = ifThen(!isExpired, isValid);
+// Same as: isExpired || isValid
 ```

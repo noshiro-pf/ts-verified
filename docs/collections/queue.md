@@ -10,14 +10,37 @@
 
 ### Queue\<T\>
 
-> **Queue**\<`T`\> = `Readonly`\<\{ `dequeue`: () => [`Optional`](../functional/optional/README.md#optional)\<`T`\>; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `number`; \}\>
+> **Queue**\<`T`\> = `Readonly`\<\{ `dequeue`: () => [`Optional`](../functional/optional/README.md#optional)\<`T`\>; `enqueue`: (`value`) => `void`; `isEmpty`: `boolean`; `size`: `SizeType.Arr`; \}\>
 
-Defined in: [src/collections/queue.mts:27](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L27)
+Defined in: [src/collections/queue.mts:67](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L67)
 
-Represents an interface for a queue, ideally FIFO (First-In, First-Out).
-Note: The default `createQueue` implementation currently exhibits LIFO (Last-In, First-Out) behavior.
-The examples illustrate usage based on the interface contract, but actual behavior
-with `createQueue` will be LIFO until its implementation is aligned.
+Interface for a high-performance queue with FIFO (First-In, First-Out) behavior.
+
+This interface defines a mutable queue data structure where elements are added to the back
+and removed from the front, maintaining the order in which they were added. The implementation
+uses a circular buffer for optimal performance, providing O(1) operations for both enqueue
+and dequeue operations.
+
+**FIFO Behavior:**
+
+- **enqueue**: Adds elements to the back of the queue
+- **dequeue**: Removes and returns elements from the front of the queue
+- Elements are processed in the exact order they were added
+
+**Performance Characteristics:**
+
+- enqueue: O(1) amortized (O(n) when buffer needs resizing)
+- dequeue: O(1) always
+- size/isEmpty: O(1) always
+- Memory efficient with automatic garbage collection of removed elements
+
+**Use Cases:**
+
+- Task scheduling and job queues
+- Breadth-first search algorithms
+- Event processing systems
+- Producer-consumer patterns
+- Buffer management for streaming data
 
 #### Type Parameters
 
@@ -25,25 +48,48 @@ with `createQueue` will be LIFO until its implementation is aligned.
 
 `T`
 
-The type of elements in the queue.
+The type of elements stored in the queue.
 
 #### Example
 
 ```typescript
-import { createQueue, Queue } from './queue'; // Adjust import path as needed
+import { createQueue, Queue } from './queue';
 
-const myQueue: Queue<string> = createQueue<string>();
+// Example 1: Basic FIFO operations
+const messageQueue: Queue<string> = createQueue<string>();
 
-myQueue.enqueue('hello');
-myQueue.enqueue('world');
+messageQueue.enqueue('first message'); // Add to back
+messageQueue.enqueue('second message'); // Add to back
+messageQueue.enqueue('third message'); // Add to back
 
-console.log(myQueue.size); // Output: 2
+console.log(messageQueue.size); // Output: 3
 
-// With current LIFO implementation of createQueue:
-console.log(myQueue.dequeue().unwrap()); // Output: "world"
-console.log(myQueue.dequeue().unwrap()); // Output: "hello"
+// Process messages in FIFO order
+console.log(messageQueue.dequeue().unwrap()); // "first message" (first in, first out)
+console.log(messageQueue.dequeue().unwrap()); // "second message"
+console.log(messageQueue.size); // Output: 1
 
-console.log(myQueue.isEmpty); // Output: true
+// Example 2: Task processing system
+type Task = { id: number; priority: string; action: () => void };
+const taskQueue: Queue<Task> = createQueue<Task>();
+
+taskQueue.enqueue({
+    id: 1,
+    priority: 'high',
+    action: () => console.log('Task 1'),
+});
+taskQueue.enqueue({
+    id: 2,
+    priority: 'low',
+    action: () => console.log('Task 2'),
+});
+
+// Process tasks in order
+while (!taskQueue.isEmpty) {
+    const task = taskQueue.dequeue().unwrap();
+    console.log(`Processing task ${task.id} with ${task.priority} priority`);
+    task.action();
+}
 ```
 
 ## Functions
@@ -52,14 +98,28 @@ console.log(myQueue.isEmpty); // Output: true
 
 > **createQueue**\<`T`\>(`initialValues?`): [`Queue`](#queue)\<`T`\>
 
-Defined in: [src/collections/queue.mts:164](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L164)
+Defined in: [src/collections/queue.mts:389](https://github.com/noshiro-pf/ts-verified/blob/main/src/collections/queue.mts#L389)
 
-Creates a new Queue instance.
-The `Queue<T>` type definition describes a FIFO (First-In, First-Out) contract.
-However, this `createQueue` function provides an implementation that currently
-behaves as a LIFO (Last-In, First-Out) stack due to its use of `unshift` for `enqueue`
-and `pop` for `dequeue`.
-The examples below demonstrate this current LIFO behavior.
+Creates a new Queue instance with FIFO (First-In, First-Out) behavior using a high-performance circular buffer.
+
+This factory function creates an optimized queue implementation that maintains excellent performance
+characteristics for both enqueue and dequeue operations. The underlying circular buffer automatically
+resizes to accommodate growing workloads while providing predictable O(1) operations.
+
+**Implementation Features:**
+
+- **O(1) enqueue operations** (amortized - occasionally O(n) when resizing)
+- **O(1) dequeue operations** (always)
+- **Automatic buffer resizing** - starts at 8 elements, doubles when full
+- **Memory efficient** - garbage collects removed elements immediately
+- **Circular buffer design** - eliminates need for array shifting operations
+
+**Performance Benefits:**
+
+- No array copying during normal operations
+- Minimal memory allocation overhead
+- Predictable performance under high load
+- Efficient memory usage with automatic cleanup
 
 #### Type Parameters
 
@@ -67,7 +127,7 @@ The examples below demonstrate this current LIFO behavior.
 
 `T`
 
-The type of elements in the queue.
+The type of elements stored in the queue.
 
 #### Parameters
 
@@ -75,45 +135,97 @@ The type of elements in the queue.
 
 readonly `T`[]
 
-Optional initial values to populate the queue. The order of elements
-during dequeue will be the reverse of their order in `initialValues`
-if no other operations are performed, due to LIFO behavior.
+Optional array of initial elements to populate the queue.
+Elements will be dequeued in the same order they appear in the array.
+If provided, the initial buffer capacity will be at least twice the array length.
 
 #### Returns
 
 [`Queue`](#queue)\<`T`\>
 
-A new Queue instance.
+A new Queue instance optimized for high-performance FIFO operations.
 
 #### Example
 
 ```typescript
-import { createQueue } from './queue'; // Adjust import path as needed
+import { createQueue } from './queue';
 
-// Example 1: Basic LIFO behavior
-const lifoQueue = createQueue<string>();
-lifoQueue.enqueue('first_in'); // Internal: ["first_in"]
-lifoQueue.enqueue('second_in'); // Internal: ["second_in", "first_in"]
-lifoQueue.enqueue('third_in'); // Internal: ["third_in", "second_in", "first_in"]
+// Example 1: Basic FIFO workflow
+const requestQueue = createQueue<string>();
 
-console.log(lifoQueue.dequeue().unwrap()); // Output: "third_in" (last one in)
-console.log(lifoQueue.dequeue().unwrap()); // Output: "second_in"
-console.log(lifoQueue.size); // Output: 1
-console.log(lifoQueue.dequeue().unwrap()); // Output: "first_in"
-console.log(lifoQueue.isEmpty); // Output: true
+// Add requests to the queue
+requestQueue.enqueue('GET /api/users'); // O(1)
+requestQueue.enqueue('POST /api/orders'); // O(1)
+requestQueue.enqueue('DELETE /api/cache'); // O(1)
 
-// Example 2: Queue with initial values
-// initialValues: [10, 20, 30]
-// Internal data after constructor: [10, 20, 30]
-const numQueue = createQueue<number>([10, 20, 30]);
-console.log(numQueue.size); // Output: 3
+// Process requests in order
+while (!requestQueue.isEmpty) {
+    const request = requestQueue.dequeue().unwrap(); // O(1)
+    console.log(`Processing: ${request}`);
+}
+// Output:
+// Processing: GET /api/users
+// Processing: POST /api/orders
+// Processing: DELETE /api/cache
 
-// Dequeue behavior with initial values (LIFO - pops from end)
-console.log(numQueue.dequeue().unwrap()); // Output: 30
-console.log(numQueue.dequeue().unwrap()); // Output: 20
+// Example 2: High-throughput event processing
+type Event = { timestamp: number; type: string; data: any };
+const eventQueue = createQueue<Event>();
 
-numQueue.enqueue(40); // Internal: [40, 10] (unshift to front, remaining [10])
-console.log(numQueue.dequeue().unwrap()); // Output: 10 (pop from end)
-console.log(numQueue.dequeue().unwrap()); // Output: 40 (pop from end)
-console.log(numQueue.isEmpty); // Output: true
+// Simulate high-volume event ingestion
+for (let i = 0; i < 10000; i++) {
+    eventQueue.enqueue({
+        timestamp: Date.now(),
+        type: `event-${i % 5}`,
+        data: { value: i },
+    }); // Each enqueue is O(1) amortized
+}
+
+// Process events efficiently
+let processedCount = 0;
+while (!eventQueue.isEmpty) {
+    const event = eventQueue.dequeue().unwrap(); // O(1)
+    // Process event...
+    processedCount++;
+}
+console.log(`Processed ${processedCount} events`); // 10000
+
+// Example 3: Queue with pre-populated data
+const priorityTasks = createQueue<string>([
+    'Initialize system',
+    'Load configuration',
+    'Start services',
+    'Begin processing',
+]);
+
+console.log(priorityTasks.size); // Output: 4
+
+// Execute tasks in initialization order
+while (!priorityTasks.isEmpty) {
+    const task = priorityTasks.dequeue().unwrap();
+    console.log(`Executing: ${task}`);
+}
+
+// Example 4: Producer-Consumer pattern
+const workQueue = createQueue<() => Promise<void>>();
+
+// Producer: Add work items
+const addWork = (workFn: () => Promise<void>) => {
+    workQueue.enqueue(workFn);
+};
+
+// Consumer: Process work items
+const processWork = async () => {
+    while (!workQueue.isEmpty) {
+        const workItem = workQueue.dequeue().unwrap();
+        await workItem();
+    }
+};
+
+// Add some work
+addWork(async () => console.log('Work item 1'));
+addWork(async () => console.log('Work item 2'));
+
+// Process the work
+await processWork();
 ```

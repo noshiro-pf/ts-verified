@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = PositiveSafeInt;
-const typeName = 'PositiveSafeInt';
+
 const typeNameInMessage = 'a positive safe integer';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -51,75 +51,137 @@ export const isPositiveSafeInt = is;
  * // asPositiveSafeInt(-1); // throws TypeError
  * ```
  */
-export const asPositiveSafeInt = castTo;
+export const asPositiveSafeInt = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for positive safe integers.
+ *
+ * All operations automatically clamp results to the positive safe integer range [1, MAX_SAFE_INTEGER].
+ * This ensures that all arithmetic maintains both the positive constraint and IEEE 754 precision guarantees,
+ * preventing precision loss and ensuring results are always positive.
+ *
+ * @example
+ * ```typescript
+ * const a = asPositiveSafeInt(1000000);
+ * const b = asPositiveSafeInt(2000000);
+ *
+ * // Arithmetic operations with positive safe range clamping
+ * const sum = PositiveSafeInt.add(a, b);          // PositiveSafeInt (3000000)
+ * const diff = PositiveSafeInt.sub(a, b);         // PositiveSafeInt (1 - clamped to MIN_VALUE)
+ * const product = PositiveSafeInt.mul(a, b);      // PositiveSafeInt (2000000000000)
+ *
+ * // Range operations
+ * const clamped = PositiveSafeInt.clamp(0);           // PositiveSafeInt (1)
+ * const minimum = PositiveSafeInt.min(a, b);          // PositiveSafeInt (1000000)
+ * const maximum = PositiveSafeInt.max(a, b);          // PositiveSafeInt (2000000)
+ *
+ * // Utility operations
+ * const random = PositiveSafeInt.random();            // PositiveSafeInt (random positive safe integer)
+ * const power = PositiveSafeInt.pow(asPositiveSafeInt(2), asPositiveSafeInt(10)); // PositiveSafeInt (1024)
+ * ```
+ */
 export const PositiveSafeInt = {
+  /**
+   * Type guard to check if a value is a PositiveSafeInt.
+   * @param value The value to check.
+   * @returns `true` if the value is a positive safe integer, `false` otherwise.
+   */
   is,
 
-  /** `1` */
+  /**
+   * The minimum value for a positive safe integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `Number.MAX_SAFE_INTEGER` */
+  /**
+   * The maximum safe integer value (2^53 - 1).
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two PositiveSafeInt values.
+   * @param a The first PositiveSafeInt.
+   * @param b The second PositiveSafeInt.
+   * @returns The minimum value as a PositiveSafeInt.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two PositiveSafeInt values.
+   * @param a The first PositiveSafeInt.
+   * @param b The second PositiveSafeInt.
+   * @returns The maximum value as a PositiveSafeInt.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the positive safe integer range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt.
+   */
   clamp,
 
+  /**
+   * Generates a random PositiveSafeInt value within the valid range.
+   * @returns A random PositiveSafeInt between 1 and MAX_SAFE_INTEGER.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[1, MAX_SAFE_INTEGER]` */
+  /**
+   * Raises a PositiveSafeInt to the power of another PositiveSafeInt.
+   * @param a The base PositiveSafeInt.
+   * @param b The exponent PositiveSafeInt.
+   * @returns `a ** b` clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[1, MAX_SAFE_INTEGER]` */
+  /**
+   * Adds two PositiveSafeInt values.
+   * @param a The first PositiveSafeInt.
+   * @param b The second PositiveSafeInt.
+   * @returns `a + b` clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[1, MAX_SAFE_INTEGER]` */
+  /**
+   * Subtracts one PositiveSafeInt from another.
+   * @param a The minuend PositiveSafeInt.
+   * @param b The subtrahend PositiveSafeInt.
+   * @returns `a - b` clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt (minimum 1).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[1, MAX_SAFE_INTEGER]` */
+  /**
+   * Multiplies two PositiveSafeInt values.
+   * @param a The first PositiveSafeInt.
+   * @param b The second PositiveSafeInt.
+   * @returns `a * b` clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[1, MAX_SAFE_INTEGER]` */
+  /**
+   * Divides one PositiveSafeInt by another using floor division.
+   * @param a The dividend PositiveSafeInt.
+   * @param b The divisor PositiveSafeInt.
+   * @returns `⌊a / b⌋` clamped to [1, MAX_SAFE_INTEGER] as a PositiveSafeInt.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '0', value: 0 },
-    { name: '-1', value: -1 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof PositiveSafeInt,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 1;
-    const max = 5;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof PositiveSafeInt,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('=');
-
-  expectType<
-    typeof PositiveSafeInt,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof PositiveSafeInt,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('<=');

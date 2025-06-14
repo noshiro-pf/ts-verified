@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = NonNegativeInt32;
-const typeName = 'NonNegativeInt32';
+
 const typeNameInMessage = 'a non-negative integer in [0, 2^31)';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -50,74 +50,138 @@ export const isNonNegativeInt32 = is;
  * // asNonNegativeInt32(2147483648); // throws TypeError
  * ```
  */
-export const asNonNegativeInt32 = castTo;
+export const asNonNegativeInt32 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 32-bit non-negative integers.
+ *
+ * All operations automatically clamp results to the valid NonNegativeInt32 range [0, 2147483647].
+ * This ensures that all arithmetic maintains the 32-bit non-negative integer constraint,
+ * with negative results clamped to 0 and overflow results clamped to MAX_VALUE.
+ *
+ * @example
+ * ```typescript
+ * const a = asNonNegativeInt32(2000000000);
+ * const b = asNonNegativeInt32(500000000);
+ *
+ * // Arithmetic operations with automatic clamping
+ * const sum = NonNegativeInt32.add(a, b);       // NonNegativeInt32 (2147483647 - clamped to MAX_VALUE)
+ * const diff = NonNegativeInt32.sub(a, b);      // NonNegativeInt32 (1500000000)
+ * const reverseDiff = NonNegativeInt32.sub(b, a); // NonNegativeInt32 (0 - clamped to MIN_VALUE)
+ * const product = NonNegativeInt32.mul(a, b);   // NonNegativeInt32 (2147483647 - clamped due to overflow)
+ *
+ * // Range operations
+ * const clamped = NonNegativeInt32.clamp(-1000);     // NonNegativeInt32 (0)
+ * const minimum = NonNegativeInt32.min(a, b);        // NonNegativeInt32 (500000000)
+ * const maximum = NonNegativeInt32.max(a, b);        // NonNegativeInt32 (2000000000)
+ *
+ * // Utility operations
+ * const random = NonNegativeInt32.random();          // NonNegativeInt32 (random value in [0, 2147483647])
+ * const power = NonNegativeInt32.pow(asNonNegativeInt32(2), asNonNegativeInt32(20)); // NonNegativeInt32 (1048576)
+ * ```
+ */
 export const NonNegativeInt32 = {
+  /**
+   * Type guard to check if a value is a NonNegativeInt32.
+   * @param value The value to check.
+   * @returns `true` if the value is a 32-bit non-negative integer, `false` otherwise.
+   */
   is,
 
-  /** `0` */
+  /**
+   * The minimum value for a 32-bit non-negative integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^31 - 1` */
+  /**
+   * The maximum value for a 32-bit non-negative integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two NonNegativeInt32 values.
+   * @param a The first NonNegativeInt32.
+   * @param b The second NonNegativeInt32.
+   * @returns The minimum value as a NonNegativeInt32.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two NonNegativeInt32 values.
+   * @param a The first NonNegativeInt32.
+   * @param b The second NonNegativeInt32.
+   * @returns The maximum value as a NonNegativeInt32.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the NonNegativeInt32 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [0, 2147483647] as a NonNegativeInt32.
+   */
   clamp,
 
+  /**
+   * Generates a random NonNegativeInt32 value within the valid range.
+   * @returns A random NonNegativeInt32 between 0 and 2147483647.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[0, 2^31)` */
+  /**
+   * Raises a NonNegativeInt32 to the power of another NonNegativeInt32.
+   * @param a The base NonNegativeInt32.
+   * @param b The exponent NonNegativeInt32.
+   * @returns `a ** b` clamped to [0, 2147483647] as a NonNegativeInt32.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[0, 2^31)` */
+  /**
+   * Adds two NonNegativeInt32 values.
+   * @param a The first NonNegativeInt32.
+   * @param b The second NonNegativeInt32.
+   * @returns `a + b` clamped to [0, 2147483647] as a NonNegativeInt32.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[0, 2^31)` */
+  /**
+   * Subtracts one NonNegativeInt32 from another.
+   * @param a The minuend NonNegativeInt32.
+   * @param b The subtrahend NonNegativeInt32.
+   * @returns `a - b` clamped to [0, 2147483647] as a NonNegativeInt32 (minimum 0).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[0, 2^31)` */
+  /**
+   * Multiplies two NonNegativeInt32 values.
+   * @param a The first NonNegativeInt32.
+   * @param b The second NonNegativeInt32.
+   * @returns `a * b` clamped to [0, 2147483647] as a NonNegativeInt32.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[0, 2^31)` */
+  /**
+   * Divides one NonNegativeInt32 by another using floor division.
+   * @param a The dividend NonNegativeInt32.
+   * @param b The divisor NonNegativeInt32.
+   * @returns `⌊a / b⌋` clamped to [0, 2147483647] as a NonNegativeInt32.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '-1', value: -1 },
-    { name: '2147483648', value: 2147483648 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof NonNegativeInt32,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'non-negative' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 0;
-    const max = 10;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof NonNegativeInt32,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'non-negative' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof NonNegativeInt32,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'non-negative' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof NonNegativeInt32,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'non-negative' | 'range'
+  >
+>('<=');

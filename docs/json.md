@@ -10,4 +10,4 @@
 
 ### Json
 
-Re-exports [Json](json/json.md#json)
+Re-exports [Json](json/json/namespaces/Json.md)

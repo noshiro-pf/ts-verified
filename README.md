@@ -5,14 +5,14 @@
 [![License](https://img.shields.io/npm/l/ts-verified.svg)](./LICENSE)
 [![codecov](https://codecov.io/gh/noshiro-pf/ts-verified/graph/badge.svg?token=H01WAPIFKG)](https://codecov.io/gh/noshiro-pf/ts-verified)
 
-`ts-verified` is a TypeScript library providing a collection of type-safe utilities and verification tools. It aims to enhance development robustness, maintainability, and correctness by leveraging TypeScript's powerful type system.
+**ts-verified** is a TypeScript utility library that provides type-safe functional programming utilities with zero runtime dependencies. It aims to enhance development robustness, maintainability, and correctness by leveraging TypeScript's powerful type system.
 
 ## Features
 
 This library offers a range of utilities, including:
 
 - **Compile-Time Type Checking**: Assert type relationships at compile time with `expectType`.
-- **Immutable Collections**: Type-safe and immutable map (`IMap`), set (`ISet`), and queue (`Queue`) implementations.
+- **Immutable Collections**: Type-safe and immutable map (`IMap`), set (`ISet`) implementations.
 - **Array Utilities**: A comprehensive suite of functions for array manipulation, creation, transformation, and querying.
 - **Number Utilities**: Safe and convenient functions for numerical operations, including branded types and range checking.
 - **Object Utilities**: Helpers for working with objects, such as shallow equality checks.
@@ -24,15 +24,94 @@ This library offers a range of utilities, including:
 ## Installation
 
 ```bash
-# npm
 npm install ts-verified
+```
 
-# yarn
+Or with other package managers:
+
+```bash
+# Yarn
 yarn add ts-verified
 
 # pnpm
 pnpm add ts-verified
 ```
+
+## TypeScript Configuration
+
+ts-verified works best with strict TypeScript settings:
+
+```json
+{
+    "compilerOptions": {
+        "strict": true, // important
+        "noUncheckedIndexedAccess": true, // important
+        "noPropertyAccessFromIndexSignature": true, // important
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "exactOptionalPropertyTypes": false
+    }
+}
+```
+
+## Core Modules
+
+### 🎯 [Functional Programming](./documents/functional.md)
+
+Essential FP utilities for cleaner, more reliable code.
+
+- **Optional** - Type-safe null handling
+- **Result** - Error handling without exceptions
+- **Pipe** - Function composition utilities
+- **match** - Pattern matching for TypeScript
+
+### 🛡️ Type Guards
+
+Runtime type checking with TypeScript integration.
+
+- **Type Checks** - `isString`, `isNumber`, `isNonNullish`, etc.
+- **Object Guards** - `isRecord`, `isNonNullObject`, `hasKey`
+- **Utility Guards** - `isNonEmptyString`, `isPrimitive`
+
+### 🔢 Number Utilities
+
+Branded number types and safe arithmetic operations.
+
+- **Branded Types** - `Int`, `Uint`, `SafeInt`, `FiniteNumber`
+- **Range Types** - `Int16`, `Uint32`, `PositiveInt`, etc.
+- **Math Utils** - Type-safe arithmetic operations
+
+### 🔧 Array Operations
+
+Type-safe array and tuple utilities with functional programming patterns.
+
+- **Array Utils** - Comprehensive array manipulation functions
+- **Tuple Utils** - Type-safe tuple operations with compile-time guarantees
+
+### 📦 [Collections](./documents/collections.md)
+
+Immutable data structures for safer state management.
+
+- **IMap** - Immutable Map implementation
+- **ISet** - Immutable Set implementation
+
+And mutable Queue/Stack implementation
+
+- **Queue** - FIFO queue with O(1) operations
+- **Stack** - LIFO stack implementation
+
+### 🔍 Other Utilities
+
+Additional helpers for common programming tasks.
+
+- **Type Casting** - `castMutable`, `castReadonly`
+- **Utilities** - `memoizeFunction`, `mapNullable`, `unknownToString`
+- **Conditionals** - `ifThen` for conditional operations
 
 ## Usage Examples
 
@@ -59,85 +138,11 @@ expectType<{ x: number }, { x: number }>('=');
 
 // The following would cause a compile-time error:
 // expectType<User, Admin>("="); // Error: Type 'User' is not strictly equal to type 'Admin'.
+
+expectType<User, any>('!='); // Error: Comparisons with `any` are also strictly checked.
 ```
 
-### 2. Number Utilities with `Num`
-
-The `Num` object provides safe and convenient functions for numerical operations.
-
-```typescript
-import { Num } from 'ts-verified';
-
-// Basic conversions
-const num = Num.from('123'); // 123
-const invalid = Num.from('abc'); // NaN
-
-// Range checking
-const inRange = Num.isInRange(0, 10);
-console.log(inRange(5)); // true
-console.log(inRange(0)); // true (inclusive lower bound)
-console.log(inRange(10)); // false (exclusive upper bound)
-
-// Clamping values
-const clamp = Num.clamp(0, 100);
-console.log(clamp(150)); // 100
-console.log(clamp(-10)); // 0
-
-// Rounding utilities
-const round2 = Num.round(2);
-console.log(round2(3.14159)); // 3.14
-
-console.log(Num.roundAt(3.14159, 3)); // 3.142
-console.log(Num.roundToInt(3.7) satisfies Int); // 4
-
-// Type guards
-declare const value: number;
-if (Num.isNonZero(value)) {
-    // value is guaranteed to be non-zero
-    const result = Num.div(10, value); // Safe division
-}
-```
-
-### 3. Array Utilities with `Arr`
-
-The `Arr` object provides a rich set of functions for array manipulation.
-
-```typescript
-import { Arr } from 'ts-verified';
-
-const numbers = [1, 2, 3, 4, 5, 2, 3] as const;
-const people = [
-    { name: 'Alice', age: 30 },
-    { name: 'Bob', age: 25 },
-    { name: 'Charlie', age: 35 },
-] as const;
-
-// Reduction
-const sum = Arr.sum(numbers);
-console.log(sum); // 20
-
-// Array creation
-const zeros = Arr.zeros(5); // [0, 0, 0, 0, 0]
-const range = Arr.range(1, 4); // [1, 2, 3]
-
-// Type-safe length checking
-if (Arr.isArrayAtLeastLength(numbers, 3)) {
-    // numbers is now guaranteed to have at least 3 elements
-    console.log(numbers[2]); // Safe access to index 2
-}
-
-// Take first n elements
-const firstThree = Arr.take(numbers, 3); // [1, 2, 3]
-
-// Find maximum by property
-const oldestPerson = Arr.maxBy(people, (person) => person.age);
-console.log(oldestPerson?.name); // 'Charlie'
-
-// Remove duplicates
-const unique = Arr.uniq(numbers); // [1, 2, 3, 4, 5]
-```
-
-### 4. Functional Programming with `Optional`, `Result`, `pipe`, and `match`
+### 2. Functional Programming with `Optional`, `Result`, `pipe`, and `match`
 
 Handle nullable values and error-prone operations safely.
 
@@ -193,6 +198,134 @@ console.log(processResult(Result.ok(42))); // 'Success: 42'
 console.log(processResult(Result.err('Failed'))); // 'Error: Failed'
 ```
 
+### 3. Number Utilities with `Num` and Branded Number Types
+
+The `Num` object provides safe and convenient functions for numerical operations.
+
+```typescript
+import { Num } from 'ts-verified';
+
+// Basic conversions
+const num = Num.from('123'); // 123
+const invalid = Num.from('abc'); // NaN
+
+// Range checking
+const inRange = Num.isInRange(0, 10);
+console.log(inRange(5)); // true
+console.log(inRange(0)); // true (inclusive lower bound)
+console.log(inRange(10)); // false (exclusive upper bound)
+
+// Clamping values
+const clamp = Num.clamp(0, 100);
+console.log(clamp(150)); // 100
+console.log(clamp(-10)); // 0
+
+// Rounding utilities
+const round2 = Num.round(2);
+console.log(round2(3.14159)); // 3.14
+
+console.log(Num.roundAt(3.14159, 3)); // 3.142
+console.log(Num.roundToInt(3.7) satisfies Int); // 4
+
+// Type guards
+declare const value: number;
+if (Num.isNonZero(value)) {
+    // value is guaranteed to be non-zero
+    const result = Num.div(10, value); // Safe division
+}
+```
+
+#### Branded Number Types for Enhanced Type Safety
+
+`ts-verified` provides branded number types that enforce specific constraints at the type level.
+
+```typescript
+import {
+    asInt,
+    asUint,
+    asFiniteNumber,
+    asSafeInt,
+    asInt16,
+    asUint32,
+    asNonZeroInt,
+    asPositiveInt,
+    Int,
+    Uint,
+    FiniteNumber,
+    SafeInt,
+    Int16,
+    Uint32,
+    NonZeroInt,
+    PositiveInt,
+} from 'ts-verified';
+
+// Basic branded types
+const integer = asInt(42); // Int - any integer
+const unsigned = asUint(42); // Uint - non-negative integer
+const finite = asFiniteNumber(3.14); // FiniteNumber - finite floating-point
+const safeInt = asSafeInt(42); // SafeInt - integer in safe range
+
+const nonInteger = asInt(3.14); // This line causes a runtime error
+
+// Range-constrained types (16-bit, 32-bit)
+const int16 = asInt16(1000); // Int16: [-32768, 32767]
+const uint32 = asUint32(3000000000); // Uint32: [0, 4294967295]
+
+// Non-zero and positive variants
+const nonZeroInt = asNonZeroInt(5); // NonZeroInt - excludes zero
+const positiveInt = asPositiveInt(10); // PositiveInt - excludes zero and negatives
+
+// Type-safe arithmetic with automatic clamping
+const sum = Int16.add(int16, asInt16(2000)); // Int16 (3000)
+const clamped = Int16.clamp(100000); // Int16 (32767 - clamped to MAX_VALUE)
+
+// Safe division with non-zero types
+const ratio = NonZeroInt.div(asNonZeroInt(10), nonZeroInt); // No division by zero risk
+
+// Random generation within type constraints
+const randomInt16 = Int16.random(); // Int16 (random value in valid range)
+```
+
+### 4. Array Utilities with `Arr`
+
+The `Arr` object provides a rich set of functions for array manipulation.
+
+```typescript
+import { Arr } from 'ts-verified';
+
+const numbers: readonly number[] = [1, 2, 3, 4, 5, 2, 3];
+const people = [
+    { name: 'Alice', age: 30 },
+    { name: 'Bob', age: 25 },
+    { name: 'Charlie', age: 35 },
+] as const;
+
+// Reduction
+const sum = Arr.sum(numbers);
+console.log(sum); // 20
+
+// Array creation
+const zeros: readonly [0, 0, 0, 0, 0] = Arr.zeros(5); // [0, 0, 0, 0, 0]
+const range: readonly [1, 2, 3] = Arr.range(1, 4); // [1, 2, 3]
+
+// Type-safe length checking
+if (Arr.isArrayAtLeastLength(numbers, 2)) {
+    // numbers is now guaranteed to have at least 3 elements
+    expectType<typeof numbers, readonly [number, number, ...number[]]>('=');
+    console.log(numbers[1]); // Safe access to index 2
+}
+
+// Take first n elements
+const firstThree = Arr.take(numbers, 3); // [1, 2, 3]
+
+// Find maximum by property
+const oldestPerson = Arr.maxBy(people, (person) => person.age);
+console.log(oldestPerson?.name); // 'Charlie'
+
+// Remove duplicates
+const unique = Arr.uniq(numbers); // [1, 2, 3, 4, 5]
+```
+
 ### 5. Immutable Collections: `IMap` and `ISet`
 
 Type-safe, immutable data structures.
@@ -201,7 +334,7 @@ Type-safe, immutable data structures.
 import { IMap, ISet, pipe } from 'ts-verified';
 
 // IMap usage - immutable operations
-const originalMap = IMap.new<string, number>([]);
+const originalMap = IMap.create<string, number>([]);
 const mapWithOne = originalMap.set('one', 1);
 const mapWithTwo = mapWithOne.set('two', 2);
 
@@ -211,24 +344,24 @@ console.log(mapWithTwo.get('one')); // Optional.some(1)
 console.log(mapWithTwo.has('three')); // false
 
 // Using pipe for fluent updates
-const updatedMap = pipe(IMap.new<string, number>([]))
-    .map((map) => map.set('one', 1))
-    .map((map) => map.set('two', 2))
-    .map((map) => map.set('three', 3)).value;
+const idMap = pipe(Arr.seq(10))
+    .map(Arr.map<number>(i => [i, i.toString()])
+     .map(Arr.skip(1)) // [ [1, "1"], ..., [9, "9"]]
+    .map(IMap.create<number, string>).value;
 
-console.log(updatedMap.size); // 3
+console.log(idMap.size); // 9
 
 // Efficient batch updates with withMutations
-const largeMap = IMap.new<string, number>([]).withMutations([
-    { type: 'set', key: 'key1', value: 1 },
-    { type: 'set', key: 'key2', value: 2 },
-    { type: 'set', key: 'key3', value: 3 },
+const idMapUpdated = idMap.withMutations([
+    { type: 'set', key: 99, value: "99" },
+    { type: 'update', key: 5, value: "five" },
+    { type: 'delete', key: 4 },
 ]);
 
-console.log(largeMap.size); // 3
+console.log(idMapUpdated.size); // 9
 
 // ISet usage
-const originalSet = ISet.new<number>([]);
+const originalSet = ISet.create<number>([]);
 const setWithItems = originalSet.add(1).add(2).add(1); // Duplicate ignored
 
 console.log(originalSet.size); // 0 (unchanged)
@@ -245,8 +378,12 @@ import { isNonNullObject, isRecord, hasKey } from 'ts-verified';
 
 function processData(data: unknown) {
     if (isRecord(data)) {
-        // data is now Record<string, unknown>
-        if (hasKey(data, 'name') && typeof data.name === 'string') {
+        // data is now UnknownRecord (= Readonly<Record<string, unknown>>)
+        if (
+            hasKey(data, 'name') &&
+            // data is now ReadonlyRecord<"name", unknown> & UnknownRecord
+            typeof data.name === 'string'
+        ) {
             console.log(`Hello, ${data.name}!`);
         }
     }
@@ -326,16 +463,16 @@ console.log(updatedState.items); // ['newItem1', 'newItem2']
 
 ## Modules Overview
 
-- **`array`**: Utilities for working with arrays and tuples, including creation, transformation, and type-safe operations.
-- **`collections`**: Immutable data structures like `IMap`, `ISet`, and `Queue` with full type safety.
 - **`expect-type`**: Compile-time type assertion utilities for testing and verification.
-- **`functional`**: Functional programming helpers like `Optional`, `Result`, `pipe`, and `match`.
 - **`guard`**: Type guard functions for safe type narrowing (e.g., `isNonNullObject`, `isRecord`).
-- **`iterator`**: Utilities for working with iterators and generators (e.g., `range`).
+- **`functional`**: Functional programming helpers like `Optional`, `Result`, `pipe`, and `match`.
+- **`number`**: Comprehensive numerical utilities including the `Num` namespace and an extensive collection of branded number types (`Int`, `Uint`, `SafeInt`, `Int16`, `Int32`, `Uint16`, `Uint32`, `NonZeroInt`, `PositiveInt`, `NonNegativeFiniteNumber`, etc.) with type-safe arithmetic operations, range checking, and automatic clamping.
+- **`array`**: Utilities for working with arrays and tuples, including creation, transformation, and type-safe operations.
+- **`object`**: Utilities for working with records/objects (e.g., `Obj.shallowEq`).
 - **`json`**: Type-safe JSON parsing and stringification utilities.
-- **`num`**: Comprehensive numerical utilities including branded types, range checking, and safe arithmetic.
+- **`collections`**: Immutable data structures like `IMap`, `ISet`, and `Queue` with full type safety.
+- **`iterator`**: Utilities for working with iterators and generators (e.g., `range`).
 - **`others`**: Miscellaneous utilities like `castMutable`, `castReadonly`, `ifThen`, `mapNullable`, `memoizeFunction`, `tuple`, `unknownToString`.
-- **`record`**: Utilities for working with records/objects (e.g., `Obj.shallowEq`).
 
 ## Key Benefits
 
@@ -381,7 +518,6 @@ export default defineConfig({
     build: {
         terserOptions: {
             compress: {
-                // 'expectType' という名前の関数呼び出しをビルド時に除去する
                 pure_funcs: ['expectType'],
             },
         },

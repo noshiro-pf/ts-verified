@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { Optional } from '../functional/optional.mjs';
 import { IMap } from './imap.mjs';
 
@@ -11,7 +9,10 @@ describe('IMap additional functionality', () => {
     });
 
     it('should create map from JavaScript Map', () => {
-      const jsMap = new Map([['a', 1], ['b', 2]]);
+      const jsMap = new Map([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const map = IMap.create(jsMap);
       expect(map.size).toBe(2);
       expect(Optional.unwrap(map.get('a'))).toBe(1);
@@ -19,7 +20,10 @@ describe('IMap additional functionality', () => {
     });
 
     it('should create map from another IMap', () => {
-      const original = IMap.create([['a', 1], ['b', 2]]);
+      const original = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const copy = IMap.create(original);
       expect(copy.size).toBe(2);
       expect(Optional.unwrap(copy.get('a'))).toBe(1);
@@ -31,33 +35,60 @@ describe('IMap additional functionality', () => {
     it('should return false for different maps (implementation bug)', () => {
       // Note: IMap.equal has a bug - it compares Optional<V> with V directly
       // This is expected behavior given the current implementation
-      const map1 = IMap.create([['a', 1], ['b', 2]]);
-      const map2 = IMap.create([['a', 1], ['b', 2]]);
+      const map1 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+      const map2 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
     it('should return false for different creation order (implementation bug)', () => {
       // Note: IMap.equal has a bug - it compares Optional<V> with V directly
-      const map1 = IMap.create([['a', 1], ['b', 2]]);
-      const map2 = IMap.create([['b', 2], ['a', 1]]);
+      const map1 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+      const map2 = IMap.create([
+        ['b', 2],
+        ['a', 1],
+      ]);
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
     it('should return false for maps with different sizes', () => {
       const map1 = IMap.create([['a', 1]]);
-      const map2 = IMap.create([['a', 1], ['b', 2]]);
+      const map2 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
     it('should return false for maps with different values', () => {
-      const map1 = IMap.create([['a', 1], ['b', 2]]);
-      const map2 = IMap.create([['a', 1], ['b', 3]]);
+      const map1 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+      const map2 = IMap.create([
+        ['a', 1],
+        ['b', 3],
+      ]);
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
     it('should return false for maps with different keys', () => {
-      const map1 = IMap.create([['a', 1], ['b', 2]]);
-      const map2 = IMap.create([['a', 1], ['c', 2]]);
+      const map1 = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+      const map2 = IMap.create([
+        ['a', 1],
+        ['c', 2],
+      ]);
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
@@ -70,12 +101,20 @@ describe('IMap additional functionality', () => {
 
   describe('every method', () => {
     it('should return true when all elements satisfy predicate', () => {
-      const map = IMap.create([['a', 2], ['b', 4], ['c', 6]]);
+      const map = IMap.create([
+        ['a', 2],
+        ['b', 4],
+        ['c', 6],
+      ]);
       expect(map.every((value) => value % 2 === 0)).toBe(true);
     });
 
     it('should return false when some elements do not satisfy predicate', () => {
-      const map = IMap.create([['a', 2], ['b', 3], ['c', 4]]);
+      const map = IMap.create([
+        ['a', 2],
+        ['b', 3],
+        ['c', 4],
+      ]);
       expect(map.every((value) => value % 2 === 0)).toBe(false);
     });
 
@@ -85,12 +124,19 @@ describe('IMap additional functionality', () => {
     });
 
     it('should work with key parameter', () => {
-      const map = IMap.create([['aa', 1], ['bb', 2], ['cc', 3]]);
+      const map = IMap.create([
+        ['aa', 1],
+        ['bb', 2],
+        ['cc', 3],
+      ]);
       expect(map.every((value, key) => key.length === 2)).toBe(true);
     });
 
     it('should work as type guard', () => {
-      const map = IMap.create<string, string | number>([['a', 'hello'], ['b', 'world']]);
+      const map = IMap.create<string, string | number>([
+        ['a', 'hello'],
+        ['b', 'world'],
+      ]);
       if (map.every((value): value is string => typeof value === 'string')) {
         // Type should be narrowed to IMap<string, string>
         const firstValue = Optional.unwrap(map.get('a'));
@@ -101,12 +147,20 @@ describe('IMap additional functionality', () => {
 
   describe('some method', () => {
     it('should return true when at least one element satisfies predicate', () => {
-      const map = IMap.create([['a', 1], ['b', 2], ['c', 3]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3],
+      ]);
       expect(map.some((value) => value % 2 === 0)).toBe(true);
     });
 
     it('should return false when no elements satisfy predicate', () => {
-      const map = IMap.create([['a', 1], ['b', 3], ['c', 5]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 3],
+        ['c', 5],
+      ]);
       expect(map.some((value) => value % 2 === 0)).toBe(false);
     });
 
@@ -116,7 +170,11 @@ describe('IMap additional functionality', () => {
     });
 
     it('should work with key parameter', () => {
-      const map = IMap.create([['a', 1], ['bb', 2], ['c', 3]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['bb', 2],
+        ['c', 3],
+      ]);
       expect(map.some((value, key) => key.length > 1)).toBe(true);
     });
   });
@@ -145,12 +203,15 @@ describe('IMap additional functionality', () => {
 
   describe('withMutations method', () => {
     it('should apply multiple mutations', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
-      
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+
       const updated = map.withMutations([
         { type: 'set', key: 'c', value: 3 },
         { type: 'update', key: 'a', updater: (x: number) => x * 2 },
-        { type: 'delete', key: 'b' }
+        { type: 'delete', key: 'b' },
       ]);
 
       expect(updated.size).toBe(2);
@@ -160,7 +221,10 @@ describe('IMap additional functionality', () => {
     });
 
     it('should handle empty mutations array', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const updated = map.withMutations([]);
       expect(updated.size).toBe(map.size);
       expect(Optional.unwrap(updated.get('a'))).toBe(1);
@@ -170,7 +234,7 @@ describe('IMap additional functionality', () => {
     it('should handle update on non-existent key', () => {
       const map = IMap.create([['a', 1]]);
       const updated = map.withMutations([
-        { type: 'update', key: 'nonexistent', updater: (x: number) => x * 2 }
+        { type: 'update', key: 'nonexistent', updater: (x: number) => x * 2 },
       ]);
       expect(updated.size).toBe(map.size);
       expect(Optional.isNone(updated.get('nonexistent'))).toBe(true);
@@ -180,7 +244,7 @@ describe('IMap additional functionality', () => {
       const map = IMap.create([['a', 1]]);
       const updated = map.withMutations([
         { type: 'set', key: 'a', value: 10 },
-        { type: 'update', key: 'a', updater: (x: number) => x + 5 }
+        { type: 'update', key: 'a', updater: (x: number) => x + 5 },
       ]);
       expect(Optional.unwrap(updated.get('a'))).toBe(15);
     });
@@ -188,26 +252,36 @@ describe('IMap additional functionality', () => {
 
   describe('map method', () => {
     it('should transform values', () => {
-      const map = IMap.create([['a', 1], ['b', 2], ['c', 3]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3],
+      ]);
       const doubled = map.map((value) => value * 2);
-      
+
       expect(Optional.unwrap(doubled.get('a'))).toBe(2);
       expect(Optional.unwrap(doubled.get('b'))).toBe(4);
       expect(Optional.unwrap(doubled.get('c'))).toBe(6);
     });
 
     it('should work with key in mapping function', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const mapped = map.map((value, key) => `${key}-${value}`);
-      
+
       expect(Optional.unwrap(mapped.get('a'))).toBe('a-1');
       expect(Optional.unwrap(mapped.get('b'))).toBe('b-2');
     });
 
     it('should change value types', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const stringified = map.map((value) => value.toString());
-      
+
       expect(Optional.unwrap(stringified.get('a'))).toBe('1');
       expect(Optional.unwrap(stringified.get('b'))).toBe('2');
     });
@@ -215,18 +289,24 @@ describe('IMap additional functionality', () => {
 
   describe('mapKeys method', () => {
     it('should transform keys', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const mapped = map.mapKeys((key) => key.toUpperCase());
-      
+
       expect(Optional.isNone(mapped.get('a'))).toBe(true);
       expect(Optional.unwrap(mapped.get('A'))).toBe(1);
       expect(Optional.unwrap(mapped.get('B'))).toBe(2);
     });
 
     it('should work with different key types', () => {
-      const map = IMap.create([['1', 'one'], ['2', 'two']]);
+      const map = IMap.create([
+        ['1', 'one'],
+        ['2', 'two'],
+      ]);
       const mapped = map.mapKeys((key) => parseInt(key, 10));
-      
+
       expect(Optional.unwrap(mapped.get(1))).toBe('one');
       expect(Optional.unwrap(mapped.get(2))).toBe('two');
     });
@@ -234,23 +314,26 @@ describe('IMap additional functionality', () => {
 
   describe('mapEntries method', () => {
     it('should transform both keys and values', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const mapped = map.mapEntries(([key, value]) => [
         key.toUpperCase(),
-        value * 2
+        value * 2,
       ]);
-      
+
       expect(Optional.unwrap(mapped.get('A'))).toBe(2);
       expect(Optional.unwrap(mapped.get('B'))).toBe(4);
     });
 
     it('should work with type changes', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
-      const mapped = map.mapEntries(([key, value]) => [
-        value,
-        key
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
       ]);
-      
+      const mapped = map.mapEntries(([key, value]) => [value, key]);
+
       expect(Optional.unwrap(mapped.get(1))).toBe('a');
       expect(Optional.unwrap(mapped.get(2))).toBe('b');
     });
@@ -258,13 +341,17 @@ describe('IMap additional functionality', () => {
 
   describe('forEach method', () => {
     it('should execute callback for each element', () => {
-      const map = IMap.create([['a', 1], ['b', 2], ['c', 3]]);
-      const collected: Array<[string, number]> = [];
-      
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3],
+      ]);
+      const collected: [string, number][] = [];
+
       map.forEach((value, key) => {
         collected.push([key, value]);
       });
-      
+
       expect(collected).toHaveLength(3);
       expect(collected).toContainEqual(['a', 1]);
       expect(collected).toContainEqual(['b', 2]);
@@ -274,17 +361,21 @@ describe('IMap additional functionality', () => {
     it('should work with empty map', () => {
       const map = IMap.create<string, number>([]);
       let called = false;
-      
+
       map.forEach(() => {
         called = true;
       });
-      
+
       expect(called).toBe(false);
     });
   });
 
   describe('conversion methods', () => {
-    const map = IMap.create([['a', 1], ['b', 2], ['c', 3]]);
+    const map = IMap.create([
+      ['a', 1],
+      ['b', 2],
+      ['c', 3],
+    ]);
 
     describe('toKeysArray', () => {
       it('should return array of keys', () => {
@@ -337,31 +428,40 @@ describe('IMap additional functionality', () => {
 
   describe('iterable functionality', () => {
     it('should work with for-of loops', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
-      const collected: Array<[string, number]> = [];
-      
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
+      const collected: [string, number][] = [];
+
       for (const entry of map) {
         collected.push(entry);
       }
-      
+
       expect(collected).toHaveLength(2);
       expect(collected).toContainEqual(['a', 1]);
       expect(collected).toContainEqual(['b', 2]);
     });
 
     it('should work with spread operator', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const entries = [...map];
-      
+
       expect(entries).toHaveLength(2);
       expect(entries).toContainEqual(['a', 1]);
       expect(entries).toContainEqual(['b', 2]);
     });
 
     it('should work with Array.from', () => {
-      const map = IMap.create([['a', 1], ['b', 2]]);
+      const map = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const entries = Array.from(map);
-      
+
       expect(entries).toHaveLength(2);
       expect(entries).toContainEqual(['a', 1]);
       expect(entries).toContainEqual(['b', 2]);
@@ -376,7 +476,10 @@ describe('IMap additional functionality', () => {
     });
 
     it('should handle boolean keys', () => {
-      const map = IMap.create([[true, 'yes'], [false, 'no']]);
+      const map = IMap.create([
+        [true, 'yes'],
+        [false, 'no'],
+      ]);
       expect(map.has(true)).toBe(true);
       expect(map.has(false)).toBe(true);
       expect(Optional.unwrap(map.get(true))).toBe('yes');
@@ -384,14 +487,20 @@ describe('IMap additional functionality', () => {
     });
 
     it('should handle string number keys', () => {
-      const map = IMap.create([['1', 'one'], ['2', 'two']]);
+      const map = IMap.create([
+        ['1', 'one'],
+        ['2', 'two'],
+      ]);
       expect(map.has('1')).toBe(true);
       expect(map.has(1)).toBe(false); // Different types
       expect(Optional.unwrap(map.get('1'))).toBe('one');
     });
 
     it('should handle undefined and null values', () => {
-      const map = IMap.create([['undef', undefined], ['null', null]]);
+      const map = IMap.create([
+        ['undef', undefined],
+        ['null', null],
+      ]);
       expect(map.has('undef')).toBe(true);
       expect(map.has('null')).toBe(true);
       expect(Optional.unwrap(map.get('undef'))).toBe(undefined);
@@ -403,7 +512,7 @@ describe('IMap additional functionality', () => {
     it('should not modify original map when setting', () => {
       const original = IMap.create([['a', 1]]);
       const modified = original.set('b', 2);
-      
+
       expect(original.size).toBe(1);
       expect(modified.size).toBe(2);
       expect(original.has('b')).toBe(false);
@@ -411,9 +520,12 @@ describe('IMap additional functionality', () => {
     });
 
     it('should not modify original map when deleting', () => {
-      const original = IMap.create([['a', 1], ['b', 2]]);
+      const original = IMap.create([
+        ['a', 1],
+        ['b', 2],
+      ]);
       const modified = original.delete('a');
-      
+
       expect(original.size).toBe(2);
       expect(modified.size).toBe(1);
       expect(original.has('a')).toBe(true);
@@ -423,7 +535,7 @@ describe('IMap additional functionality', () => {
     it('should not modify original map when updating', () => {
       const original = IMap.create([['a', 1]]);
       const modified = original.update('a', (x) => x * 2);
-      
+
       expect(Optional.unwrap(original.get('a'))).toBe(1);
       expect(Optional.unwrap(modified.get('a'))).toBe(2);
     });

@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { expectType } from '../expect-type.mjs';
 import { Optional } from '../functional/optional.mjs';
 import { Arr } from './array-utils.mjs';
@@ -157,7 +155,7 @@ describe('Arr additional edge cases and uncovered functions', () => {
     it('should create large arrays', () => {
       const result = Arr.zeros(1000);
       expect(result.length).toBe(1000);
-      expect(result.every(x => x === 0)).toBe(true);
+      expect(result.every((x) => x === 0)).toBe(true);
     });
 
     it('should work with curried version', () => {

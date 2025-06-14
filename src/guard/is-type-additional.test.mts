@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { expectType } from '../expect-type.mjs';
 import {
   isNonNullish,
@@ -64,7 +62,9 @@ describe('isNotNumber', () => {
     const value: string | number | boolean = 'test';
     if (isNotNumber(value)) {
       expectType<typeof value, string | boolean>('=');
-      expect(typeof value === 'string' || typeof value === 'boolean').toBe(true);
+      expect(typeof value === 'string' || typeof value === 'boolean').toBe(
+        true,
+      );
     }
   });
 });
@@ -120,7 +120,9 @@ describe('isNotString', () => {
     const value: string | number | boolean = 42;
     if (isNotString(value)) {
       expectType<typeof value, number | boolean>('=');
-      expect(typeof value === 'number' || typeof value === 'boolean').toBe(true);
+      expect(typeof value === 'number' || typeof value === 'boolean').toBe(
+        true,
+      );
     }
   });
 });
@@ -179,7 +181,7 @@ describe('isNullish', () => {
   });
 
   it('should handle edge cases', () => {
-    // Test that it uses loose equality (==) 
+    // Test that it uses loose equality (==)
     expect(isNullish(null)).toBe(true);
     expect(isNullish(undefined)).toBe(true);
   });
@@ -218,12 +220,12 @@ describe('isNonNullish', () => {
       null,
       'world',
       undefined,
-      'test'
+      'test',
     ];
 
     const definedItems = items.filter(isNonNullish);
     expectType<typeof definedItems, string[]>('=');
-    
+
     expect(definedItems).toHaveLength(3);
     expect(definedItems).toEqual(['hello', 'world', 'test']);
   });
@@ -231,7 +233,7 @@ describe('isNonNullish', () => {
   it('should handle complex union types', () => {
     type ComplexType = string | number | boolean | null | undefined;
     const value: ComplexType = 42;
-    
+
     if (isNonNullish(value)) {
       expectType<typeof value, string | number | boolean>('=');
       expect(value !== null && value !== undefined).toBe(true);
@@ -242,7 +244,7 @@ describe('isNonNullish', () => {
 describe('type guard behavior in complex scenarios', () => {
   it('should work with nested conditions', () => {
     const value: string | number | boolean | null | undefined = 'test';
-    
+
     if (isNonNullish(value)) {
       if (isNotBoolean(value)) {
         if (isNotNumber(value)) {
@@ -262,18 +264,18 @@ describe('type guard behavior in complex scenarios', () => {
       'world',
       undefined,
       false,
-      123
+      123,
     ];
 
     const nonNullish = mixed.filter(isNonNullish);
     expectType<typeof nonNullish, (string | number | boolean)[]>('=');
-    
+
     const nonBooleans = nonNullish.filter(isNotBoolean);
     expectType<typeof nonBooleans, (string | number)[]>('=');
-    
+
     const strings = nonBooleans.filter(isNotNumber);
     expectType<typeof strings, string[]>('=');
-    
+
     expect(strings).toEqual(['hello', 'world']);
   });
 });

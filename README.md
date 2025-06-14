@@ -44,17 +44,17 @@ ts-verified works best with strict TypeScript settings:
 ```json
 {
     "compilerOptions": {
-        "allowUnreachableCode": false,
-        "allowUnusedLabels": false,
-        "exactOptionalPropertyTypes": false,
+        "strict": true, // important
+        "noUncheckedIndexedAccess": true, // important
+        "noPropertyAccessFromIndexSignature": true, // important
         "noFallthroughCasesInSwitch": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
-        "noPropertyAccessFromIndexSignature": true, // important
-        "noUncheckedIndexedAccess": true, // important
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strict": true // important
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "exactOptionalPropertyTypes": false
     }
 }
 ```

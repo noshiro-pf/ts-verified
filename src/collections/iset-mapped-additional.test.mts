@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest';
-
 import { ISetMapped } from './iset-mapped.mjs';
 
 type TestElement = { id: number; type: string };
-const testElementToString = (elem: TestElement): string => `${elem.type}_${elem.id}`;
+const testElementToString = (elem: TestElement): string =>
+  `${elem.type}_${elem.id}`;
 const stringToTestElement = (str: string): TestElement => {
   const [type, idStr] = str.split('_');
   return { type, id: Number(idStr) };
@@ -12,7 +11,11 @@ const stringToTestElement = (str: string): TestElement => {
 describe('ISetMapped additional functionality', () => {
   describe('ISetMapped.create', () => {
     it('should create empty set', () => {
-      const set = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
+      const set = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
       expect(set.size).toBe(0);
       expect(set.isEmpty).toBe(true);
     });
@@ -20,9 +23,13 @@ describe('ISetMapped additional functionality', () => {
     it('should create set with initial elements', () => {
       const elements: TestElement[] = [
         { id: 1, type: 'user' },
-        { id: 2, type: 'admin' }
+        { id: 2, type: 'admin' },
       ];
-      const set = ISetMapped.create(elements, testElementToString, stringToTestElement);
+      const set = ISetMapped.create(
+        elements,
+        testElementToString,
+        stringToTestElement,
+      );
       expect(set.size).toBe(2);
       expect(set.isEmpty).toBe(false);
       expect(set.has({ id: 1, type: 'user' })).toBe(true);
@@ -32,9 +39,13 @@ describe('ISetMapped additional functionality', () => {
       const elements: TestElement[] = [
         { id: 1, type: 'user' },
         { id: 1, type: 'user' }, // duplicate
-        { id: 2, type: 'admin' }
+        { id: 2, type: 'admin' },
       ];
-      const set = ISetMapped.create(elements, testElementToString, stringToTestElement);
+      const set = ISetMapped.create(
+        elements,
+        testElementToString,
+        stringToTestElement,
+      );
       expect(set.size).toBe(2); // duplicates removed
     });
   });
@@ -44,12 +55,12 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(ISetMapped.equal(set1, set2)).toBe(true);
     });
@@ -58,12 +69,12 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(ISetMapped.equal(set1, set2)).toBe(false);
     });
@@ -72,19 +83,27 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(ISetMapped.equal(set1, set2)).toBe(false);
     });
 
     it('should return true for empty sets', () => {
-      const set1 = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
-      const set2 = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
+      const set1 = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
+      const set2 = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
       expect(ISetMapped.equal(set1, set2)).toBe(true);
     });
   });
@@ -92,14 +111,20 @@ describe('ISetMapped additional functionality', () => {
   describe('ISetMapped.diff', () => {
     it('should compute difference between sets', () => {
       const oldSet = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const newSet = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'admin' }, { id: 3, type: 'guest' }],
+        [
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'guest' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const diff = ISetMapped.diff(oldSet, newSet);
@@ -115,12 +140,12 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const diff = ISetMapped.diff(set1, set2);
@@ -133,14 +158,20 @@ describe('ISetMapped additional functionality', () => {
   describe('ISetMapped.intersection', () => {
     it('should compute intersection of sets', () => {
       const setA = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'admin' }, { id: 3, type: 'guest' }],
+        [
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'guest' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const intersection = ISetMapped.intersection(setA, setB);
@@ -153,12 +184,12 @@ describe('ISetMapped additional functionality', () => {
       const setA = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const intersection = ISetMapped.intersection(setA, setB);
@@ -171,12 +202,12 @@ describe('ISetMapped additional functionality', () => {
       const setA = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const union = ISetMapped.union(setA, setB);
@@ -188,14 +219,20 @@ describe('ISetMapped additional functionality', () => {
 
     it('should handle overlapping sets', () => {
       const setA = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'admin' }, { id: 3, type: 'guest' }],
+        [
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'guest' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
 
       const union = ISetMapped.union(setA, setB);
@@ -210,24 +247,34 @@ describe('ISetMapped additional functionality', () => {
   describe('every method', () => {
     it('should return true when all elements satisfy predicate', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'user' }, { id: 4, type: 'admin' }],
+        [
+          { id: 2, type: 'user' },
+          { id: 4, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(set.every((elem) => elem.id % 2 === 0)).toBe(true);
     });
 
     it('should return false when some elements do not satisfy predicate', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'user' }, { id: 3, type: 'admin' }],
+        [
+          { id: 2, type: 'user' },
+          { id: 3, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(set.every((elem) => elem.id % 2 === 0)).toBe(false);
     });
 
     it('should return true for empty set', () => {
-      const set = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
+      const set = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
       expect(set.every((elem) => elem.id > 0)).toBe(true);
     });
   });
@@ -235,33 +282,47 @@ describe('ISetMapped additional functionality', () => {
   describe('some method', () => {
     it('should return true when at least one element satisfies predicate', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 4, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 4, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(set.some((elem) => elem.id % 2 === 0)).toBe(true);
     });
 
     it('should return false when no elements satisfy predicate', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 3, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 3, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       expect(set.some((elem) => elem.id % 2 === 0)).toBe(false);
     });
 
     it('should return false for empty set', () => {
-      const set = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
+      const set = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
       expect(set.some((elem) => elem.id > 0)).toBe(false);
     });
   });
 
   describe('add method', () => {
     it('should add new element', () => {
-      const set = ISetMapped.create<TestElement, string>([], testElementToString, stringToTestElement);
+      const set = ISetMapped.create<TestElement, string>(
+        [],
+        testElementToString,
+        stringToTestElement,
+      );
       const updated = set.add({ id: 1, type: 'user' });
-      
+
       expect(updated.size).toBe(1);
       expect(updated.has({ id: 1, type: 'user' })).toBe(true);
     });
@@ -270,10 +331,10 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const updated = set.add({ id: 1, type: 'user' });
-      
+
       expect(updated).toBe(set); // Should return same instance
     });
   });
@@ -283,10 +344,10 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const updated = set.delete({ id: 1, type: 'user' });
-      
+
       expect(updated.size).toBe(0);
       expect(updated.has({ id: 1, type: 'user' })).toBe(false);
     });
@@ -295,10 +356,10 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const updated = set.delete({ id: 2, type: 'admin' });
-      
+
       expect(updated).toBe(set); // Should return same instance
     });
   });
@@ -308,13 +369,13 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const updated = set.withMutations([
         { type: 'add', key: { id: 2, type: 'admin' } },
         { type: 'add', key: { id: 3, type: 'guest' } },
-        { type: 'delete', key: { id: 1, type: 'user' } }
+        { type: 'delete', key: { id: 1, type: 'user' } },
       ]);
 
       expect(updated.size).toBe(2);
@@ -327,7 +388,7 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const updated = set.withMutations([]);
       expect(ISetMapped.equal(set, updated)).toBe(true);
@@ -337,12 +398,15 @@ describe('ISetMapped additional functionality', () => {
   describe('map method', () => {
     it('should transform elements', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const mapped = set.map((elem) => ({ ...elem, id: elem.id + 100 }));
-      
+
       expect(mapped.size).toBe(2);
       expect(mapped.has({ id: 101, type: 'user' })).toBe(true);
       expect(mapped.has({ id: 102, type: 'admin' })).toBe(true);
@@ -352,12 +416,16 @@ describe('ISetMapped additional functionality', () => {
   describe('filter method', () => {
     it('should filter elements', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }, { id: 3, type: 'user' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'user' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const filtered = set.filter((elem) => elem.type === 'user');
-      
+
       expect(filtered.size).toBe(2);
       expect(filtered.has({ id: 1, type: 'user' })).toBe(true);
       expect(filtered.has({ id: 3, type: 'user' })).toBe(true);
@@ -368,12 +436,16 @@ describe('ISetMapped additional functionality', () => {
   describe('filterNot method', () => {
     it('should filter out elements', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }, { id: 3, type: 'user' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'user' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const filtered = set.filterNot((elem) => elem.type === 'user');
-      
+
       expect(filtered.size).toBe(1);
       expect(filtered.has({ id: 2, type: 'admin' })).toBe(true);
       expect(filtered.has({ id: 1, type: 'user' })).toBe(false);
@@ -384,14 +456,17 @@ describe('ISetMapped additional functionality', () => {
   describe('forEach method', () => {
     it('should iterate over all elements', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const elements: TestElement[] = [];
       set.forEach((elem) => elements.push(elem));
-      
+
       expect(elements).toHaveLength(2);
       expect(elements).toContainEqual({ id: 1, type: 'user' });
       expect(elements).toContainEqual({ id: 2, type: 'admin' });
@@ -403,14 +478,17 @@ describe('ISetMapped additional functionality', () => {
       const subset = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const superset = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       expect(subset.isSubsetOf(superset)).toBe(true);
     });
 
@@ -418,14 +496,14 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       expect(set1.isSubsetOf(set2)).toBe(false);
     });
 
@@ -433,14 +511,14 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       expect(set1.isSubsetOf(set2)).toBe(true);
     });
   });
@@ -448,16 +526,19 @@ describe('ISetMapped additional functionality', () => {
   describe('isSupersetOf method', () => {
     it('should return true for proper superset', () => {
       const superset = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const subset = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       expect(superset.isSupersetOf(subset)).toBe(true);
     });
 
@@ -465,14 +546,14 @@ describe('ISetMapped additional functionality', () => {
       const set1 = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const set2 = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       expect(set1.isSupersetOf(set2)).toBe(false);
     });
   });
@@ -480,18 +561,21 @@ describe('ISetMapped additional functionality', () => {
   describe('subtract method', () => {
     it('should compute set difference', () => {
       const setA = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const difference = setA.subtract(setB);
-      
+
       expect(difference.size).toBe(1);
       expect(difference.has({ id: 1, type: 'user' })).toBe(true);
       expect(difference.has({ id: 2, type: 'admin' })).toBe(false);
@@ -501,18 +585,24 @@ describe('ISetMapped additional functionality', () => {
   describe('intersect method', () => {
     it('should compute set intersection', () => {
       const setA = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
-        [{ id: 2, type: 'admin' }, { id: 3, type: 'guest' }],
+        [
+          { id: 2, type: 'admin' },
+          { id: 3, type: 'guest' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const intersection = setA.intersect(setB);
-      
+
       expect(intersection.size).toBe(1);
       expect(intersection.has({ id: 2, type: 'admin' })).toBe(true);
     });
@@ -523,16 +613,16 @@ describe('ISetMapped additional functionality', () => {
       const setA = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
       const setB = ISetMapped.create<TestElement, string>(
         [{ id: 2, type: 'admin' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const union = setA.union(setB);
-      
+
       expect(union.size).toBe(2);
       expect(union.has({ id: 1, type: 'user' })).toBe(true);
       expect(union.has({ id: 2, type: 'admin' })).toBe(true);
@@ -542,11 +632,14 @@ describe('ISetMapped additional functionality', () => {
   describe('iteration methods', () => {
     it('should provide keys iterator', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const keys = Array.from(set.keys());
       expect(keys).toHaveLength(2);
       expect(keys).toContainEqual({ id: 1, type: 'user' });
@@ -555,11 +648,14 @@ describe('ISetMapped additional functionality', () => {
 
     it('should provide values iterator', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const values = Array.from(set.values());
       expect(values).toHaveLength(2);
       expect(values).toContainEqual({ id: 1, type: 'user' });
@@ -570,21 +666,27 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const entries = Array.from(set.entries());
       expect(entries).toHaveLength(1);
-      expect(entries[0]).toEqual([{ id: 1, type: 'user' }, { id: 1, type: 'user' }]);
+      expect(entries[0]).toEqual([
+        { id: 1, type: 'user' },
+        { id: 1, type: 'user' },
+      ]);
     });
 
     it('should be iterable', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const elements = [...set];
       expect(elements).toHaveLength(2);
       expect(elements).toContainEqual({ id: 1, type: 'user' });
@@ -595,11 +697,14 @@ describe('ISetMapped additional functionality', () => {
   describe('conversion methods', () => {
     it('should convert to array', () => {
       const set = ISetMapped.create<TestElement, string>(
-        [{ id: 1, type: 'user' }, { id: 2, type: 'admin' }],
+        [
+          { id: 1, type: 'user' },
+          { id: 2, type: 'admin' },
+        ],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const array = set.toArray();
       expect(array).toHaveLength(2);
       expect(array).toContainEqual({ id: 1, type: 'user' });
@@ -610,9 +715,9 @@ describe('ISetMapped additional functionality', () => {
       const set = ISetMapped.create<TestElement, string>(
         [{ id: 1, type: 'user' }],
         testElementToString,
-        stringToTestElement
+        stringToTestElement,
       );
-      
+
       const rawSet = set.toRawSet();
       expect(rawSet.size).toBe(1);
       expect(rawSet.has('user_1')).toBe(true);

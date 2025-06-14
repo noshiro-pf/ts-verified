@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { expectType } from '../expect-type.mjs';
 import { Tpl } from './tuple-utils.mjs';
 
@@ -182,7 +180,7 @@ describe('Tpl.findIndex edge cases', () => {
     const objects = [
       { name: 'Alice', age: 30 },
       { name: 'Bob', age: 25 },
-      { name: 'Charlie', age: 35 }
+      { name: 'Charlie', age: 35 },
     ] as const;
     const index = Tpl.findIndex(objects, (obj) => obj.age > 30);
     expect(index).toBe(2);
@@ -216,7 +214,9 @@ describe('Tpl.set edge cases', () => {
   it('should work with different value types', () => {
     const nums = [1, 2, 3] as const;
     const withString = Tpl.set(nums, 1, 'two');
-    expectType<typeof withString, readonly [1 | 'two', 2 | 'two', 3 | 'two']>('=');
+    expectType<typeof withString, readonly [1 | 'two', 2 | 'two', 3 | 'two']>(
+      '=',
+    );
     expect(withString).toEqual([1, 'two', 3]);
   });
 
@@ -236,14 +236,18 @@ describe('Tpl.set edge cases', () => {
 describe('Tpl.toUpdated edge cases', () => {
   it('should work with complex transformations', () => {
     const objects = [{ count: 1 }, { count: 2 }, { count: 3 }] as const;
-    const updated = Tpl.toUpdated(objects, 1, (obj) => ({ count: obj.count * 10 }));
+    const updated = Tpl.toUpdated(objects, 1, (obj) => ({
+      count: obj.count * 10,
+    }));
     expect(updated).toEqual([{ count: 1 }, { count: 20 }, { count: 3 }]);
   });
 
   it('should work with type changing updater', () => {
     const nums = [1, 2, 3] as const;
     const updated = Tpl.toUpdated(nums, 0, (n) => `Number: ${n}`);
-    expectType<typeof updated, readonly [string | 1, 2 | string, 3 | string]>('=');
+    expectType<typeof updated, readonly [string | 1, 2 | string, 3 | string]>(
+      '=',
+    );
     expect(updated).toEqual(['Number: 1', 2, 3]);
   });
 });
@@ -289,7 +293,14 @@ describe('Tpl.toSorted edge cases', () => {
   it('should work with string sorting and comparator', () => {
     const strings = ['banana', 'apple', 'cherry'] as const;
     const sorted = Tpl.toSorted(strings, (a, b) => a.localeCompare(b));
-    expectType<typeof sorted, readonly ['banana' | 'apple' | 'cherry', 'banana' | 'apple' | 'cherry', 'banana' | 'apple' | 'cherry']>('=');
+    expectType<
+      typeof sorted,
+      readonly [
+        'banana' | 'apple' | 'cherry',
+        'banana' | 'apple' | 'cherry',
+        'banana' | 'apple' | 'cherry',
+      ]
+    >('=');
     expect(sorted).toEqual(['apple', 'banana', 'cherry']);
   });
 
@@ -315,12 +326,16 @@ describe('Tpl.toSortedBy edge cases', () => {
   });
 
   it('should work with string sorting by length', () => {
-    const strings = [{ text: 'long text' }, { text: 'hi' }, { text: 'medium' }] as const;
+    const strings = [
+      { text: 'long text' },
+      { text: 'hi' },
+      { text: 'medium' },
+    ] as const;
     const sorted = Tpl.toSortedBy(strings, (x) => x.text.length);
     expect(sorted).toEqual([
       { text: 'hi' },
       { text: 'medium' },
-      { text: 'long text' }
+      { text: 'long text' },
     ]);
   });
 
@@ -328,33 +343,39 @@ describe('Tpl.toSortedBy edge cases', () => {
     const users = [
       { name: 'Alice', age: 30 },
       { name: 'Bob', age: 20 },
-      { name: 'Charlie', age: 25 }
+      { name: 'Charlie', age: 25 },
     ] as const;
-    const sorted = Tpl.toSortedBy(users, (user) => user.age, (a, b) => b - a);
+    const sorted = Tpl.toSortedBy(
+      users,
+      (user) => user.age,
+      (a, b) => b - a,
+    );
     expect(sorted).toEqual([
       { name: 'Alice', age: 30 },
       { name: 'Charlie', age: 25 },
-      { name: 'Bob', age: 20 }
+      { name: 'Bob', age: 20 },
     ]);
   });
 
   it('should work with computed sorting values', () => {
-    const points = [{ x: 3, y: 4 }, { x: 1, y: 1 }, { x: 2, y: 2 }] as const;
-    const sorted = Tpl.toSortedBy(points, (p) => Math.sqrt(p.x ** 2 + p.y ** 2));
+    const points = [
+      { x: 3, y: 4 },
+      { x: 1, y: 1 },
+      { x: 2, y: 2 },
+    ] as const;
+    const sorted = Tpl.toSortedBy(points, (p) =>
+      Math.sqrt(p.x ** 2 + p.y ** 2),
+    );
     expect(sorted).toEqual([
       { x: 1, y: 1 },
       { x: 2, y: 2 },
-      { x: 3, y: 4 }
+      { x: 3, y: 4 },
     ]);
   });
 
   it('should work with non-numeric mapper without comparator', () => {
     const items = [{ priority: 3 }, { priority: 1 }, { priority: 2 }] as const;
     const sorted = Tpl.toSortedBy(items, (item) => item.priority);
-    expect(sorted).toEqual([
-      { priority: 1 },
-      { priority: 2 },
-      { priority: 3 }
-    ]);
+    expect(sorted).toEqual([{ priority: 1 }, { priority: 2 }, { priority: 3 }]);
   });
 });

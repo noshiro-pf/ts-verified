@@ -727,7 +727,7 @@ class ISetMappedClass<K, KM extends MapSetKeyType>
   delete(key: K): ISetMapped<K, KM> {
     if (!this.has(key)) {
       if (this.#showNotFoundMessage) {
-        console.warn(`ISetMapped.delete: key not found: ${this.#toKey(key)}`);
+        console.warn(`ISetMapped.delete: key not found: ${String(this.#toKey(key))}`);
       }
       return this;
     }

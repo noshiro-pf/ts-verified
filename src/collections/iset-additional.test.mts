@@ -49,14 +49,14 @@ describe('ISet additional functionality', () => {
     });
 
     it('should return false for sets with different sizes', () => {
-      const set1 = ISet.create(['a', 'b']);
-      const set2 = ISet.create(['a', 'b', 'c']);
-      expect(ISet.equal<string>(set1, set2)).toBe(false);
+      const set1 = ISet.create<string>(['a', 'b']);
+      const set2 = ISet.create<string>(['a', 'b', 'c']);
+      expect(ISet.equal(set1, set2)).toBe(false);
     });
 
     it('should return false for sets with different elements', () => {
-      const set1 = ISet.create(['a', 'b', 'c']);
-      const set2 = ISet.create(['a', 'b', 'd']);
+      const set1 = ISet.create(['a', 'b', 'c']) as ISet<'a' | 'b' | 'c' | 'd'>;
+      const set2 = ISet.create(['a', 'b', 'd']) as ISet<'a' | 'b' | 'c' | 'd'>;
       expect(ISet.equal(set1, set2)).toBe(false);
     });
 
@@ -104,7 +104,7 @@ describe('ISet additional functionality', () => {
     });
 
     it('should add new element and return new instance', () => {
-      const set = ISet.create(['a', 'b']);
+      const set = ISet.create<string>(['a', 'b']);
       const updated = set.add('c');
       expect(updated).not.toBe(set);
       expect(updated.size).toBe(3);
@@ -114,7 +114,7 @@ describe('ISet additional functionality', () => {
 
   describe('withMutations method', () => {
     it('should apply multiple mutations', () => {
-      const set = ISet.create(['a', 'b']);
+      const set = ISet.create<string>(['a', 'b']);
 
       const updated = set.withMutations([
         { type: 'add', key: 'c' },
@@ -205,8 +205,8 @@ describe('ISet additional functionality', () => {
 
   describe('ISet.diff', () => {
     it('should compute differences between sets', () => {
-      const oldSet = ISet.create(['a', 'b', 'c']);
-      const newSet = ISet.create(['b', 'c', 'd']);
+      const oldSet = ISet.create(['a', 'b', 'c']) as ISet<'a' | 'b' | 'c' | 'd'>;
+      const newSet = ISet.create(['b', 'c', 'd']) as ISet<'a' | 'b' | 'c' | 'd'>;
 
       const diff = ISet.diff(oldSet, newSet);
 
@@ -228,8 +228,8 @@ describe('ISet additional functionality', () => {
     });
 
     it('should handle complete replacement', () => {
-      const oldSet = ISet.create(['a', 'b']);
-      const newSet = ISet.create(['c', 'd']);
+      const oldSet = ISet.create(['a', 'b']) as ISet<'a' | 'b' | 'c' | 'd'>;
+      const newSet = ISet.create(['c', 'd']) as ISet<'a' | 'b' | 'c' | 'd'>;
 
       const diff = ISet.diff(oldSet, newSet);
 
@@ -301,7 +301,7 @@ describe('ISet additional functionality', () => {
     });
 
     it('should work with empty sets', () => {
-      const set1 = ISet.create([1, 2, 3]);
+      const set1 = ISet.create<number>([1, 2, 3]);
       const set2 = ISet.create<number>([]);
 
       const union = set1.union(set2);
@@ -462,8 +462,8 @@ describe('ISet additional functionality', () => {
   describe('static utility functions', () => {
     describe('ISet.intersection', () => {
       it('should work as static method', () => {
-        const set1 = ISet.create([1, 2, 3]);
-        const set2 = ISet.create([2, 3, 4]);
+        const set1 = ISet.create([1, 2, 3]) as ISet<1 | 2 | 3 | 4>;
+        const set2 = ISet.create([2, 3, 4]) as ISet<1 | 2 | 3 | 4>;
 
         const intersection = ISet.intersection(set1, set2);
         expect(intersection.size).toBe(2);

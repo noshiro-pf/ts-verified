@@ -1,11 +1,11 @@
 import { ISetMapped } from './iset-mapped.mjs';
 
 type TestElement = { id: number; type: string };
-const testElementToString = (elem: TestElement): string =>
+const testElementToString = (elem: Readonly<TestElement>): string =>
   `${elem.type}_${elem.id}`;
 const stringToTestElement = (str: string): TestElement => {
   const [type, idStr] = str.split('_');
-  return { type, id: Number(idStr) };
+  return { type: type ?? '', id: Number(idStr ?? '0') };
 };
 
 describe('ISetMapped additional functionality', () => {

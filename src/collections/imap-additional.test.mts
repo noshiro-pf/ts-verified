@@ -60,7 +60,7 @@ describe('IMap additional functionality', () => {
     });
 
     it('should return false for maps with different sizes', () => {
-      const map1 = IMap.create([['a', 1]]);
+      const map1 = IMap.create([['a', 1]]) as IMap<'a' | 'b', number>;
       const map2 = IMap.create([
         ['a', 1],
         ['b', 2],
@@ -84,11 +84,11 @@ describe('IMap additional functionality', () => {
       const map1 = IMap.create([
         ['a', 1],
         ['b', 2],
-      ]);
+      ]) as IMap<'a' | 'b' | 'c', number>;
       const map2 = IMap.create([
         ['a', 1],
         ['c', 2],
-      ]);
+      ]) as IMap<'a' | 'b' | 'c', number>;
       expect(IMap.equal(map1, map2)).toBe(false);
     });
 
@@ -129,7 +129,7 @@ describe('IMap additional functionality', () => {
         ['bb', 2],
         ['cc', 3],
       ]);
-      expect(map.every((value, key) => key.length === 2)).toBe(true);
+      expect(map.every((_value, key) => key.length === 2)).toBe(true);
     });
 
     it('should work as type guard', () => {
@@ -175,7 +175,7 @@ describe('IMap additional functionality', () => {
         ['bb', 2],
         ['c', 3],
       ]);
-      expect(map.some((value, key) => key.length > 1)).toBe(true);
+      expect(map.some((_value, key) => key.length > 1)).toBe(true);
     });
   });
 
@@ -203,7 +203,7 @@ describe('IMap additional functionality', () => {
 
   describe('withMutations method', () => {
     it('should apply multiple mutations', () => {
-      const map = IMap.create([
+      const map = IMap.create<string, number>([
         ['a', 1],
         ['b', 2],
       ]);
@@ -232,7 +232,7 @@ describe('IMap additional functionality', () => {
     });
 
     it('should handle update on non-existent key', () => {
-      const map = IMap.create([['a', 1]]);
+      const map = IMap.create<string, number>([['a', 1]]);
       const updated = map.withMutations([
         { type: 'update', key: 'nonexistent', updater: (x: number) => x * 2 },
       ]);
@@ -305,7 +305,7 @@ describe('IMap additional functionality', () => {
         ['1', 'one'],
         ['2', 'two'],
       ]);
-      const mapped = map.mapKeys((key) => parseInt(key, 10));
+      const mapped = map.mapKeys((key) => Number.parseInt(key, 10));
 
       expect(Optional.unwrap(mapped.get(1))).toBe('one');
       expect(Optional.unwrap(mapped.get(2))).toBe('two');
@@ -432,10 +432,10 @@ describe('IMap additional functionality', () => {
         ['a', 1],
         ['b', 2],
       ]);
-      const collected: [string, number][] = [];
+      const collected: readonly [string, number][] = [];
 
       for (const entry of map) {
-        collected.push(entry);
+        (collected as [string, number][]).push([...entry]);
       }
 
       expect(collected).toHaveLength(2);
@@ -470,9 +470,9 @@ describe('IMap additional functionality', () => {
 
   describe('edge cases', () => {
     it('should handle NaN keys correctly', () => {
-      const map = IMap.create([[NaN, 'not-a-number']]);
-      expect(map.has(NaN)).toBe(true);
-      expect(Optional.unwrap(map.get(NaN))).toBe('not-a-number');
+      const map = IMap.create([[Number.NaN, 'not-a-number']]);
+      expect(map.has(Number.NaN)).toBe(true);
+      expect(Optional.unwrap(map.get(Number.NaN))).toBe('not-a-number');
     });
 
     it('should handle boolean keys', () => {
@@ -492,7 +492,7 @@ describe('IMap additional functionality', () => {
         ['2', 'two'],
       ]);
       expect(map.has('1')).toBe(true);
-      expect(map.has(1)).toBe(false); // Different types
+      expect(map.has(1 as any)).toBe(false); // Different types
       expect(Optional.unwrap(map.get('1'))).toBe('one');
     });
 
@@ -510,7 +510,7 @@ describe('IMap additional functionality', () => {
 
   describe('immutability', () => {
     it('should not modify original map when setting', () => {
-      const original = IMap.create([['a', 1]]);
+      const original = IMap.create<string, number>([['a', 1]]);
       const modified = original.set('b', 2);
 
       expect(original.size).toBe(1);

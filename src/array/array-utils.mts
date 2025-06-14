@@ -140,10 +140,14 @@ export namespace Arr {
    * Arr.isArray(null); // false
    * ```
    */
-  export const isArray = <E,>(
-    value: E,
-  ): value is E extends readonly unknown[] ? E : readonly unknown[] =>
+  export const isArray = <E,>(value: E): value is FilterArray<E> =>
     Array.isArray(value);
+
+  type FilterArray<T> = T extends readonly unknown[]
+    ? T
+    : TypeEq<T, unknown> extends true
+      ? readonly unknown[]
+      : never;
 
   // validation
 

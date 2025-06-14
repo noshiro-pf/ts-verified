@@ -589,7 +589,7 @@ class IMapMappedClass<K, V, KM extends MapSetKeyType>
   delete(key: K): IMapMapped<K, V, KM> {
     if (!this.has(key)) {
       if (this.#showNotFoundMessage) {
-        console.warn(`IMapMapped.delete: key not found: ${this.#toKey(key)}`);
+        console.warn(`IMapMapped.delete: key not found: ${String(this.#toKey(key))}`);
       }
       return this;
     }
@@ -634,7 +634,7 @@ class IMapMappedClass<K, V, KM extends MapSetKeyType>
 
     if (Optional.isNone(curr)) {
       if (this.#showNotFoundMessage) {
-        console.warn(`IMapMapped.update: key not found: ${this.#toKey(key)}`);
+        console.warn(`IMapMapped.update: key not found: ${String(this.#toKey(key))}`);
       }
       return this;
     }
@@ -684,7 +684,7 @@ class IMapMappedClass<K, V, KM extends MapSetKeyType>
           if (!mut_result.has(key) || curr === undefined) {
             if (this.#showNotFoundMessage) {
               console.warn(
-                `IMapMapped.withMutations::update: key not found: ${key}`,
+                `IMapMapped.withMutations::update: key not found: ${String(key)}`,
               );
             }
             break;

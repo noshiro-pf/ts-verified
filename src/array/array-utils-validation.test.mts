@@ -70,6 +70,36 @@ describe('Arr', () => {
       expect(checkUnion(true)).toBe(-1);
       expect(checkUnion({ a: 1 })).toBe(-1);
     });
+
+    test('should exclude impossible array types from unions (including unknown)', () => {
+      function checkUnion(
+        value:
+          | string
+          | boolean
+          | readonly number[]
+          | { readonly a: number }
+          // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+          | unknown
+          // eslint-disable-next-line @typescript-eslint/no-restricted-types
+          | object,
+      ): number {
+        if (Arr.isArray(value)) {
+          // Only number[] should remain
+          expectType<typeof value, readonly number[]>('=');
+          return value.length;
+        }
+        // Non-array types
+        expectType<typeof value, string | boolean | { readonly a: number }>(
+          '=',
+        );
+        return -1;
+      }
+
+      expect(checkUnion([1, 2])).toBe(2);
+      expect(checkUnion('test')).toBe(-1);
+      expect(checkUnion(true)).toBe(-1);
+      expect(checkUnion({ a: 1 })).toBe(-1);
+    });
   });
 
   describe('isEmpty', () => {

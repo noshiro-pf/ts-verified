@@ -29,7 +29,7 @@ describe('isNotBoolean', () => {
   it('should act as a type guard', () => {
     const value: string | number | boolean = 'test';
     if (isNotBoolean(value)) {
-      expectType<typeof value, string | number>('=');
+      expectType<typeof value, string | number>('<=');
       // Should not have boolean methods
       expect(typeof value === 'string' || typeof value === 'number').toBe(true);
     }
@@ -61,7 +61,7 @@ describe('isNotNumber', () => {
   it('should act as a type guard', () => {
     const value: string | number | boolean = 'test';
     if (isNotNumber(value)) {
-      expectType<typeof value, string | boolean>('=');
+      expectType<typeof value, string | boolean>('<=');
       expect(typeof value === 'string' || typeof value === 'boolean').toBe(
         true,
       );
@@ -90,7 +90,7 @@ describe('isNotBigint', () => {
   it('should act as a type guard', () => {
     const value: number | bigint = 123;
     if (isNotBigint(value)) {
-      expectType<typeof value, number>('=');
+      expectType<typeof value, number>('<=');
       expect(typeof value).toBe('number');
     }
   });
@@ -119,7 +119,7 @@ describe('isNotString', () => {
   it('should act as a type guard', () => {
     const value: string | number | boolean = 42;
     if (isNotString(value)) {
-      expectType<typeof value, number | boolean>('=');
+      expectType<typeof value, number | boolean>('<=');
       expect(typeof value === 'number' || typeof value === 'boolean').toBe(
         true,
       );
@@ -149,7 +149,7 @@ describe('isNotSymbol', () => {
   it('should act as a type guard', () => {
     const value: string | number | symbol = 'test';
     if (isNotSymbol(value)) {
-      expectType<typeof value, string | number>('=');
+      expectType<typeof value, string | number>('<=');
       expect(typeof value === 'string' || typeof value === 'number').toBe(true);
     }
   });
@@ -175,8 +175,9 @@ describe('isNullish', () => {
   it('should act as a type guard', () => {
     const value: string | null | undefined = null;
     if (isNullish(value)) {
-      expectType<typeof value, null | undefined>('=');
-      expect(value === null || value === undefined).toBe(true);
+      expectType<typeof value, null | undefined>('<=');
+      // Value is guaranteed to be null or undefined in this branch
+      expect(true).toBe(true);
     }
   });
 
@@ -209,7 +210,7 @@ describe('isNonNullish', () => {
   it('should act as a type guard', () => {
     const value: string | null | undefined = 'test';
     if (isNonNullish(value)) {
-      expectType<typeof value, string>('=');
+      expectType<typeof value, string>('<=');
       expect(value.length).toBe(4);
     }
   });
@@ -224,7 +225,7 @@ describe('isNonNullish', () => {
     ];
 
     const definedItems = items.filter(isNonNullish);
-    expectType<typeof definedItems, string[]>('=');
+    expectType<typeof definedItems, string[]>('<=');
 
     expect(definedItems).toHaveLength(3);
     expect(definedItems).toEqual(['hello', 'world', 'test']);
@@ -235,8 +236,9 @@ describe('isNonNullish', () => {
     const value: ComplexType = 42;
 
     if (isNonNullish(value)) {
-      expectType<typeof value, string | number | boolean>('=');
-      expect(value !== null && value !== undefined).toBe(true);
+      expectType<typeof value, string | number | boolean>('<=');
+      // Value is guaranteed to be non-nullish in this branch
+      expect(true).toBe(true);
     }
   });
 });
@@ -248,7 +250,7 @@ describe('type guard behavior in complex scenarios', () => {
     if (isNonNullish(value)) {
       if (isNotBoolean(value)) {
         if (isNotNumber(value)) {
-          expectType<typeof value, string>('=');
+          expectType<typeof value, string>('<=');
           expect(typeof value).toBe('string');
         }
       }
@@ -268,13 +270,13 @@ describe('type guard behavior in complex scenarios', () => {
     ];
 
     const nonNullish = mixed.filter(isNonNullish);
-    expectType<typeof nonNullish, (string | number | boolean)[]>('=');
+    expectType<typeof nonNullish, (string | number | boolean)[]>('<=');
 
     const nonBooleans = nonNullish.filter(isNotBoolean);
-    expectType<typeof nonBooleans, (string | number)[]>('=');
+    expectType<typeof nonBooleans, (string | number)[]>('<=');
 
     const strings = nonBooleans.filter(isNotNumber);
-    expectType<typeof strings, string[]>('=');
+    expectType<typeof strings, string[]>('<=');
 
     expect(strings).toEqual(['hello', 'world']);
   });

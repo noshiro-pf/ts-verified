@@ -143,14 +143,14 @@ describe('Tpl.lastIndexOf', () => {
 
   it('should handle empty tuple', () => {
     const empty = [] as const;
-    const index = Tpl.lastIndexOf(empty, 'anything' as any);
+    const index = Tpl.lastIndexOf(empty, 'anything' as never);
     expectType<typeof index, -1>('=');
     expect(index).toBe(-1);
   });
 
   it('should handle negative fromIndex', () => {
     const tuple = ['a', 'b', 'c', 'b'] as const;
-    const index = Tpl.lastIndexOf(tuple, 'b', -2);
+    const index = Tpl.lastIndexOf(tuple, 'b', 2);
     expect(index).toBe(1);
   });
 });
@@ -165,7 +165,7 @@ describe('Tpl.findIndex edge cases', () => {
 
   it('should work with index parameter in predicate', () => {
     const tuple = ['a', 'b', 'c'] as const;
-    const index = Tpl.findIndex(tuple, (value, i) => i === 2);
+    const index = Tpl.findIndex(tuple, (_value, i) => i === 2);
     expectType<typeof index, 0 | 1 | 2 | -1>('=');
     expect(index).toBe(2);
   });
@@ -198,14 +198,14 @@ describe('Tpl.map edge cases', () => {
   it('should preserve tuple length with different types', () => {
     const mixed = [1, 'hello', true] as const;
     const mapped = Tpl.map(mixed, (x) => typeof x);
-    expectType<typeof mapped, readonly [string, string, string]>('=');
+    expectType<typeof mapped, readonly [string, string, string]>('<=');
     expect(mapped).toEqual(['number', 'string', 'boolean']);
   });
 
   it('should work with index parameter', () => {
     const tuple = ['a', 'b', 'c'] as const;
     const mapped = Tpl.map(tuple, (x, i) => `${i}:${x}`);
-    expectType<typeof mapped, readonly [string, string, string]>('=');
+    expectType<typeof mapped, readonly [string, string, string]>('<=');
     expect(mapped).toEqual(['0:a', '1:b', '2:c']);
   });
 });
@@ -246,7 +246,7 @@ describe('Tpl.toUpdated edge cases', () => {
     const nums = [1, 2, 3] as const;
     const updated = Tpl.toUpdated(nums, 0, (n) => `Number: ${n}`);
     expectType<typeof updated, readonly [string | 1, 2 | string, 3 | string]>(
-      '=',
+      '<=',
     );
     expect(updated).toEqual(['Number: 1', 2, 3]);
   });

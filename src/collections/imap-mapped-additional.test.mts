@@ -5,7 +5,7 @@ type TestKey = { id: number; type: string };
 const testKeyToString = (key: TestKey): string => `${key.type}_${key.id}`;
 const stringToTestKey = (str: string): TestKey => {
   const [type, idStr] = str.split('_');
-  return { type, id: Number(idStr) };
+  return { type: type ?? '', id: Number(idStr ?? '0') };
 };
 
 describe('IMapMapped additional functionality', () => {
@@ -389,8 +389,8 @@ describe('IMapMapped additional functionality', () => {
       const stringToComplexKey = (str: string): ComplexKey => {
         const [idStr, arrStr] = str.split('_');
         return {
-          nested: { id: Number(idStr) },
-          arr: arrStr.split(',').map(Number),
+          nested: { id: Number(idStr ?? '0') },
+          arr: (arrStr ?? '').split(',').map(Number),
         };
       };
 

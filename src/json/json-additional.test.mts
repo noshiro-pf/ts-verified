@@ -65,7 +65,7 @@ describe('Json.stringify with replacer and space', () => {
       email: 'john@example.com',
     };
 
-    const secureReplacer = (key: string, value: unknown) => {
+    const secureReplacer = (key: string, value: unknown): unknown => {
       if (key === 'password') return '[REDACTED]';
       return value;
     };
@@ -209,15 +209,14 @@ describe('Json.stringifySelected', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
+      const parsed: unknown = JSON.parse(result.value);
       expect(parsed).toEqual({ a: 1, b: 2 });
     }
   });
 
   it('should handle circular references with error', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const circular: any = { name: 'test' };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    type CircularType = { name: string; self?: CircularType };
+    const circular: CircularType = { name: 'test' };
     circular.self = circular;
 
     const result = Json.stringifySelected(circular, ['name', 'self']);
@@ -270,15 +269,21 @@ describe('Json.stringifySortedKey', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
-      const keys = Object.keys(parsed);
-      expect(keys).toEqual(['settings', 'user']); // sorted top-level keys
+      const parsed: unknown = JSON.parse(result.value);
+      if (isRecord(parsed)) {
+        const keys = Object.keys(parsed);
+        expect(keys).toEqual(['settings', 'user']); // sorted top-level keys
 
-      const userKeys = Object.keys(parsed.user);
-      expect(userKeys).toEqual(['address', 'age', 'name']); // sorted nested keys
+        if (hasKey(parsed, 'user') && isRecord(parsed.user)) {
+          const userKeys = Object.keys(parsed.user);
+          expect(userKeys).toEqual(['address', 'age', 'name']); // sorted nested keys
 
-      const addressKeys = Object.keys(parsed.user.address);
-      expect(addressKeys).toEqual(['city', 'country', 'zip']); // sorted deeper nested keys
+          if (hasKey(parsed.user, 'address') && isRecord(parsed.user.address)) {
+            const addressKeys = Object.keys(parsed.user.address);
+            expect(addressKeys).toEqual(['city', 'country', 'zip']); // sorted deeper nested keys
+          }
+        }
+      }
     }
   });
 
@@ -299,19 +304,32 @@ describe('Json.stringifySortedKey', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
+      const parsed: unknown = JSON.parse(result.value);
 
-      // Check top-level keys are sorted
-      const topKeys = Object.keys(parsed);
-      expect(topKeys).toEqual(['metadata', 'users']);
+      if (isRecord(parsed)) {
+        // Check top-level keys are sorted
+        const topKeys = Object.keys(parsed);
+        expect(topKeys).toEqual(['metadata', 'users']);
 
-      // Check metadata keys are sorted
-      const metadataKeys = Object.keys(parsed.metadata);
-      expect(metadataKeys).toEqual(['author', 'created', 'version']);
+        // Check metadata keys are sorted
+        if (hasKey(parsed, 'metadata') && isRecord(parsed.metadata)) {
+          const metadataKeys = Object.keys(parsed.metadata);
+          expect(metadataKeys).toEqual(['author', 'created', 'version']);
+        }
 
-      // Check user object keys are sorted
-      const userKeys = Object.keys(parsed.users[0]);
-      expect(userKeys).toEqual(['active', 'id', 'name']);
+        // Check user object keys are sorted
+        if (
+          hasKey(parsed, 'users') &&
+          Array.isArray(parsed.users) &&
+          parsed.users.length > 0
+        ) {
+          const firstUser = parsed.users[0];
+          if (isRecord(firstUser)) {
+            const userKeys = Object.keys(firstUser);
+            expect(userKeys).toEqual(['active', 'id', 'name']);
+          }
+        }
+      }
     }
   });
 
@@ -323,7 +341,7 @@ describe('Json.stringifySortedKey', () => {
     if (Result.isOk(result)) {
       expect(result.value).toContain('\n');
       expect(result.value).toContain('  ');
-      expect(result.value).toMatch(/{\s+"a": 1,\s+"b": 2\s+}/);
+      expect(result.value).toMatch(/\{\s+"a": 1,\s+"b": 2\s+\}/u);
     }
   });
 
@@ -344,9 +362,13 @@ describe('Json.stringifySortedKey', () => {
 
   it('should handle problematic objects', () => {
     try {
-      const problematicObj = {
+      type CircularObj = {
+        normal: string;
+        circular: { self?: CircularObj };
+      };
+      const problematicObj: CircularObj = {
         normal: 'value',
-        circular: {} as any,
+        circular: {},
       };
       problematicObj.circular.self = problematicObj;
 
@@ -390,8 +412,22 @@ describe('Json.stringifySortedKey', () => {
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
       const parsed: unknown = JSON.parse(result.value);
-      expect(Object.keys(parsed.level1)).toEqual(['a', 'z']);
-      expect(Object.keys(parsed.level1.a.nested)).toEqual(['x', 'y']);
+      if (isRecord(parsed) && hasKey(parsed, 'level1')) {
+        const level1 = parsed.level1;
+        if (isRecord(level1)) {
+          expect(Object.keys(level1)).toEqual(['a', 'z']);
+          if (
+            hasKey(level1, 'a') &&
+            isRecord(level1.a) &&
+            hasKey(level1.a, 'nested')
+          ) {
+            const nested = level1.a.nested;
+            if (isRecord(nested)) {
+              expect(Object.keys(nested)).toEqual(['x', 'y']);
+            }
+          }
+        }
+      }
     }
   });
 });

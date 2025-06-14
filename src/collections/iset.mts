@@ -629,7 +629,8 @@ class ISetClass<K extends MapSetKeyType> implements ISet<K>, Iterable<K> {
 
   /** @inheritdoc */
   isSupersetOf(set: ISet<WidenLiteral<K>>): boolean {
-    return set.every((k) => this.has(k));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    return set.every((k) => this.has(k as K));
   }
 
   /** @inheritdoc */

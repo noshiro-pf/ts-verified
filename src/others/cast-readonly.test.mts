@@ -33,6 +33,7 @@ describe('castReadonly', () => {
 
   it('should work with null and undefined', () => {
     expect(castReadonly(null)).toBe(null);
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     expect(castReadonly(undefined)).toBe(undefined);
   });
 });
@@ -58,7 +59,7 @@ describe('castDeepReadonly', () => {
     const readonly = castDeepReadonly(complex);
 
     expect(readonly).toBe(complex);
-    expect(readonly.users[0].profile.name).toBe('Alice');
+    expect(readonly.users[0]?.profile.name).toBe('Alice');
     expect(readonly.settings.options.debug).toBe(true);
   });
 
@@ -70,8 +71,8 @@ describe('castDeepReadonly', () => {
     const readonly = castDeepReadonly(data);
 
     expect(readonly).toBe(data);
-    expect(readonly[0].meta.active).toBe(true);
-    expect(readonly[1].meta.active).toBe(false);
+    expect(readonly[0]?.meta.active).toBe(true);
+    expect(readonly[1]?.meta.active).toBe(false);
   });
 
   it('should work with primitives', () => {
@@ -82,6 +83,7 @@ describe('castDeepReadonly', () => {
 
   it('should work with null and undefined', () => {
     expect(castDeepReadonly(null)).toBe(null);
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     expect(castDeepReadonly(undefined)).toBe(undefined);
   });
 });

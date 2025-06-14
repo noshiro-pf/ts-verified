@@ -142,7 +142,8 @@ export namespace Arr {
    */
   export const isArray = <E,>(
     value: E,
-  ): value is E extends readonly unknown[] ? E : never => Array.isArray(value);
+  ): value is E extends readonly unknown[] ? E : readonly unknown[] =>
+    Array.isArray(value);
 
   // validation
 

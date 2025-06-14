@@ -51,7 +51,7 @@ describe('ISet additional functionality', () => {
     it('should return false for sets with different sizes', () => {
       const set1 = ISet.create(['a', 'b']);
       const set2 = ISet.create(['a', 'b', 'c']);
-      expect(ISet.equal(set1, set2)).toBe(false);
+      expect(ISet.equal<string>(set1, set2)).toBe(false);
     });
 
     it('should return false for sets with different elements', () => {
@@ -245,8 +245,8 @@ describe('ISet additional functionality', () => {
 
   describe('intersect method', () => {
     it('should find common elements', () => {
-      const set1 = ISet.create([1, 2, 3, 4]);
-      const set2 = ISet.create([3, 4, 5, 6]);
+      const set1 = ISet.create<number>([1, 2, 3, 4]);
+      const set2 = ISet.create<number>([3, 4, 5, 6]);
 
       const intersection = set1.intersect(set2);
 
@@ -256,15 +256,15 @@ describe('ISet additional functionality', () => {
     });
 
     it('should return empty set for no common elements', () => {
-      const set1 = ISet.create([1, 2]);
-      const set2 = ISet.create([3, 4]);
+      const set1 = ISet.create<number>([1, 2]);
+      const set2 = ISet.create<number>([3, 4]);
 
       const intersection = set1.intersect(set2);
       expect(intersection.isEmpty).toBe(true);
     });
 
     it('should work with empty sets', () => {
-      const set1 = ISet.create([1, 2, 3]);
+      const set1 = ISet.create<number>([1, 2, 3]);
       const set2 = ISet.create<number>([]);
 
       const intersection = set1.intersect(set2);
@@ -400,8 +400,8 @@ describe('ISet additional functionality', () => {
 
   describe('edge cases', () => {
     it('should handle NaN values correctly', () => {
-      const set = ISet.create([NaN, 1, 2]);
-      expect(set.has(NaN)).toBe(true);
+      const set = ISet.create([Number.NaN, 1, 2]);
+      expect(set.has(Number.NaN)).toBe(true);
       expect(set.size).toBe(3);
     });
 
@@ -415,6 +415,7 @@ describe('ISet additional functionality', () => {
     it('should handle string number values', () => {
       const set = ISet.create(['1', '2', '3']);
       expect(set.has('1')).toBe(true);
+      // @ts-expect-error Testing type coercion
       expect(set.has(1)).toBe(false); // Different types
     });
 
@@ -428,7 +429,7 @@ describe('ISet additional functionality', () => {
 
   describe('immutability', () => {
     it('should not modify original set when adding', () => {
-      const original = ISet.create(['a', 'b']);
+      const original = ISet.create<string>(['a', 'b']);
       const modified = original.add('c');
 
       expect(original.size).toBe(2);

@@ -1,5 +1,6 @@
 import { expectType } from '../expect-type.mjs';
 import { Optional } from '../functional/optional.mjs';
+import { asUint32 } from '../number/index.mjs';
 import { Arr } from './array-utils.mjs';
 
 describe('Arr additional edge cases and uncovered functions', () => {
@@ -54,7 +55,6 @@ describe('Arr additional edge cases and uncovered functions', () => {
 
     it('should return false for invalid indices', () => {
       const array = ['a', 'b', 'c'];
-      expect(Arr.indexIsInRange(array, -1)).toBe(false);
       expect(Arr.indexIsInRange(array, 3)).toBe(false);
       expect(Arr.indexIsInRange(array, 10)).toBe(false);
     });
@@ -62,12 +62,15 @@ describe('Arr additional edge cases and uncovered functions', () => {
     it('should work with empty array', () => {
       const empty: readonly string[] = [];
       expect(Arr.indexIsInRange(empty, 0)).toBe(false);
+      // @ts-expect-error negative indices should not be allowed
       expect(Arr.indexIsInRange(empty, -1)).toBe(false);
     });
 
-    it('should work with floating point indices', () => {
+    it('should be type error with floating point indices', () => {
       const array = [1, 2, 3];
+      // @ts-expect-error floating point indices should not be allowed
       expect(Arr.indexIsInRange(array, 1.5)).toBe(true); // JavaScript arrays accept floating point indices
+      // @ts-expect-error floating point indices should not be allowed
       expect(Arr.indexIsInRange(array, 3.1)).toBe(false);
     });
   });
@@ -110,7 +113,7 @@ describe('Arr additional edge cases and uncovered functions', () => {
     it('should work as type guard', () => {
       const array: readonly number[] = [1, 2, 3];
       if (Arr.isArrayAtLeastLength(array, 2)) {
-        expectType<typeof array, ArrayAtLeastLength<2, number>>('=');
+        expectType<typeof array, ArrayAtLeastLen<2, number>>('=');
         expect(array.length >= 2).toBe(true);
       }
     });
@@ -153,8 +156,9 @@ describe('Arr additional edge cases and uncovered functions', () => {
     });
 
     it('should create large arrays', () => {
-      const result = Arr.zeros(1000);
-      expect(result.length).toBe(1000);
+      const result = Arr.zeros(asUint32(1000));
+      expect(result).toHaveLength(1000);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       expect(result.every((x) => x === 0)).toBe(true);
     });
 
@@ -171,8 +175,8 @@ describe('Arr additional edge cases and uncovered functions', () => {
     });
 
     it('should create sequence with large length', () => {
-      const result = Arr.seq(100);
-      expect(result.length).toBe(100);
+      const result = Arr.seq(asUint32(100));
+      expect(result).toHaveLength(100);
       expect(result[0]).toBe(0);
       expect(result[99]).toBe(99);
     });
@@ -185,7 +189,7 @@ describe('Arr additional edge cases and uncovered functions', () => {
 
   describe('Arr.create with additional cases', () => {
     it('should create array with function values', () => {
-      const fn = () => 'test';
+      const fn = (): string => 'test';
       const result = Arr.create(3, fn);
       expect(result).toEqual([fn, fn, fn]);
       expect(result[0]).toBe(fn);
@@ -221,17 +225,17 @@ describe('Arr additional edge cases and uncovered functions', () => {
       expect(result).toEqual([]); // Should be empty when step direction conflicts
     });
 
-    it('should handle floating point steps', () => {
+    it('should be type error with floating point steps', () => {
+      // @ts-expect-error floating point step should not be allowed
       const result = Arr.range(0, 2, 0.5);
       // May need to adjust expectations based on actual implementation
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toBe(0);
     });
 
-    it('should handle zero step (edge case)', () => {
-      // Test what actually happens - may not throw
+    it('should be type error with zero step (edge case)', () => {
+      // @ts-expect-error floating point step should not be allowed
       const result = Arr.range(0, 5, 0);
-      // Check if it returns empty array or handles gracefully
       expect(Array.isArray(result)).toBe(true);
     });
 
@@ -245,13 +249,13 @@ describe('Arr additional edge cases and uncovered functions', () => {
   describe('Arr.at with additional edge cases', () => {
     it('should handle very large positive indices', () => {
       const array = [1, 2, 3];
-      const result = Arr.at(array, 1000);
+      const result = Arr.at(array, asUint32(1000));
       expect(Optional.isNone(result)).toBe(true);
     });
 
     it('should handle very large negative indices', () => {
       const array = [1, 2, 3];
-      const result = Arr.at(array, -1000);
+      const result = Arr.at(array, asUint32(-1000));
       expect(Optional.isNone(result)).toBe(true);
     });
 

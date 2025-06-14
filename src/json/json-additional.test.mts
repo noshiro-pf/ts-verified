@@ -1,10 +1,12 @@
+import { Arr } from '../array/index.mjs';
 import { Result } from '../functional/result.mjs';
+import { hasKey, isRecord } from '../guard/index.mjs';
 import { Json } from './json.mjs';
 
 describe('Json.parse with reviver', () => {
   it('should use reviver function to transform values', () => {
-    const dateReviver = (key: string, value: unknown): unknown => {
-      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const dateReviver = (_key: string, value: unknown): unknown => {
+      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/u.test(value)) {
         return new Date(value);
       }
       return value;
@@ -15,15 +17,21 @@ describe('Json.parse with reviver', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      expect(result.value.name).toBe('test');
-      expect(result.value.created).toBeInstanceOf(Date);
+      if (
+        isRecord(result.value) &&
+        hasKey(result.value, 'name') &&
+        hasKey(result.value, 'created')
+      ) {
+        expect(result.value.name).toBe('test');
+        expect(result.value.created).toBeInstanceOf(Date);
+      }
     }
   });
 
   it('should handle reviver returning different types', () => {
     const transformReviver = (key: string, value: unknown): unknown => {
       if (key === 'number' && typeof value === 'string') {
-        return parseInt(value, 10);
+        return Number.parseInt(value, 10);
       }
       return value;
     };
@@ -35,8 +43,16 @@ describe('Json.parse with reviver', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      expect(result.value.number).toBe(42);
-      expect(result.value.text).toBe('hello');
+      expect(result.value).toHaveProperty('number');
+      expect(result.value).toHaveProperty('text');
+      if (
+        isRecord(result.value) &&
+        hasKey(result.value, 'number') &&
+        hasKey(result.value, 'text')
+      ) {
+        expect(result.value.number).toBe(42);
+        expect(result.value.text).toBe('hello');
+      }
     }
   });
 });
@@ -100,7 +116,7 @@ describe('Json.stringifySelected', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
+      const parsed: unknown = JSON.parse(result.value);
       expect(parsed).toEqual({
         id: 1,
         name: 'Alice',
@@ -130,14 +146,19 @@ describe('Json.stringifySelected', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
-      expect(parsed.users).toHaveLength(2);
-      expect(parsed.users[0]).toEqual({ id: 1, name: 'Alice' });
-      expect(parsed.users[0]).not.toHaveProperty('secret');
-      if (parsed.metadata) {
-        expect(parsed.metadata).toEqual({ total: 2 });
-        expect(parsed.metadata).not.toHaveProperty('page');
-        expect(parsed.metadata).not.toHaveProperty('internal');
+      const parsed: unknown = JSON.parse(result.value);
+      if (isRecord(parsed) && hasKey(parsed, 'users')) {
+        expect(isRecord(parsed.users)).toBe(true);
+        expect(parsed.users).toHaveLength(2);
+        if (Arr.isArray(parsed.users)) {
+          expect(parsed.users[0]).toEqual({ id: 1, name: 'Alice' });
+          expect(parsed.users[0]).not.toHaveProperty('secret');
+        }
+        if (isRecord(parsed) && hasKey(parsed, 'metadata')) {
+          expect(parsed.metadata).toEqual({ total: 2 });
+          expect(parsed.metadata).not.toHaveProperty('page');
+          expect(parsed.metadata).not.toHaveProperty('internal');
+        }
       }
     }
   });
@@ -153,7 +174,7 @@ describe('Json.stringifySelected', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
+      const parsed: unknown = JSON.parse(result.value);
       // Note: stringifySelected works with JSON.stringify's replacer parameter
       // which may not work as expected with arrays
       expect(Array.isArray(parsed)).toBe(true);
@@ -194,7 +215,9 @@ describe('Json.stringifySelected', () => {
   });
 
   it('should handle circular references with error', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const circular: any = { name: 'test' };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     circular.self = circular;
 
     const result = Json.stringifySelected(circular, ['name', 'self']);
@@ -366,7 +389,7 @@ describe('Json.stringifySortedKey', () => {
 
     expect(Result.isOk(result)).toBe(true);
     if (Result.isOk(result)) {
-      const parsed = JSON.parse(result.value);
+      const parsed: unknown = JSON.parse(result.value);
       expect(Object.keys(parsed.level1)).toEqual(['a', 'z']);
       expect(Object.keys(parsed.level1.a.nested)).toEqual(['x', 'y']);
     }

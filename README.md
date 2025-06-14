@@ -12,7 +12,7 @@
 This library offers a range of utilities, including:
 
 - **Compile-Time Type Checking**: Assert type relationships at compile time with `expectType`.
-- **Immutable Collections**: Type-safe and immutable map (`IMap`), set (`ISet`), and queue (`Queue`) implementations.
+- **Immutable Collections**: Type-safe and immutable map (`IMap`), set (`ISet`) implementations.
 - **Array Utilities**: A comprehensive suite of functions for array manipulation, creation, transformation, and querying.
 - **Number Utilities**: Safe and convenient functions for numerical operations, including branded types and range checking.
 - **Object Utilities**: Helpers for working with objects, such as shallow equality checks.
@@ -50,11 +50,11 @@ ts-verified works best with strict TypeScript settings:
         "noFallthroughCasesInSwitch": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true, // important
+        "noUncheckedIndexedAccess": true, // important
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strict": true
+        "strict": true // important
     }
 }
 ```
@@ -68,13 +68,13 @@ Essential FP utilities for cleaner, more reliable code.
 - **Optional** - Type-safe null handling
 - **Result** - Error handling without exceptions
 - **Pipe** - Function composition utilities
-- **Match** - Pattern matching for TypeScript
+- **match** - Pattern matching for TypeScript
 
 ### 🛡️ Type Guards
 
 Runtime type checking with TypeScript integration.
 
-- **Type Checks** - `isString`, `isNumber`, `isBoolean`, etc.
+- **Type Checks** - `isString`, `isNumber`, `isNonNulish`, etc.
 - **Object Guards** - `isRecord`, `isNonNullObject`, `hasKey`
 - **Utility Guards** - `isNonEmptyString`, `isPrimitive`
 
@@ -99,6 +99,8 @@ Immutable data structures for safer state management.
 
 - **IMap** - Immutable Map implementation
 - **ISet** - Immutable Set implementation
+
+And mutable Queue/Stack implementation
 - **Queue** - FIFO queue with O(1) operations
 - **Stack** - LIFO stack implementation
 
@@ -135,6 +137,8 @@ expectType<{ x: number }, { x: number }>('=');
 
 // The following would cause a compile-time error:
 // expectType<User, Admin>("="); // Error: Type 'User' is not strictly equal to type 'Admin'.
+
+expectType<User, any>("!="); // Error: Comparisons with `any` are also strictly checked.
 ```
 
 ### 2. Functional Programming with `Optional`, `Result`, `pipe`, and `match`

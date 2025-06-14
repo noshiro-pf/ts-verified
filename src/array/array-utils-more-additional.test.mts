@@ -1,5 +1,6 @@
 import { expectType } from '../expect-type.mjs';
 import { Optional } from '../functional/optional.mjs';
+import { asUint32 } from '../number/index.mjs';
 import { Arr } from './array-utils.mjs';
 
 describe('Arr more additional edge cases and functions', () => {
@@ -64,13 +65,13 @@ describe('Arr more additional edge cases and functions', () => {
 
     it('should clamp end index above length', () => {
       const array = [1, 2, 3, 4, 5];
-      const result = Arr.sliceClamped(array, 2, 100);
+      const result = Arr.sliceClamped(array, asUint32(2), asUint32(100));
       expect(result).toEqual([3, 4, 5]);
     });
 
     it('should work with both indices out of range', () => {
       const array = [1, 2, 3];
-      const result = Arr.sliceClamped(array, -10, 100);
+      const result = Arr.sliceClamped(array, asUint32(-10), asUint32(100));
       expect(result).toEqual([1, 2, 3]);
     });
 
@@ -99,13 +100,13 @@ describe('Arr more additional edge cases and functions', () => {
 
       if (Optional.isSome(fruits)) {
         expect(fruits.value).toHaveLength(2);
-        expect(fruits.value[0].name).toBe('apple');
-        expect(fruits.value[1].name).toBe('banana');
+        expect(fruits.value[0]?.name).toBe('apple');
+        expect(fruits.value[1]?.name).toBe('banana');
       }
 
       if (Optional.isSome(vegetables)) {
         expect(vegetables.value).toHaveLength(1);
-        expect(vegetables.value[0].name).toBe('carrot');
+        expect(vegetables.value[0]?.name).toBe('carrot');
       }
     });
 
@@ -214,17 +215,17 @@ describe('Arr more additional edge cases and functions', () => {
       const result = Arr.toSortedBy(people, (person) => person.age);
 
       expect(result).toHaveLength(3);
-      expect(result[0].name).toBe('Bob');
-      expect(result[1].name).toBe('Charlie');
-      expect(result[2].name).toBe('Alice');
+      expect(result[0]?.name).toBe('Bob');
+      expect(result[1]?.name).toBe('Charlie');
+      expect(result[2]?.name).toBe('Alice');
     });
 
     it('should work with string sorting', () => {
       const words = ['banana', 'apple', 'cherry'];
       const result = Arr.toSortedBy(
         words,
-        (word) => word,
-        (a, b) => a.localeCompare(b),
+        (word: string) => word,
+        (a: string, b: string) => a.localeCompare(b),
       );
       expect(result).toEqual(['apple', 'banana', 'cherry']);
     });

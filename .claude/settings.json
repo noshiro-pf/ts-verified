@@ -40,9 +40,7 @@
       "Bash(sed:*)",
       "Bash(touch *)",
       "Fetch(https://*)",
-      "List(*)",
-      "mcp__ide__executeCode",
-      "mcp__ide__getDiagnostics"
+      "List(*)"
     ],
     "deny": []
   }

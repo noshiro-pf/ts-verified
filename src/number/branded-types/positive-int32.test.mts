@@ -44,6 +44,26 @@ describe('PositiveInt32', () => {
       expect(asPositiveInt32(1)).toBe(1);
       expect(asPositiveInt32(2147483647)).toBe(2147483647);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+      { name: '-1', value: -1 },
+      { name: '2147483648', value: 2147483648 },
+    ] as const)(
+      `asPositiveInt32($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asPositiveInt32(value)).toThrow(
+          new TypeError(
+            `Expected a positive integer in [1, 2^31), got: ${value}`,
+          ),
+        );
+      },
+    );
   });
 
   describe('isPositiveInt32', () => {
@@ -170,10 +190,8 @@ describe('PositiveInt32', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<PositiveInt32, number>('<=');
-      expectType<number, PositiveInt32>('>=');
 
-      const _value = asPositiveInt32(1000000);
-      expectType<typeof _value, PositiveInt32>('<=');
+      expectTypeOf(asPositiveInt32(1000000)).toExtend<PositiveInt32>();
     });
   });
 });

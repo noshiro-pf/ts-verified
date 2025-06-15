@@ -52,6 +52,23 @@ describe('PositiveSafeInt', () => {
       expect(asPositiveSafeInt(1)).toBe(1);
       expect(asPositiveSafeInt(10)).toBe(10);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+      { name: '-1', value: -1 },
+    ] as const)(
+      `asPositiveSafeInt($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asPositiveSafeInt(value)).toThrow(
+          new TypeError(`Expected a positive safe integer, got: ${value}`),
+        );
+      },
+    );
   });
 
   describe('isPositiveSafeInt', () => {
@@ -186,10 +203,8 @@ describe('PositiveSafeInt', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<PositiveSafeInt, number>('<=');
-      expectType<number, PositiveSafeInt>('>=');
 
-      const _value = asPositiveSafeInt(5);
-      expectType<typeof _value, PositiveSafeInt>('<=');
+      expectTypeOf(asPositiveSafeInt(5)).toExtend<PositiveSafeInt>();
     });
   });
 });

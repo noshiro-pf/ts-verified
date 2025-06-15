@@ -43,6 +43,25 @@ describe('NonNegativeInt32', () => {
       expect(asNonNegativeInt32(5)).toBe(5);
       expect(asNonNegativeInt32(2147483647)).toBe(2147483647);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '-1', value: -1 },
+      { name: '2147483648', value: 2147483648 },
+    ] as const)(
+      `asNonNegativeInt32($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asNonNegativeInt32(value)).toThrow(
+          new TypeError(
+            `Expected a non-negative integer in [0, 2^31), got: ${value}`,
+          ),
+        );
+      },
+    );
   });
 
   describe('isNonNegativeInt32', () => {
@@ -178,10 +197,8 @@ describe('NonNegativeInt32', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<NonNegativeInt32, number>('<=');
-      expectType<number, NonNegativeInt32>('>=');
 
-      const _value = asNonNegativeInt32(1000000);
-      expectType<typeof _value, NonNegativeInt32>('<=');
+      expectTypeOf(asNonNegativeInt32(1000000)).toExtend<NonNegativeInt32>();
     });
   });
 });

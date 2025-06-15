@@ -34,6 +34,21 @@ describe('Uint16', () => {
       expect(asUint16(0)).toBe(0);
       expect(asUint16(65535)).toBe(65535);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '-1', value: -1 },
+    ] as const)(`asUint16($name) should throw a TypeError`, ({ value }) => {
+      expect(() => asUint16(value)).toThrow(
+        new TypeError(
+          `Expected a non-negative integer less than 2^16, got: ${value}`,
+        ),
+      );
+    });
   });
 
   describe('isUint16', () => {
@@ -148,10 +163,8 @@ describe('Uint16', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<Uint16, number>('<=');
-      expectType<number, Uint16>('>=');
 
-      const _value = asUint16(100);
-      expectType<typeof _value, Uint16>('<=');
+      expectTypeOf(asUint16(100)).toExtend<Uint16>();
     });
   });
 });

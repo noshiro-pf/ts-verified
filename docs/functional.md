@@ -8,6 +8,12 @@
 
 ## References
 
+### match
+
+Re-exports [match](functional/match.md#match)
+
+---
+
 ### Optional
 
 Re-exports [Optional](functional/optional/README.md#optional)

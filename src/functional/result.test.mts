@@ -1,5 +1,6 @@
 import { expectType } from '../expect-type.mjs';
 import { Optional } from './optional.mjs';
+import { pipe } from './pipe.mjs';
 import { Result } from './result.mjs';
 
 describe('Result', () => {
@@ -108,6 +109,37 @@ describe('Result', () => {
       }
       expectType<typeof mapped, Result<number, string>>('<=');
     });
+
+    test('should support curried form', () => {
+      const doubler = Result.map((x: number) => x * 2);
+
+      const okResult = Result.ok(5);
+      const mapped = doubler(okResult);
+
+      expect(Result.isOk(mapped)).toBe(true);
+      if (Result.isOk(mapped)) {
+        expect(mapped.value).toBe(10);
+      }
+
+      const errResult: Result<number, string> = Result.err('error');
+      const mappedErr = doubler(errResult);
+      expect(Result.isErr(mappedErr)).toBe(true);
+      if (Result.isErr(mappedErr)) {
+        expect(mappedErr.value).toBe('error');
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const doubler = Result.map((x: number) => x * 2);
+      const toStringFn = Result.map((x: number) => x.toString());
+
+      const result = pipe(Result.ok(5)).map(doubler).map(toStringFn).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe('10');
+      }
+    });
   });
 
   describe('mapErr', () => {
@@ -129,6 +161,38 @@ describe('Result', () => {
         expect(mapped.value).toBe(42);
       }
       expectType<typeof mapped, Result<number, string>>('~=');
+    });
+
+    test('should support curried form', () => {
+      const errorUppercase = Result.mapErr((e: string) => e.toUpperCase());
+
+      const errResult: Result<number, string> = Result.err('error');
+      const mapped = errorUppercase(errResult);
+      expect(Result.isErr(mapped)).toBe(true);
+      if (Result.isErr(mapped)) {
+        expect(mapped.value).toBe('ERROR');
+      }
+
+      const okResult: Result<number, string> = Result.ok(42);
+      const mappedOk = errorUppercase(okResult);
+      expect(Result.isOk(mappedOk)).toBe(true);
+      if (Result.isOk(mappedOk)) {
+        expect(mappedOk.value).toBe(42);
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const errorUppercase = Result.mapErr((e: string) => e.toUpperCase());
+      const errorPrefix = Result.mapErr((e: string) => `ERROR: ${e}`);
+
+      const result = pipe(Result.err('failed'))
+        .map(errorUppercase)
+        .map(errorPrefix).value;
+
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        expect(result.value).toBe('ERROR: FAILED');
+      }
     });
   });
 
@@ -159,6 +223,30 @@ describe('Result', () => {
       const value = Result.unwrapOkOr(result, 0);
       expect(value).toBe(0);
       expectType<typeof value, number>('<=');
+    });
+
+    test('should support curried form', () => {
+      const unwrapWithDefault = Result.unwrapOkOr(42);
+
+      const okResult = Result.ok(100);
+      const successValue = unwrapWithDefault(okResult);
+      expect(successValue).toBe(100);
+
+      const errResult: Result<number, string> = Result.err('failed');
+      const defaultValue = unwrapWithDefault(errResult);
+      expect(defaultValue).toBe(42);
+    });
+
+    test('should work with pipe when curried', () => {
+      const unwrapWithDefault = Result.unwrapOkOr(0);
+
+      const successResult = pipe(Result.ok(200)).map(unwrapWithDefault).value;
+      expect(successResult).toBe(200);
+
+      const errorResult = pipe(Result.err('computation failed')).map(
+        unwrapWithDefault,
+      ).value;
+      expect(errorResult).toBe(0);
     });
   });
 
@@ -206,6 +294,48 @@ describe('Result', () => {
         expect(folded.value).toBe(5); // length of 'error'
       }
       expectType<typeof folded, Result<number, number>>('=');
+    });
+
+    test('should support curried form', () => {
+      const folder = Result.fold(
+        (x: number) => x * 2,
+        (e: string) => e.length,
+      );
+
+      const okResult = Result.ok(42);
+      const foldedOk = folder(okResult);
+      expect(Result.isOk(foldedOk)).toBe(true);
+      if (Result.isOk(foldedOk)) {
+        expect(foldedOk.value).toBe(84);
+      }
+
+      const errResult: Result<number, string> = Result.err('error');
+      const foldedErr = folder(errResult);
+      expect(Result.isErr(foldedErr)).toBe(true);
+      if (Result.isErr(foldedErr)) {
+        expect(foldedErr.value).toBe(5);
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const folder = Result.fold(
+        (x: number) => x * 2,
+        () => 0,
+      );
+
+      const result = pipe(Result.ok(21)).map(folder).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(42);
+      }
+
+      const errorResult = pipe(Result.err('error')).map(folder).value;
+
+      expect(Result.isErr(errorResult)).toBe(true);
+      if (Result.isErr(errorResult)) {
+        expect(errorResult.value).toBe(0);
+      }
     });
   });
 
@@ -272,6 +402,53 @@ describe('Result', () => {
       );
       expect(Result.unwrapOk(result)).toBe(60);
     });
+
+    test('should support curried form', () => {
+      const divide = (a: number, b: number): Result<number, string> =>
+        b === 0 ? Result.err('Division by zero') : Result.ok(a / b);
+
+      const divideBy2 = Result.flatMap((x: number) => divide(x, 2));
+
+      const okResult = Result.ok(10);
+      const result = divideBy2(okResult);
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(5);
+      }
+
+      const divideByZero = Result.flatMap((x: number) => divide(x, 0));
+      const errorResult = divideByZero(Result.ok(10));
+      expect(Result.isErr(errorResult)).toBe(true);
+      if (Result.isErr(errorResult)) {
+        expect(errorResult.value).toBe('Division by zero');
+      }
+
+      const initialError = divideBy2(Result.err('initial error'));
+      expect(Result.isErr(initialError)).toBe(true);
+      if (Result.isErr(initialError)) {
+        expect(initialError.value).toBe('initial error');
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const parseNumber = (s: string): Result<number, string> => {
+        const n = Number(s);
+        return Number.isNaN(n) ? Result.err('Not a number') : Result.ok(n);
+      };
+
+      const doubleIfPositive = (n: number): Result<number, string> =>
+        n > 0 ? Result.ok(n * 2) : Result.err('Not positive');
+
+      const parser = Result.flatMap(parseNumber);
+      const doubler = Result.flatMap(doubleIfPositive);
+
+      const result = pipe(Result.ok('42')).map(parser).map(doubler).value;
+
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe(84);
+      }
+    });
   });
 
   describe('swap', () => {
@@ -326,6 +503,83 @@ describe('Result', () => {
     });
   });
 
+  describe('unwrapErrOr', () => {
+    test('should return error value for Err result', () => {
+      const result = Result.err('error message');
+      const value = Result.unwrapErrOr(result, 'default');
+      expect(value).toBe('error message');
+    });
+
+    test('should return default value for Ok result', () => {
+      const result = Result.ok(42);
+      const value = Result.unwrapErrOr(result, 'default');
+      expect(value).toBe('default');
+    });
+
+    test('should support curried form', () => {
+      const unwrapErrorWithDefault = Result.unwrapErrOr('unknown error');
+
+      const errResult: Result<number, string> = Result.err('failed');
+      const errorValue = unwrapErrorWithDefault(errResult);
+      expect(errorValue).toBe('failed');
+
+      const okResult: Result<number, string> = Result.ok(42);
+      const defaultValue = unwrapErrorWithDefault(okResult);
+      expect(defaultValue).toBe('unknown error');
+    });
+
+    test('should work with pipe when curried', () => {
+      const unwrapErrorWithDefault = Result.unwrapErrOr('unknown error');
+
+      const errorResult = pipe(Result.err('network failure')).map(
+        unwrapErrorWithDefault,
+      ).value;
+      expect(errorResult).toBe('network failure');
+
+      const okResult = pipe(Result.ok('success')).map(
+        unwrapErrorWithDefault,
+      ).value;
+      expect(okResult).toBe('unknown error');
+    });
+  });
+
+  describe('expectToBe', () => {
+    test('should return value for Ok result', () => {
+      const result = Result.ok(42);
+      const value = Result.expectToBe(result, 'Expected valid number');
+      expect(value).toBe(42);
+    });
+
+    test('should throw custom error for Err result', () => {
+      const result = Result.err('failed');
+      expect(() => Result.expectToBe(result, 'Operation must succeed')).toThrow(
+        'Operation must succeed',
+      );
+    });
+
+    test('should support curried form', () => {
+      const mustBeOk = Result.expectToBe('Expected successful result');
+
+      const okResult = Result.ok('success');
+      const value = mustBeOk(okResult);
+      expect(value).toBe('success');
+
+      const errResult: Result<string, string> = Result.err('failed');
+      expect(() => mustBeOk(errResult)).toThrow('Expected successful result');
+    });
+
+    test('should work with pipe when curried', () => {
+      const mustBeOk = Result.expectToBe('Validation failed');
+
+      const successResult = pipe(Result.ok(100)).map(mustBeOk).value;
+      expect(successResult).toBe(100);
+
+      expect(
+        () => pipe(Result.err('validation error')).map(mustBeOk).value,
+      ).toThrow('Validation failed');
+    });
+  });
+
   describe('orElse', () => {
     test('should return the first Result if it is Ok', () => {
       const primary = Result.ok(42);
@@ -346,6 +600,40 @@ describe('Result', () => {
       const fallback = Result.err('error2');
       const result = Result.orElse(primary, fallback);
       expect(Result.unwrapErr(result)).toBe('error2');
+    });
+
+    test('should support curried form', () => {
+      const fallbackTo = Result.orElse(Result.ok('fallback'));
+
+      const okResult = Result.ok('primary');
+      const result = fallbackTo(okResult);
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBe('primary');
+      }
+
+      const errResult: Result<string, string> = Result.err('failed');
+      const fallbackResult = fallbackTo(errResult);
+      expect(Result.isOk(fallbackResult)).toBe(true);
+      if (Result.isOk(fallbackResult)) {
+        expect(fallbackResult.value).toBe('fallback');
+      }
+    });
+
+    test('should work with pipe when curried', () => {
+      const fallbackTo = Result.orElse(Result.ok('backup'));
+
+      const okResult = pipe(Result.ok('original')).map(fallbackTo).value;
+      expect(Result.isOk(okResult)).toBe(true);
+      if (Result.isOk(okResult)) {
+        expect(okResult.value).toBe('original');
+      }
+
+      const errResult = pipe(Result.err('network error')).map(fallbackTo).value;
+      expect(Result.isOk(errResult)).toBe(true);
+      if (Result.isOk(errResult)) {
+        expect(errResult.value).toBe('backup');
+      }
     });
   });
 
@@ -376,6 +664,114 @@ describe('Result', () => {
       const b = Result.err('error2');
       const zipped = Result.zip(a, b);
       expect(Result.unwrapErr(zipped)).toBe('error1');
+    });
+  });
+
+  describe('fromThrowable', () => {
+    test('should return Ok when function succeeds', () => {
+      const result = Result.fromThrowable(() => 42);
+      expect(Result.isOk(result)).toBe(true);
+      expect(Result.unwrapOk(result)).toBe(42);
+      expectType<typeof result, Result<number, Error>>('<=');
+    });
+
+    test('should return Ok with object when function succeeds', () => {
+      const obj = { name: 'test', value: 123 };
+      const result = Result.fromThrowable(() => obj);
+      expect(Result.isOk(result)).toBe(true);
+      expect(Result.unwrapOk(result)).toStrictEqual(obj);
+    });
+
+    test('should return Err when function throws Error', () => {
+      const errorMessage = 'Something went wrong';
+      const result = Result.fromThrowable(() => {
+        throw new Error(errorMessage);
+      });
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        const error = result.value;
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe(errorMessage);
+      }
+    });
+
+    test('should return Err when function throws string', () => {
+      const errorMessage = 'String error';
+      const result = Result.fromThrowable(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw errorMessage;
+      });
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        const error = result.value;
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe(errorMessage);
+      }
+    });
+
+    test('should return Err when function throws non-string primitive', () => {
+      const result = Result.fromThrowable(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw 404;
+      });
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        const error = result.value;
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe('404');
+      }
+    });
+
+    test('should work with JSON.parse', () => {
+      const validJson = '{"key": "value"}';
+      const invalidJson = '{invalid json}';
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      const validResult = Result.fromThrowable(() => JSON.parse(validJson));
+      expect(Result.isOk(validResult)).toBe(true);
+      expect(Result.unwrapOk(validResult)).toStrictEqual({ key: 'value' });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      const invalidResult = Result.fromThrowable(() => JSON.parse(invalidJson));
+      expect(Result.isErr(invalidResult)).toBe(true);
+      if (Result.isErr(invalidResult)) {
+        const error = invalidResult.value;
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+
+    test('should work with array access', () => {
+      const arr = [1, 2, 3];
+
+      // This won't throw, but demonstrates the pattern
+      const result = Result.fromThrowable(() => {
+        const index = 5;
+        const value = arr[index];
+        if (value === undefined) {
+          throw new Error('Index out of bounds');
+        }
+        return value;
+      });
+
+      expect(Result.isErr(result)).toBe(true);
+      if (Result.isErr(result)) {
+        const error = result.value;
+        expect(error.message).toBe('Index out of bounds');
+      }
+    });
+
+    test('should preserve function return type', () => {
+      expectTypeOf(Result.fromThrowable(() => 'hello')).toEqualTypeOf<
+        Result<string, Error>
+      >();
+
+      expectTypeOf(Result.fromThrowable(() => 42)).toEqualTypeOf<
+        Result<number, Error>
+      >();
+
+      expectTypeOf(Result.fromThrowable(() => true)).toEqualTypeOf<
+        Result<boolean, Error>
+      >();
     });
   });
 });

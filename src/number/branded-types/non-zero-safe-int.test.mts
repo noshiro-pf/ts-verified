@@ -49,6 +49,22 @@ describe('NonZeroSafeInt', () => {
       expect(asNonZeroSafeInt(-10)).toBe(-10);
       expect(asNonZeroSafeInt(1)).toBe(1);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '0', value: 0 },
+    ] as const)(
+      `asNonZeroSafeInt($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asNonZeroSafeInt(value)).toThrow(
+          new TypeError(`Expected a non-zero safe integer, got: ${value}`),
+        );
+      },
+    );
   });
 
   describe('isNonZeroSafeInt', () => {
@@ -209,10 +225,8 @@ describe('NonZeroSafeInt', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<NonZeroSafeInt, number>('<=');
-      expectType<number, NonZeroSafeInt>('>=');
 
-      const _value = asNonZeroSafeInt(5);
-      expectType<typeof _value, NonZeroSafeInt>('<=');
+      expectTypeOf(asNonZeroSafeInt(5)).toExtend<NonZeroSafeInt>();
     });
   });
 });

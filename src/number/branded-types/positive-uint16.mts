@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = PositiveUint16;
-const typeName = 'PositiveUint16';
+
 const typeNameInMessage = 'a positive integer in [1, 2^16)';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -51,75 +51,138 @@ export const isPositiveUint16 = is;
  * // asPositiveUint16(65536); // throws TypeError
  * ```
  */
-export const asPositiveUint16 = castTo;
+export const asPositiveUint16 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 16-bit positive unsigned integers.
+ *
+ * All operations automatically clamp results to the valid PositiveUint16 range [1, 65535].
+ * This ensures that all arithmetic maintains the 16-bit positive unsigned integer constraint,
+ * with results below 1 clamped to MIN_VALUE and overflow results clamped to MAX_VALUE.
+ *
+ * @example
+ * ```typescript
+ * const a = asPositiveUint16(60000);
+ * const b = asPositiveUint16(10000);
+ *
+ * // Arithmetic operations with automatic clamping and positive constraint
+ * const sum = PositiveUint16.add(a, b);       // PositiveUint16 (65535 - clamped to MAX_VALUE)
+ * const diff = PositiveUint16.sub(a, b);      // PositiveUint16 (50000)
+ * const reverseDiff = PositiveUint16.sub(b, a); // PositiveUint16 (1 - clamped to MIN_VALUE)
+ * const product = PositiveUint16.mul(a, b);   // PositiveUint16 (65535 - clamped due to overflow)
+ *
+ * // Range operations (maintaining positive constraint)
+ * const clamped = PositiveUint16.clamp(-100);     // PositiveUint16 (1)
+ * const minimum = PositiveUint16.min(a, b);       // PositiveUint16 (10000)
+ * const maximum = PositiveUint16.max(a, b);       // PositiveUint16 (60000)
+ *
+ * // Utility operations
+ * const random = PositiveUint16.random();         // PositiveUint16 (random value in [1, 65535])
+ * const power = PositiveUint16.pow(asPositiveUint16(2), asPositiveUint16(10)); // PositiveUint16 (1024)
+ * ```
+ */
 export const PositiveUint16 = {
+  /**
+   * Type guard to check if a value is a PositiveUint16.
+   * @param value The value to check.
+   * @returns `true` if the value is a 16-bit positive unsigned integer, `false` otherwise.
+   */
   is,
 
-  /** `1` */
+  /**
+   * The minimum value for a 16-bit positive unsigned integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^16 - 1` */
+  /**
+   * The maximum value for a 16-bit positive unsigned integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two PositiveUint16 values.
+   * @param a The first PositiveUint16.
+   * @param b The second PositiveUint16.
+   * @returns The minimum value as a PositiveUint16.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two PositiveUint16 values.
+   * @param a The first PositiveUint16.
+   * @param b The second PositiveUint16.
+   * @returns The maximum value as a PositiveUint16.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the PositiveUint16 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [1, 65535] as a PositiveUint16.
+   */
   clamp,
 
+  /**
+   * Generates a random PositiveUint16 value within the valid range.
+   * @returns A random PositiveUint16 between 1 and 65535.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[1, 2^16)` */
+  /**
+   * Raises a PositiveUint16 to the power of another PositiveUint16.
+   * @param a The base PositiveUint16.
+   * @param b The exponent PositiveUint16.
+   * @returns `a ** b` clamped to [1, 65535] as a PositiveUint16.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[1, 2^16)` */
+  /**
+   * Adds two PositiveUint16 values.
+   * @param a The first PositiveUint16.
+   * @param b The second PositiveUint16.
+   * @returns `a + b` clamped to [1, 65535] as a PositiveUint16.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[1, 2^16)` */
+  /**
+   * Subtracts one PositiveUint16 from another.
+   * @param a The minuend PositiveUint16.
+   * @param b The subtrahend PositiveUint16.
+   * @returns `a - b` clamped to [1, 65535] as a PositiveUint16 (minimum 1).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[1, 2^16)` */
+  /**
+   * Multiplies two PositiveUint16 values.
+   * @param a The first PositiveUint16.
+   * @param b The second PositiveUint16.
+   * @returns `a * b` clamped to [1, 65535] as a PositiveUint16.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[1, 2^16)` */
+  /**
+   * Divides one PositiveUint16 by another using floor division.
+   * @param a The dividend PositiveUint16.
+   * @param b The divisor PositiveUint16.
+   * @returns `⌊a / b⌋` clamped to [1, 65535] as a PositiveUint16.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '0', value: 0 },
-    { name: '-1', value: -1 },
-    { name: '65536', value: 65536 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof PositiveUint16,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 1;
-    const max = 10;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof PositiveUint16,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof PositiveUint16,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'positive' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof PositiveUint16,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'positive' | 'range'
+  >
+>('<=');

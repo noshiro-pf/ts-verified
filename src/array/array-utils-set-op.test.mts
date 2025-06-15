@@ -1,7 +1,7 @@
 import { expectType } from '../expect-type.mjs';
 import { Arr } from './array-utils.mjs';
 
-describe('Arr', () => {
+describe('Arr set operations', () => {
   describe('eq', () => {
     {
       const xs = [1, 2, 3] as const;

@@ -1,3 +1,4 @@
+import { asInt32, asUint32 } from '../number/index.mjs';
 import { Arr } from './array-utils.mjs';
 
 describe('Arr', () => {
@@ -77,6 +78,36 @@ describe('Arr', () => {
       },
     ] as const)('sliceClamped($start, $end)', ({ start, end, expected }) => {
       expect(Arr.sliceClamped(list, start, end)).toStrictEqual(expected);
+    });
+
+    test('should slice with clamped indices', () => {
+      const array = [1, 2, 3, 4, 5];
+      const result = Arr.sliceClamped(array, 1, 3);
+      expect(result).toStrictEqual([2, 3]);
+    });
+
+    test('should clamp start index below 0', () => {
+      const array = [1, 2, 3, 4, 5];
+      const result = Arr.sliceClamped(array, -10, 3);
+      expect(result).toStrictEqual([1, 2, 3]);
+    });
+
+    test('should clamp end index above length', () => {
+      const array = [1, 2, 3, 4, 5];
+      const result = Arr.sliceClamped(array, asUint32(2), asUint32(100));
+      expect(result).toStrictEqual([3, 4, 5]);
+    });
+
+    test('should work with both indices out of range', () => {
+      const array = [1, 2, 3];
+      const result = Arr.sliceClamped(array, asInt32(-10), asUint32(100));
+      expect(result).toStrictEqual([1, 2, 3]);
+    });
+
+    test('should work with empty array', () => {
+      const array: readonly number[] = [];
+      const result = Arr.sliceClamped(array, 0, 5);
+      expect(result).toStrictEqual([]);
     });
   });
 });

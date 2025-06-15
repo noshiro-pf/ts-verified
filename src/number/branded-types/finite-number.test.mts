@@ -25,6 +25,19 @@ describe('FiniteNumber', () => {
       expect(asFiniteNumber(-10)).toBe(-10);
       expect(asFiniteNumber(0)).toBe(0);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+    ] as const)(
+      `asFiniteNumber($name) should throw a TypeError`,
+      ({ value }) => {
+        expect(() => asFiniteNumber(value)).toThrow(
+          new TypeError(`Expected a finite number, got: ${value}`),
+        );
+      },
+    );
   });
 
   describe('FiniteNumber.is', () => {
@@ -115,10 +128,8 @@ describe('FiniteNumber', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<FiniteNumber, number>('<=');
-      expectType<number, FiniteNumber>('>=');
 
-      const _value = asFiniteNumber(5.5);
-      expectType<typeof _value, FiniteNumber>('<=');
+      expectTypeOf(asFiniteNumber(5.5)).toExtend<FiniteNumber>();
     });
   });
 });

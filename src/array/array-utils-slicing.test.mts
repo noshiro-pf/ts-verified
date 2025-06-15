@@ -1,131 +1,225 @@
 import { expectType } from '../expect-type.mjs';
+import { Optional } from '../functional/index.mjs';
 import { Arr } from './array-utils.mjs';
 
-describe('Arr', () => {
+describe('Arr slicing', () => {
   describe('head', () => {
-    {
+    test('case 1', () => {
       const xs = [1, 2, 3] as const;
       const head = Arr.head(xs);
 
-      expectType<typeof head, 1>('=');
+      expectType<typeof head, Optional.Some<1>>('=');
 
-      test('case 1', () => {
-        expect(head).toBe(1);
-      });
-    }
-    {
+      expect(Optional.isSome(head)).toBe(true);
+      if (Optional.isSome(head)) {
+        expect(head.value).toBe(1);
+      }
+    });
+
+    test('case 2', () => {
       const xs: MutableNonEmptyArray<number> = [1, 2, 3];
       const head = Arr.head(xs);
 
-      expectType<typeof head, number>('=');
+      expectType<typeof head, Optional.Some<number>>('=');
 
-      test('case 2', () => {
-        expect(head).toBe(1);
-      });
-    }
-    {
+      expect(Optional.isSome(head)).toBe(true);
+      if (Optional.isSome(head)) {
+        expect(head.value).toBe(1);
+      }
+    });
+
+    test('case 3', () => {
       const mut_xs: number[] = [1, 2, 3];
       const head = Arr.head(mut_xs);
 
-      expectType<typeof head, number | undefined>('=');
+      expectType<typeof head, Optional<number>>('=');
 
-      test('case 3', () => {
-        expect(head).toBe(1);
-      });
-    }
-    {
+      expect(Optional.isSome(head)).toBe(true);
+      if (Optional.isSome(head)) {
+        expect(head.value).toBe(1);
+      }
+    });
+
+    test('case 4', () => {
       const xs = [] as const;
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+
       const head = Arr.head(xs);
 
-      expectType<typeof head, undefined>('=');
+      expectType<typeof head, Optional.None>('=');
 
-      test('case 4', () => {
-        expect(head).toBeUndefined();
-      });
-    }
+      expect(Optional.isNone(head)).toBe(true);
+    });
+
+    test('should return none for empty array', () => {
+      const result = Arr.head([]);
+      expect(Optional.isNone(result)).toBe(true);
+    });
+
+    test('should work with single element array', () => {
+      const result = Arr.head([42]);
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(result.value).toBe(42);
+      }
+    });
   });
 
   describe('last', () => {
-    {
+    test('case 1', () => {
       const xs = [1, 2, 3] as const;
       const last = Arr.last(xs);
 
-      expectType<typeof last, 3>('=');
+      expectType<typeof last, Optional.Some<3>>('=');
 
-      test('case 1', () => {
-        expect(last).toBe(3);
-      });
-    }
-    {
+      expect(Optional.isSome(last)).toBe(true);
+      if (Optional.isSome(last)) {
+        expect(last.value).toBe(3);
+      }
+    });
+
+    test('case 2', () => {
       const xs: MutableNonEmptyArray<number> = [1, 2, 3];
       const last = Arr.last(xs);
 
-      expectType<typeof last, number>('=');
+      expectType<typeof last, Optional.Some<number>>('=');
 
-      test('case 2', () => {
-        expect(last).toBe(3);
-      });
-    }
-    {
+      expect(Optional.isSome(last)).toBe(true);
+      if (Optional.isSome(last)) {
+        expect(last.value).toBe(3);
+      }
+    });
+
+    test('case 3', () => {
       const mut_xs: number[] = [1, 2, 3];
       const last = Arr.last(mut_xs);
 
-      expectType<typeof last, number | undefined>('=');
+      expectType<typeof last, Optional<number>>('=');
 
-      test('case 3', () => {
-        expect(last).toBe(3);
-      });
-    }
-    {
+      expect(Optional.isSome(last)).toBe(true);
+      if (Optional.isSome(last)) {
+        expect(last.value).toBe(3);
+      }
+    });
+
+    test('case 4', () => {
       const xs = [] as const;
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+
       const last = Arr.last(xs);
 
-      expectType<typeof last, undefined>('=');
+      expectType<typeof last, Optional.None>('=');
 
-      test('case 4', () => {
-        expect(last).toBeUndefined();
-      });
-    }
+      expect(Optional.isNone(last)).toBe(true);
+    });
+
+    test('should return none for empty array', () => {
+      const result = Arr.last([]);
+      expect(Optional.isNone(result)).toBe(true);
+    });
+
+    test('should work with single element array', () => {
+      const result = Arr.last([42]);
+      expect(Optional.isSome(result)).toBe(true);
+      if (Optional.isSome(result)) {
+        expect(result.value).toBe(42);
+      }
+    });
   });
 
   describe('tail', () => {
-    const xs = [1, 2, 3] as const;
-    const tail = Arr.tail(xs);
-
-    expectType<typeof tail, readonly [2, 3]>('=');
-
-    test('case 1', () => {
-      expect(tail).toStrictEqual([2, 3]);
+    test('should return all elements except the first', () => {
+      const array = [1, 2, 3, 4] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly [2, 3, 4]>('=');
+      expect(result).toStrictEqual([2, 3, 4]);
     });
 
-    test('alias 1', () => {
-      expect(Arr.rest).toStrictEqual(Arr.tail);
+    test('should work with single element array', () => {
+      const array = [1] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should work with empty array', () => {
+      const array = [] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should return all elements except the first', () => {
+      const array = [1, 2, 3, 4] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly [2, 3, 4]>('=');
+      expect(result).toStrictEqual([2, 3, 4]);
+    });
+
+    test('should work with single element array', () => {
+      const array = [1] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should work with empty array', () => {
+      const array = [] as const;
+      const result = Arr.tail(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
     });
   });
 
   describe('butLast', () => {
-    {
-      const xs = [1, 2, 3] as const;
-      const butLast = Arr.butLast(xs);
-
-      expectType<typeof butLast, readonly [1, 2]>('=');
-
-      test('case 1', () => {
-        expect(butLast).toStrictEqual([1, 2]);
-      });
-    }
-    {
+    test('readonly number[] type', () => {
       const xs: readonly number[] = [1, 2, 3];
       const butLast = Arr.butLast(xs);
 
       expectType<typeof butLast, readonly number[]>('=');
 
-      test('case 2', () => {
-        expect(butLast).toStrictEqual([1, 2]);
-      });
-    }
+      expect(butLast).toStrictEqual([1, 2]);
+    });
+
+    test('should return all elements except the last', () => {
+      const array = [1, 2, 3, 4] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly [1, 2, 3]>('=');
+      expect(result).toStrictEqual([1, 2, 3]);
+    });
+
+    test('should work with single element array', () => {
+      const array = [1] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should work with empty array', () => {
+      const array = [] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should return all elements except the last', () => {
+      const array = [1, 2, 3, 4] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly [1, 2, 3]>('=');
+      expect(result).toStrictEqual([1, 2, 3]);
+    });
+
+    test('should work with single element array', () => {
+      const array = [1] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
+
+    test('should work with empty array', () => {
+      const array = [] as const;
+      const result = Arr.butLast(array);
+      expectType<typeof result, readonly []>('=');
+      expect(result).toStrictEqual([]);
+    });
   });
 
   describe('take', () => {

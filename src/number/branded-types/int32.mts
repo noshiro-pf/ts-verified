@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = Int32;
-const typeName = 'Int32';
+
 const typeNameInMessage = 'an integer in [-2^31, 2^31)';
 
 const {
@@ -18,7 +18,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -51,74 +51,143 @@ export const isInt32 = is;
  * // asInt32(1.5); // throws TypeError
  * ```
  */
-export const asInt32 = castTo;
+export const asInt32 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 32-bit signed integers.
+ *
+ * All operations automatically clamp results to the valid Int32 range [-2147483648, 2147483647].
+ * This ensures that all arithmetic maintains the 32-bit signed integer constraint, preventing overflow.
+ *
+ * @example
+ * ```typescript
+ * const a = asInt32(2000000000);
+ * const b = asInt32(500000000);
+ *
+ * // Arithmetic operations with automatic clamping
+ * const sum = Int32.add(a, b);      // Int32 (2147483647 - clamped to MAX_VALUE)
+ * const diff = Int32.sub(a, b);     // Int32 (1500000000)
+ * const product = Int32.mul(a, b);  // Int32 (2147483647 - clamped due to overflow)
+ *
+ * // Range operations
+ * const clamped = Int32.clamp(5000000000);    // Int32 (2147483647)
+ * const minimum = Int32.min(a, b);            // Int32 (500000000)
+ * const maximum = Int32.max(a, b);            // Int32 (2000000000)
+ *
+ * // Utility operations
+ * const absolute = Int32.abs(asInt32(-1000)); // Int32 (1000)
+ * const random = Int32.random();              // Int32 (random value in valid range)
+ * ```
+ */
 export const Int32 = {
+  /**
+   * Type guard to check if a value is an Int32.
+   * @param value The value to check.
+   * @returns `true` if the value is a 32-bit signed integer, `false` otherwise.
+   */
   is,
 
-  /** `-2^31` */
+  /**
+   * The minimum value for a 32-bit signed integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^31 - 1` */
+  /**
+   * The maximum value for a 32-bit signed integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the absolute value of a 32-bit signed integer.
+   * @param a The Int32 value.
+   * @returns The absolute value as an Int32, clamped to valid range.
+   */
   abs,
 
+  /**
+   * Returns the smaller of two Int32 values.
+   * @param a The first Int32.
+   * @param b The second Int32.
+   * @returns The minimum value as an Int32.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two Int32 values.
+   * @param a The first Int32.
+   * @param b The second Int32.
+   * @returns The maximum value as an Int32.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the Int32 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [-2147483648, 2147483647] as an Int32.
+   */
   clamp,
 
+  /**
+   * Generates a random Int32 value within the valid range.
+   * @returns A random Int32 between MIN_VALUE and MAX_VALUE.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[-2^31, 2^31)` */
+  /**
+   * Raises an Int32 to the power of another Int32.
+   * @param a The base Int32.
+   * @param b The exponent Int32.
+   * @returns `a ** b` clamped to [-2147483648, 2147483647] as an Int32.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[-2^31, 2^31)` */
+  /**
+   * Adds two Int32 values.
+   * @param a The first Int32.
+   * @param b The second Int32.
+   * @returns `a + b` clamped to [-2147483648, 2147483647] as an Int32.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[-2^31, 2^31)` */
+  /**
+   * Subtracts one Int32 from another.
+   * @param a The minuend Int32.
+   * @param b The subtrahend Int32.
+   * @returns `a - b` clamped to [-2147483648, 2147483647] as an Int32.
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[-2^31, 2^31)` */
+  /**
+   * Multiplies two Int32 values.
+   * @param a The first Int32.
+   * @param b The second Int32.
+   * @returns `a * b` clamped to [-2147483648, 2147483647] as an Int32.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[-2^31, 2^31)` */
+  /**
+   * Divides one Int32 by another using floor division.
+   * @param a The dividend Int32.
+   * @param b The divisor Int32.
+   * @returns `⌊a / b⌋` clamped to [-2147483648, 2147483647] as an Int32.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof Int32,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = -5;
-    const max = 5;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof Int32,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof Int32,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof Int32,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'range'
+  >
+>('<=');

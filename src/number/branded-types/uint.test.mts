@@ -30,6 +30,19 @@ describe('Uint', () => {
       expect(asUint(0)).toBe(0);
       expect(asUint(10)).toBe(10);
     });
+
+    test.each([
+      { name: 'Number.NaN', value: Number.NaN },
+      { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
+      { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
+      { name: '1.2', value: 1.2 },
+      { name: '-3.4', value: -3.4 },
+      { name: '-1', value: -1 },
+    ] as const)(`asUint($name) should throw a TypeError`, ({ value }) => {
+      expect(() => asUint(value)).toThrow(
+        new TypeError(`Expected a non-negative integer, got: ${value}`),
+      );
+    });
   });
 
   describe('isUint', () => {
@@ -138,10 +151,8 @@ describe('Uint', () => {
   describe('type assertions', () => {
     test('type relationships', () => {
       expectType<Uint, number>('<=');
-      expectType<number, Uint>('>=');
 
-      const _value = asUint(5);
-      expectType<typeof _value, Uint>('<=');
+      expectTypeOf(asUint(5)).toExtend<Uint>();
     });
   });
 });

@@ -2,7 +2,7 @@ import { expectType } from '../../expect-type.mjs';
 import { TsVerifiedInternals } from '../refined-number-utils.mjs';
 
 type ElementType = NonNegativeInt16;
-const typeName = 'NonNegativeInt16';
+
 const typeNameInMessage = 'a non-negative integer in [0, 2^15)';
 
 const {
@@ -17,7 +17,7 @@ const {
   div,
   random,
   is,
-  castTo,
+  castType,
   clamp,
 } = TsVerifiedInternals.RefinedNumberUtils.operatorsForInteger<
   ElementType,
@@ -50,74 +50,138 @@ export const isNonNegativeInt16 = is;
  * // asNonNegativeInt16(32768); // throws TypeError
  * ```
  */
-export const asNonNegativeInt16 = castTo;
+export const asNonNegativeInt16 = castType;
 
+/**
+ * Namespace providing type-safe arithmetic operations for 16-bit non-negative integers.
+ *
+ * All operations automatically clamp results to the valid NonNegativeInt16 range [0, 32767].
+ * This ensures that all arithmetic maintains the 16-bit non-negative integer constraint,
+ * with negative results clamped to 0 and overflow results clamped to MAX_VALUE.
+ *
+ * @example
+ * ```typescript
+ * const a = asNonNegativeInt16(30000);
+ * const b = asNonNegativeInt16(5000);
+ *
+ * // Arithmetic operations with automatic clamping
+ * const sum = NonNegativeInt16.add(a, b);       // NonNegativeInt16 (32767 - clamped to MAX_VALUE)
+ * const diff = NonNegativeInt16.sub(a, b);      // NonNegativeInt16 (25000)
+ * const reverseDiff = NonNegativeInt16.sub(b, a); // NonNegativeInt16 (0 - clamped to MIN_VALUE)
+ * const product = NonNegativeInt16.mul(a, b);   // NonNegativeInt16 (32767 - clamped due to overflow)
+ *
+ * // Range operations
+ * const clamped = NonNegativeInt16.clamp(-100);     // NonNegativeInt16 (0)
+ * const minimum = NonNegativeInt16.min(a, b);       // NonNegativeInt16 (5000)
+ * const maximum = NonNegativeInt16.max(a, b);       // NonNegativeInt16 (30000)
+ *
+ * // Utility operations
+ * const random = NonNegativeInt16.random();         // NonNegativeInt16 (random value in [0, 32767])
+ * const power = NonNegativeInt16.pow(asNonNegativeInt16(2), asNonNegativeInt16(10)); // NonNegativeInt16 (1024)
+ * ```
+ */
 export const NonNegativeInt16 = {
+  /**
+   * Type guard to check if a value is a NonNegativeInt16.
+   * @param value The value to check.
+   * @returns `true` if the value is a 16-bit non-negative integer, `false` otherwise.
+   */
   is,
 
-  /** `0` */
+  /**
+   * The minimum value for a 16-bit non-negative integer.
+   * @readonly
+   */
   MIN_VALUE,
 
-  /** `2^15 - 1` */
+  /**
+   * The maximum value for a 16-bit non-negative integer.
+   * @readonly
+   */
   MAX_VALUE,
 
+  /**
+   * Returns the smaller of two NonNegativeInt16 values.
+   * @param a The first NonNegativeInt16.
+   * @param b The second NonNegativeInt16.
+   * @returns The minimum value as a NonNegativeInt16.
+   */
   min: min_,
+
+  /**
+   * Returns the larger of two NonNegativeInt16 values.
+   * @param a The first NonNegativeInt16.
+   * @param b The second NonNegativeInt16.
+   * @returns The maximum value as a NonNegativeInt16.
+   */
   max: max_,
+
+  /**
+   * Clamps a number to the NonNegativeInt16 range.
+   * @param value The number to clamp.
+   * @returns The value clamped to [0, 32767] as a NonNegativeInt16.
+   */
   clamp,
 
+  /**
+   * Generates a random NonNegativeInt16 value within the valid range.
+   * @returns A random NonNegativeInt16 between 0 and 32767.
+   */
   random,
 
-  /** @returns `a ** b`, but clamped to `[0, 2^15)` */
+  /**
+   * Raises a NonNegativeInt16 to the power of another NonNegativeInt16.
+   * @param a The base NonNegativeInt16.
+   * @param b The exponent NonNegativeInt16.
+   * @returns `a ** b` clamped to [0, 32767] as a NonNegativeInt16.
+   */
   pow,
 
-  /** @returns `a + b`, but clamped to `[0, 2^15)` */
+  /**
+   * Adds two NonNegativeInt16 values.
+   * @param a The first NonNegativeInt16.
+   * @param b The second NonNegativeInt16.
+   * @returns `a + b` clamped to [0, 32767] as a NonNegativeInt16.
+   */
   add,
 
-  /** @returns `a - b`, but clamped to `[0, 2^15)` */
+  /**
+   * Subtracts one NonNegativeInt16 from another.
+   * @param a The minuend NonNegativeInt16.
+   * @param b The subtrahend NonNegativeInt16.
+   * @returns `a - b` clamped to [0, 32767] as a NonNegativeInt16 (minimum 0).
+   */
   sub,
 
-  /** @returns `a * b`, but clamped to `[0, 2^15)` */
+  /**
+   * Multiplies two NonNegativeInt16 values.
+   * @param a The first NonNegativeInt16.
+   * @param b The second NonNegativeInt16.
+   * @returns `a * b` clamped to [0, 32767] as a NonNegativeInt16.
+   */
   mul,
 
-  /** @returns `⌊a / b⌋`, but clamped to `[0, 2^15)` */
+  /**
+   * Divides one NonNegativeInt16 by another using floor division.
+   * @param a The dividend NonNegativeInt16.
+   * @param b The divisor NonNegativeInt16.
+   * @returns `⌊a / b⌋` clamped to [0, 32767] as a NonNegativeInt16.
+   */
   div,
 } as const;
 
-if (import.meta.vitest !== undefined) {
-  test.each([
-    { name: 'Number.NaN', value: Number.NaN },
-    { name: 'Number.POSITIVE_INFINITY', value: Number.POSITIVE_INFINITY },
-    { name: 'Number.NEGATIVE_INFINITY', value: Number.NEGATIVE_INFINITY },
-    { name: '1.2', value: 1.2 },
-    { name: '-3.4', value: -3.4 },
-    { name: '-1', value: -1 },
-    { name: '32768', value: 32768 },
-  ] as const)(`to${typeName}($name) should throw a TypeError`, ({ value }) => {
-    expect(() => castTo(value)).toThrow(
-      new TypeError(`Expected ${typeNameInMessage}, got: ${value}`),
-    );
-  });
+expectType<
+  keyof typeof NonNegativeInt16,
+  keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'non-negative' | 'range'
+  >
+>('=');
 
-  test(`${typeName}.random`, () => {
-    const min = 0;
-    const max = 10;
-    const result = random(min, max);
-    expect(result).toBeGreaterThanOrEqual(min);
-    expect(result).toBeLessThanOrEqual(max);
-  });
-
-  expectType<
-    keyof typeof NonNegativeInt16,
-    keyof TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'non-negative' | 'range'
-    >
-  >('=');
-  expectType<
-    typeof NonNegativeInt16,
-    TsVerifiedInternals.RefinedNumberUtils.NumberClass<
-      ElementType,
-      'int' | 'non-negative' | 'range'
-    >
-  >('<=');
-}
+expectType<
+  typeof NonNegativeInt16,
+  TsVerifiedInternals.RefinedNumberUtils.NumberClass<
+    ElementType,
+    'int' | 'non-negative' | 'range'
+  >
+>('<=');
